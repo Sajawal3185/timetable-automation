@@ -11,12 +11,11 @@ def calculate_gpa():
     
     print("=== GPA Calculator ===")
     print("Type 'done' for the course name when you are finished.\n")
-    
+
     while True:
         course_name = input("Enter course name (or 'done'): ").strip()
         if course_name.lower() == 'done':
-            break
-            
+            brea            
         grade = input(f"Enter grade for {course_name} (e.g., A, B+, C): ").strip().upper()
         if grade not in grade_scale:
             print("Invalid grade entered. Please use standard letter grades (A, B+, C, etc.).\n")
