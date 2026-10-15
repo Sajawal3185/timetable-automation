@@ -5,8 +5,7 @@ def calculate_gpa():
         'B+': 3.3, 'B': 3.0, 'B-': 2.7,
         'C+': 2.3, 'C': 2.0, 'C-': 1.7,
         'D+': 1.3, 'D': 1.0, 'F': 0.0
-    }
-    
+    }    
     total_quality_points = 0.0
     total_credits = 0.0
     
