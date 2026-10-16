@@ -1,0 +1,20 @@
+/* Test CSS for Timetable Automation - Frontend Branch */
+.test-box {
+    background-color: #e3f2fd;
+    border: 2px dashed #2196f3;
+    padding: 20px;
+    margin: 15px auto;
+    border-radius: 8px;
+    max-width: 400px;
+    text-align: center;
+}
+
+.test-box h3 {
+    color: #0d47a1;
+    font-family: Arial, sans-serif;
+}
+
+.test-box p {
+    color: #37474f;
+    font-size: 14px;
+}
