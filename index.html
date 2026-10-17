@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>NUML Archive</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="index.css">
+</head>
+<body>
+
+  <!-- Splash screen (5 seconds) -->
+  <div class="splash" id="splash">
+    <div class="splash-logo">
+      <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M2 5.5C2 4.7 2.7 4 3.5 4H10c1.1 0 2 .9 2 2v14c0-1.1-.9-2-2-2H3.5c-.8 0-1.5-.7-1.5-1.5v-11z"/>
+        <path d="M22 5.5c0-.8-.7-1.5-1.5-1.5H14c-1.1 0-2 .9-2 2v14c0-1.1.9-2 2-2h6.5c.8 0 1.5-.7 1.5-1.5v-11z"/>
+      </svg>
+    </div>
+    <h2>NUML Archive</h2>
+    <p>A project by NUML students</p>
+    <div class="spinner"></div>
+  </div>
+
+  <!-- Navbar (Log in and Sign up appear only here) -->
+  <header class="navbar">
+    <a href="#top" class="logo">NUML <span>Archive</span></a>
+    <nav>
+      <a href="#features" class="nl">Features</a>
+      <a href="login.html" class="btn outline">Log in</a>
+      <a href="signup.html" class="btn solid">Sign up</a>
+    </nav>
+  </header>
+
+  <!-- Hero -->
+  <section class="hero" id="top">
+    <span class="pill">A project by NUML students</span>
+    <h1>Your semester files,<br>always one click away.</h1>
+    <p>Free up your storage and come back for past papers, lectures and software links whenever you need them again.</p>
+    <a href="#features" class="btn white lg">Explore features</a>
+  </section>
+
+  <!-- Features -->
+  <section class="features" id="features">
+    <div class="head">
+      <h2>Features</h2>
+      <p>Everything you get with NUML Archive.</p>
+    </div>
+
+    <div class="feature-grid">
+
+      <article class="feature">
+        <span class="ic">📄</span>
+        <h3>Past Papers</h3>
+        <p>Practise with real papers from earlier semesters.</p>
+        <ul>
+          <li>Filter by semester, subject and year</li>
+          <li>Midterm and final term papers</li>
+          <li>View online or download</li>
+        </ul>
+      </article>
+
+      <article class="feature">
+        <span class="ic">🎓</span>
+        <h3>Lectures</h3>
+        <p>Missed a class or retaking a course? Your lectures stay available.</p>
+        <ul>
+          <li>Organised by course and semester</li>
+          <li>Download whenever you need</li>
+          <li>Pick up easily after a back or a break</li>
+        </ul>
+      </article>
+
+      <article class="feature">
+        <span class="ic">💾</span>
+        <h3>Semester Resources</h3>
+        <p>Keep the link, not the heavy file on your laptop.</p>
+        <ul>
+          <li>Links for Ubuntu and other large downloads</li>
+          <li>Sorted by semester</li>
+          <li>Reinstall later with ease</li>
+        </ul>
+      </article>
+
+      <article class="feature">
+        <span class="ic">🧮</span>
+        <h3>GPA & CGPA Calculator</h3>
+        <p>Work out your results in seconds.</p>
+        <ul>
+          <li>Live GPA for the current semester</li>
+          <li>CGPA across all your semesters</li>
+          <li>Complete grading table</li>
+        </ul>
+      </article>
+
+      <article class="feature">
+        <span class="ic">🗓️</span>
+        <h3>Timetable</h3>
+        <p>See your whole week at a glance.</p>
+        <ul>
+          <li>Clear weekly view of your classes</li>
+          <li>Course, time and room together</li>
+          <li>Find your free slots</li>
+        </ul>
+      </article>
+
+      <article class="feature">
+        <span class="ic">🚪</span>
+        <h3>Free Rooms</h3>
+        <p>Find an empty room in seconds.</p>
+        <ul>
+          <li>See which rooms are free now</li>
+          <li>Check by time slot</li>
+          <li>Great for group study</li>
+        </ul>
+      </article>
+
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <b>NUML Archive</b>
+    <span>A project by students of the National University of Modern Languages.</span>
+  </footer>
+
+  <script>
+    // Splash screen: shows for 5 seconds, once per browser session
+    const splash = document.getElementById("splash");
+    let seen = false;
+    try { seen = sessionStorage.getItem("splashSeen"); } catch (e) {}
+
+    if (seen) {
+      splash.remove();
+    } else {
+      document.body.classList.add("lock");
+      setTimeout(() => {
+        splash.classList.add("hide");
+        document.body.classList.remove("lock");
+        setTimeout(() => splash.remove(), 600);
+        try { sessionStorage.setItem("splashSeen", "1"); } catch (e) {}
+      }, 5000);
+    }
+  </script>
+</body>
+</html>
