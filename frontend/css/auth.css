@@ -61,3 +61,24 @@ button:hover { background: #154a96; }
   color: #1e5fbf;
   margin-top: 15px;
 }
+select {
+  width: 100%;
+  padding: 10px;
+  margin: 5px 0 15px;
+  border: 2px solid transparent;
+  border-radius: 6px;
+  background: #e8f0fb;
+  font-size: 14px;
+}
+select:focus { outline: none; border-color: #1e5fbf; }
+
+.hint {
+  display: block;
+  font-size: 12px;
+  color: gray;
+  margin: -10px 0 15px;
+}
+.hint.error { color: #b91c1c; }
+.hint.ok { color: #15803d; }
+
+input.invalid { border-color: #b91c1c; }
