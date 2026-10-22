@@ -1,0 +1,1093 @@
+{
+  "info": {
+    "name": "Timetable Automation - Wajiha's endpoints",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Set base_url (default http://127.0.0.1:8000) and token (JWT from Sajawal's login endpoint) as collection/environment variables. Never save a real token in this file."
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://127.0.0.1:8000"
+    },
+    {
+      "key": "token",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "Timetable import & view",
+      "item": [
+        {
+          "name": "Preview import (dry run)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/timetable/import",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "timetable",
+                "import"
+              ]
+            },
+            "description": "Admin/HOD. Select backend/data/sample_timetables/sample_SE_flat.xlsx",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "department_code",
+                  "value": "SE",
+                  "type": "text"
+                },
+                {
+                  "key": "dry_run",
+                  "value": "true",
+                  "type": "text"
+                },
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Import for real",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/timetable/import",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "timetable",
+                "import"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "department_code",
+                  "value": "SE",
+                  "type": "text"
+                },
+                {
+                  "key": "dry_run",
+                  "value": "false",
+                  "type": "text"
+                },
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "List timetable",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/timetable?day=Monday",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "timetable"
+              ],
+              "query": [
+                {
+                  "key": "day",
+                  "value": "Monday"
+                }
+              ]
+            },
+            "description": ""
+          }
+        }
+      ]
+    },
+    {
+      "name": "Rooms & reference data",
+      "item": [
+        {
+          "name": "List rooms",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/rooms?min_capacity=40",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "rooms"
+              ],
+              "query": [
+                {
+                  "key": "min_capacity",
+                  "value": "40"
+                }
+              ]
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "Empty rooms",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/rooms/empty?day=Monday&start=10:00&end=11:30",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "rooms",
+                "empty"
+              ],
+              "query": [
+                {
+                  "key": "day",
+                  "value": "Monday"
+                },
+                {
+                  "key": "start",
+                  "value": "10:00"
+                },
+                {
+                  "key": "end",
+                  "value": "11:30"
+                }
+              ]
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "Create room (admin/HOD)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/rooms",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "rooms"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"R-20\",\n  \"capacity\": 50,\n  \"building\": \"Block A\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Update room",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/rooms/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "rooms",
+                "1"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"capacity\": 60\n}"
+            }
+          }
+        },
+        {
+          "name": "Departments",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/departments",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "departments"
+              ]
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "Courses",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/courses?search=design",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "courses"
+              ],
+              "query": [
+                {
+                  "key": "search",
+                  "value": "design"
+                }
+              ]
+            },
+            "description": ""
+          }
+        }
+      ]
+    },
+    {
+      "name": "Exam repository",
+      "item": [
+        {
+          "name": "Upload paper (teacher/HOD/admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/exam-papers",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "exam-papers"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "course_id",
+                  "value": "1",
+                  "type": "text"
+                },
+                {
+                  "key": "title",
+                  "value": "CS101 Midterm",
+                  "type": "text"
+                },
+                {
+                  "key": "term",
+                  "value": "Fall 2025",
+                  "type": "text"
+                },
+                {
+                  "key": "exam_type",
+                  "value": "midterm",
+                  "type": "text"
+                },
+                {
+                  "key": "year",
+                  "value": "2025",
+                  "type": "text"
+                },
+                {
+                  "key": "instructor_name",
+                  "value": "Dr. Ali",
+                  "type": "text"
+                },
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Search papers",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/exam-papers?course_id=1&term=Fall 2025&exam_type=midterm&q=ali",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "exam-papers"
+              ],
+              "query": [
+                {
+                  "key": "course_id",
+                  "value": "1"
+                },
+                {
+                  "key": "term",
+                  "value": "Fall 2025"
+                },
+                {
+                  "key": "exam_type",
+                  "value": "midterm"
+                },
+                {
+                  "key": "q",
+                  "value": "ali"
+                }
+              ]
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "Download paper",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/exam-papers/1/download",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "exam-papers",
+                "1",
+                "download"
+              ]
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "Delete paper",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/exam-papers/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "exam-papers",
+                "1"
+              ]
+            },
+            "description": ""
+          }
+        }
+      ]
+    },
+    {
+      "name": "Lecture materials",
+      "item": [
+        {
+          "name": "Upload material",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/lecture-materials",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "lecture-materials"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "course_id",
+                  "value": "1",
+                  "type": "text"
+                },
+                {
+                  "key": "title",
+                  "value": "Week 1 slides",
+                  "type": "text"
+                },
+                {
+                  "key": "material_type",
+                  "value": "slides",
+                  "type": "text"
+                },
+                {
+                  "key": "instructor_name",
+                  "value": "Dr. Ali",
+                  "type": "text"
+                },
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "List materials",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/lecture-materials?course_id=1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "lecture-materials"
+              ],
+              "query": [
+                {
+                  "key": "course_id",
+                  "value": "1"
+                }
+              ]
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "Materials grouped by instructor",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/lecture-materials/by-course/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "lecture-materials",
+                "by-course",
+                "1"
+              ]
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "Download material",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/lecture-materials/1/download",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "lecture-materials",
+                "1",
+                "download"
+              ]
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "Delete material",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/lecture-materials/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "lecture-materials",
+                "1"
+              ]
+            },
+            "description": ""
+          }
+        }
+      ]
+    },
+    {
+      "name": "GPA / CGPA",
+      "item": [
+        {
+          "name": "Grade scale",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/gpa/grade-scale",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "gpa",
+                "grade-scale"
+              ]
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "Calculate (nothing saved)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/gpa/calculate",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "gpa",
+                "calculate"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"terms\": [\n    {\n      \"term\": \"Fall 2025\",\n      \"courses\": [\n        {\n          \"credit_hours\": 3,\n          \"grade\": \"A\",\n          \"course_code\": \"CS101\"\n        },\n        {\n          \"credit_hours\": 3,\n          \"grade\": \"B+\"\n        },\n        {\n          \"credit_hours\": 4,\n          \"grade\": \"C\"\n        }\n      ]\n    },\n    {\n      \"term\": \"Spring 2026\",\n      \"courses\": [\n        {\n          \"credit_hours\": 3,\n          \"grade\": \"A-\"\n        }\n      ]\n    }\n  ],\n  \"repeat_policy\": \"all\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Calculate on top of previous CGPA",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/gpa/calculate",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "gpa",
+                "calculate"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"terms\": [\n    {\n      \"term\": \"Next term\",\n      \"courses\": [\n        {\n          \"credit_hours\": 3,\n          \"grade\": \"A\"\n        }\n      ]\n    }\n  ],\n  \"previous_cgpa\": 3.0,\n  \"previous_credit_hours\": 60\n}"
+            }
+          }
+        },
+        {
+          "name": "Save a grade",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/gpa/records",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "gpa",
+                "records"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"term\": \"Fall 2025\",\n  \"course_code\": \"CS101\",\n  \"course_title\": \"Programming Fundamentals\",\n  \"credit_hours\": 3,\n  \"grade\": \"A\"\n}"
+            }
+          }
+        },
+        {
+          "name": "My saved grades",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/gpa/records",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "gpa",
+                "records"
+              ]
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "My GPA/CGPA summary",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/gpa/summary?repeat_policy=all",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "gpa",
+                "summary"
+              ],
+              "query": [
+                {
+                  "key": "repeat_policy",
+                  "value": "all"
+                }
+              ]
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "Delete saved grade",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/gpa/records/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "gpa",
+                "records",
+                "1"
+              ]
+            },
+            "description": ""
+          }
+        }
+      ]
+    },
+    {
+      "name": "Software directory",
+      "item": [
+        {
+          "name": "List software",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/software-resources?category=IDE",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "software-resources"
+              ],
+              "query": [
+                {
+                  "key": "category",
+                  "value": "IDE"
+                }
+              ]
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "Add software",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/software-resources",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "software-resources"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Visual Studio Code\",\n  \"category\": \"IDE\",\n  \"download_url\": \"https://code.visualstudio.com\",\n  \"instructions\": \"Install with the default options.\",\n  \"course_id\": 1\n}"
+            }
+          }
+        },
+        {
+          "name": "Update software",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/software-resources/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "software-resources",
+                "1"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"category\": \"Editor\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Delete software",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/software-resources/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "software-resources",
+                "1"
+              ]
+            },
+            "description": ""
+          }
+        }
+      ]
+    },
+    {
+      "name": "Event calendar",
+      "item": [
+        {
+          "name": "Events in a month",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/events?month=2026-10",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "events"
+              ],
+              "query": [
+                {
+                  "key": "month",
+                  "value": "2026-10"
+                }
+              ]
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "Create event (admin/HOD)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/events",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "events"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Midterm exams\",\n  \"event_type\": \"deadline\",\n  \"start_date\": \"2026-10-20\",\n  \"end_date\": \"2026-10-25\",\n  \"location\": \"Main campus\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Update event",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/events/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "events",
+                "1"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Mid-term exams\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Delete event",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/events/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "events",
+                "1"
+              ]
+            },
+            "description": ""
+          }
+        }
+      ]
+    }
+  ]
+}
