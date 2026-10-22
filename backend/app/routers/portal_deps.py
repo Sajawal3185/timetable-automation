@@ -17,7 +17,8 @@ ADMINS = ("hod", "admin")
 def require_roles(*roles: str):
     """Dependency factory: allow the request only if the user has one of `roles`."""
     def checker(user=Depends(get_current_user)):
-        if getattr(user, "role", None) not in roles:
+        user_role = (getattr(user, "role", "") or "").lower()
+        if user_role not in roles:
             raise HTTPException(status_code=403, detail=f"Requires one of these roles: {', '.join(roles)}")
         return user
     return checker

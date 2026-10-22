@@ -1,14 +1,15 @@
 """Exam repository (Wajiha) - proposal 4.1.
 
-  POST   /api/exam-papers                 upload (teacher / HOD / admin), multipart form
-  GET    /api/exam-papers                 search + filter (course_id, term, exam_type, year, q)
+  POST   /api/exam-papers                    upload (teacher / HOD / admin), multipart form
+  GET    /api/exam-papers                    search + filter (course_id, term, exam_type, year, q)
   GET    /api/exam-papers/{id}
-  GET    /api/exam-papers/{id}/download   returns the file
+  GET    /api/exam-papers/{id}/download      returns the file
   DELETE /api/exam-papers/{id}            uploader or admin/HOD
 """
-from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, UploadFile
+import mimetypes
+from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, Response, UploadFile
 from fastapi.responses import FileResponse
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from database import get_db
@@ -19,6 +20,11 @@ from app.schemas.portal import ExamPaperOut, ExamType
 from app.utils.file_storage import PAPER_EXTENSIONS, delete_file, resolve_path, save_upload
 
 router = APIRouter(prefix="/api/exam-papers", tags=["Exam Repository"])
+
+
+def _escape_like(val: str) -> str:
+    """Escape SQL LIKE special characters (% and _)."""
+    return val.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
 
 
 @router.post("", response_model=ExamPaperOut, status_code=201)
@@ -33,12 +39,20 @@ def upload_exam_paper(
     db: Session = Depends(get_db),
     user=Depends(require_roles(*STAFF)),
 ):
-    if db.get(Course, course_id) is None:
+    course = db.get(Course, course_id)
+    if course is None:
         raise HTTPException(404, "Course not found")
+        
+    user_role = (getattr(user, "role", "") or "").lower()
+    if user_role == "teacher" or not instructor_name:
+        final_instructor_name = (getattr(user, "name", "") or "Unknown").strip()
+    else:
+        final_instructor_name = instructor_name.strip()
+
     saved = save_upload(file, "exam_papers", PAPER_EXTENSIONS)
     paper = ExamPaper(
         course_id=course_id, title=title.strip(), term=term.strip(), exam_type=exam_type.value,
-        year=year, instructor_name=instructor_name, file_path=saved.relative_path,
+        year=year, instructor_name=final_instructor_name, file_path=saved.relative_path,
         original_filename=saved.original_filename, content_type=saved.content_type,
         file_size=saved.size, uploaded_by=user.id,
     )
@@ -55,6 +69,7 @@ def upload_exam_paper(
 
 @router.get("", response_model=list[ExamPaperOut], dependencies=[Depends(get_current_user)])
 def search_exam_papers(
+    response: Response,
     course_id: int | None = None,
     term: str | None = None,
     exam_type: ExamType | None = None,
@@ -64,22 +79,32 @@ def search_exam_papers(
     limit: int = Query(50, ge=1, le=200),
     db: Session = Depends(get_db),
 ):
-    stmt = select(ExamPaper).join(Course, Course.id == ExamPaper.course_id)
+    base_stmt = select(ExamPaper).join(Course, Course.id == ExamPaper.course_id)
+    
     if course_id:
-        stmt = stmt.where(ExamPaper.course_id == course_id)
+        base_stmt = base_stmt.where(ExamPaper.course_id == course_id)
     if term:
-        stmt = stmt.where(ExamPaper.term.ilike(term))
+        base_stmt = base_stmt.where(ExamPaper.term.ilike(term.strip()))
     if exam_type:
-        stmt = stmt.where(ExamPaper.exam_type == exam_type.value)
+        base_stmt = base_stmt.where(ExamPaper.exam_type == exam_type.value)
     if year:
-        stmt = stmt.where(ExamPaper.year == year)
+        base_stmt = base_stmt.where(ExamPaper.year == year)
     if q:
-        like = f"%{q}%"
-        stmt = stmt.where(
-            ExamPaper.title.ilike(like) | ExamPaper.instructor_name.ilike(like)
-            | Course.code.ilike(like) | Course.title.ilike(like)
+        escaped_q = _escape_like(q.strip())
+        like_expr = f"%{escaped_q}%"
+        base_stmt = base_stmt.where(
+            ExamPaper.title.ilike(like_expr, escape="\\") | 
+            ExamPaper.instructor_name.ilike(like_expr, escape="\\") |
+            Course.code.ilike(like_expr, escape="\\") | 
+            Course.title.ilike(like_expr, escape="\\")
         )
-    stmt = stmt.order_by(ExamPaper.year.desc(), ExamPaper.id.desc()).offset(skip).limit(limit)
+
+    # Calculate total count for pagination header
+    count_stmt = select(func.count()).select_from(base_stmt.subquery())
+    total_count = db.scalar(count_stmt) or 0
+    response.headers["X-Total-Count"] = str(total_count)
+
+    stmt = base_stmt.order_by(ExamPaper.year.desc(), ExamPaper.id.desc()).offset(skip).limit(limit)
     return db.execute(stmt).scalars().all()
 
 
@@ -98,9 +123,11 @@ def get_exam_paper(paper_id: int, db: Session = Depends(get_db)):
 @router.get("/{paper_id}/download", dependencies=[Depends(get_current_user)])
 def download_exam_paper(paper_id: int, db: Session = Depends(get_db)):
     paper = _get_or_404(db, paper_id)
+    file_path = resolve_path(paper.file_path)
+    media_type, _ = mimetypes.guess_type(paper.original_filename)
     return FileResponse(
-        resolve_path(paper.file_path), filename=paper.original_filename,
-        media_type=paper.content_type or "application/octet-stream",
+        file_path, filename=paper.original_filename,
+        media_type=media_type or "application/octet-stream",
     )
 
 

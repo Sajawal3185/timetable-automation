@@ -1,17 +1,18 @@
 """Institutional event calendar (Wajiha) - proposal 4.6.
 
-  GET    /api/events          list (filter: month=YYYY-MM, from_date, to_date, event_type,
-                              department_id).  An event overlapping the range is included.
+  GET    /api/events         list (filter: month=YYYY-MM, from_date, to_date, event_type,
+                             department_id).  An event overlapping the range is included.
   GET    /api/events/{id}
-  POST   /api/events          admin / HOD
-  PUT    /api/events/{id}     admin / HOD
-  DELETE /api/events/{id}     admin / HOD
+  POST   /api/events         admin / HOD
+  PATCH  /api/events/{id}    admin / HOD
+  DELETE /api/events/{id}    admin / HOD
 """
 import calendar
 from datetime import date
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import func, or_, select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from database import get_db
@@ -83,24 +84,46 @@ def create_event(body: EventIn, db: Session = Depends(get_db), user=Depends(requ
     data["event_type"] = body.event_type.value
     event = Event(**data, created_by=user.id)
     db.add(event)
-    db.commit()
+    
+    try:
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(422, "Database constraint violation (e.g., end_date cannot be earlier than start_date)")
+        
     db.refresh(event)
     return event
 
 
-@router.put("/{event_id}", response_model=EventOut, dependencies=[Depends(require_roles(*ADMINS))])
+@router.patch("/{event_id}", response_model=EventOut, dependencies=[Depends(require_roles(*ADMINS))])
 def update_event(event_id: int, body: EventUpdate, db: Session = Depends(get_db)):
     event = _get_or_404(db, event_id)
     data = body.model_dump(exclude_unset=True)
+    
+    # Prevent explicit nulls from being assigned to non-nullable fields causing 500 errors
+    non_nullable_fields = {"title", "event_type", "start_date"}
+    for field in non_nullable_fields:
+        if field in data and data[field] is None:
+            raise HTTPException(422, f"{field} cannot be null")
+
     if "event_type" in data and data["event_type"] is not None:
         data["event_type"] = data["event_type"].value
+    
     _check_department(db, data.get("department_id"))
+    
     for key, value in data.items():
         setattr(event, key, value)
+        
     if event.end_date and event.end_date < event.start_date:
         db.rollback()
         raise HTTPException(422, "end_date cannot be before start_date")
-    db.commit()
+        
+    try:
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(422, "Database constraint violation (e.g., end_date cannot be earlier than start_date)")
+        
     db.refresh(event)
     return event
 
