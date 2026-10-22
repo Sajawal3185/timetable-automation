@@ -1,0 +1,235 @@
+/* =========================================================
+   APP.CSS: pages that need login
+   1. Shared app parts (used by more than one app page)
+   2. One section for each page (below)
+   ========================================================= */
+
+
+/* =========================================================
+   1. SHARED APP PARTS
+   ========================================================= */
+
+/* ----- Blue banner at the top of every app page ----- */
+.page-head {
+  background: linear-gradient(rgba(10, 40, 100, 0.85), rgba(10, 40, 100, 0.75)),
+              url("../images/numl.webp");   /* ../ = one folder up, out of css/ */
+  background-size: cover;
+  background-position: center;
+  color: white;
+  text-align: center;
+  padding: 22px 20px 90px;                  /* extra bottom space for the overlap */
+}
+
+.page-head h1 {
+  margin: 22px 0 8px;
+  font-size: 34px;
+}
+
+.page-head p {
+  margin: 0;
+}
+
+.back-link {
+  display: block;
+  text-align: left;
+  color: white;
+  font-size: 14px;
+}
+
+.back-link:hover {
+  text-decoration: underline;
+}
+
+
+/* ----- Main content area, pulled up over the banner ----- */
+.page-body {
+  max-width: 1000px;
+  margin: -55px auto 40px;                  /* negative top margin = overlap */
+  padding: 0 16px;
+}
+
+
+/* ----- White box that holds filters or search ----- */
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 14px;
+  background: white;
+  padding: 18px;
+  border-radius: 14px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+  margin-bottom: 20px;
+}
+
+.filters label {
+  font-size: 13px;
+  font-weight: bold;
+}
+
+
+/* ----- Form fields (filters and upload forms) ----- */
+.filters select,
+.filters input,
+.upload-box select,
+.upload-box input {
+  display: block;
+  min-width: 150px;
+  margin-top: 6px;
+  padding: 10px;
+  font-size: 14px;
+  background: #f5f8fe;
+  border: 2px solid #d6e0f3;
+  border-radius: 8px;
+}
+
+.filters select:focus,
+.filters input:focus,
+.upload-box select:focus,
+.upload-box input:focus {
+  outline: none;
+  border-color: var(--blue);
+  background: white;
+}
+
+
+/* ----- Upload box (past papers, lectures and resources all use it) ----- */
+.upload-box {
+  background: white;
+  padding: 22px;
+  border-radius: 14px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+  margin-bottom: 20px;
+}
+
+.upload-box label {
+  font-size: 13px;
+  font-weight: bold;
+}
+
+.upload-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.rules {
+  margin: 6px 0 0;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+
+/* ----- Messages ----- */
+.form-msg {
+  min-height: 20px;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.form-msg.error { color: #dc2626; }
+.form-msg.ok    { color: #16a34a; }
+
+.note {
+  color: #16a34a;
+  font-weight: bold;
+}
+
+.empty {
+  text-align: center;
+  margin-top: 30px;
+  color: var(--muted);
+}
+
+
+/* ----- Mobile ----- */
+@media (max-width: 600px) {
+  .page-head h1 { font-size: 26px; }
+  .filters { flex-direction: column; align-items: stretch; }
+  .filters select, .filters input { width: 100%; }
+}
+
+
+/* =========================================================
+   2. PAGE: PAST PAPERS  (past-papers.html)
+   ========================================================= */
+
+.papers-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+  gap: 16px;
+}
+
+.paper-card {
+  background: white;
+  padding: 20px;
+  border-radius: 14px;
+  border-top: 4px solid var(--blue);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.paper-card h3 { margin: 12px 0 4px; color: var(--navy); }
+.paper-card p  { margin: 0 0 14px; color: var(--muted); font-size: 14px; }
+
+.badge { padding: 3px 12px; border-radius: 12px; font-size: 12px; font-weight: bold; color: white; }
+.badge.mid { background: #2563eb; }
+.badge.fin { background: #7c3aed; }
+
+.actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.report  { margin-left: auto; border: 0; background: none; color: #94a3b8; font-size: 12px; cursor: pointer; text-decoration: underline; }
+
+
+/* =========================================================
+   3. PAGE: LECTURES  (lectures.html)
+   Add the lectures CSS here, below this comment.
+   ========================================================= */
+
+
+/* Lecture Upload Form */
+.upload-box {
+  background: white;
+  padding: 22px;
+  border-radius: 14px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+  margin-bottom: 20px;
+}
+
+.upload-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin: 18px 0;
+}
+
+.upload-grid label {
+  display: block;
+  font-size: 14px;
+  font-weight: bold;
+  color: var(--navy);
+}
+
+.upload-grid input,
+.upload-grid select {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  margin-top: 8px;
+  padding: 12px;
+  font-size: 14px;
+  background: #f5f8fe;
+  border: 2px solid #d6e0f3;
+  border-radius: 8px;
+}
+
+.upload-grid input:focus,
+.upload-grid select:focus {
+  outline: none;
+  border-color: var(--blue);
+  background: white;
+}
+
+@media (max-width: 600px) {
+  .upload-grid {
+    grid-template-columns: 1fr;
+  }
+}

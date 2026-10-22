@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>NUML Archive - Past Papers</title>
+<link rel="stylesheet" href="../css/master.css">
+<link rel="stylesheet" href="../css/app.css">
+</head>
+<body>
+
+  <header class="page-head">
+    <a href="dashboard.html" class="back-link">← Back to dashboard</a>
+    <h1>Past Papers</h1>
+    <p>Midterm and final term papers. View online or download.</p>
+  </header>
+
+  <main class="page-body">
+
+<!-- Filters: subject, year and paper type -->
+<section class="filters">
+
+  <label>
+    Subject
+    <select id="fSubject"></select>
+  </label>
+
+  <label>
+    Year
+    <select id="fYear"></select>
+  </label>
+
+  <label>
+    Paper type
+    <select id="fType">
+      <option value="">All</option>
+      <option value="Midterm">Mids (Midterm)</option>
+      <option value="Final">Final Term</option>
+    </select>
+  </label>
+
+  <button type="button" class="btn solid" id="toggleUpload">
+    + Upload a paper
+  </button>
+
+</section>
+
+
+    <!-- Upload form (hidden until the button is clicked) -->
+    <form class="upload-box" id="uploadForm" hidden>
+      <h2>Upload a past paper</h2>
+      <p class="rules">Only real Midterm or Final papers in PDF format (max 10 MB). Your paper will appear after it is reviewed.</p>
+
+      <div class="upload-grid">
+        <label>Subject * <select id="uSubject" required></select></label>
+        <label>Year * <select id="uYear" required></select></label>
+        <label>Paper type *
+          <select id="uType" required>
+            <option value="">Choose type</option>
+            <option>Midterm</option>
+            <option>Final</option>
+          </select>
+        </label>
+        <label>PDF file * <input type="file" id="uFile" accept="application/pdf" required></label>
+      </div>
+
+      <p class="form-msg" id="uMsg"></p>
+      <button type="submit" class="btn solid">Submit for review</button>
+      <button type="button" class="btn" id="cancelUpload">Cancel</button>
+    </form>
+
+    <p class="note" id="note"></p>
+    <div class="papers-grid" id="list"></div>
+    <p class="empty" id="empty" hidden>No papers found for these filters.</p>
+
+  </main>
+
+<script src="../js/pastpaper.js"></script>
+</body>
+</html>

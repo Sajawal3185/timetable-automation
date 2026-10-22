@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>NUML Archive - Lectures</title>
+  <link rel="stylesheet" href="../css/master.css">
+  <link rel="stylesheet" href="../css/app.css">
+</head>
+<body>
+
+  <header class="page-head">
+    <a href="dashboard.html" class="back-link">← Back to dashboard</a>
+    <h1>Lectures</h1>
+    <p>Lecture slides for every course. View online or download.</p>
+  </header>
+
+  <main class="page-body">
+
+    <!-- Filters: title, subject and year -->
+    <section class="filters">
+      <label>
+        Title
+        <input type="text" id="fTitle" placeholder="Search by title...">
+      </label>
+
+      <label>
+        Subject
+        <select id="fSubject"></select>
+      </label>
+
+      <label>
+        Year
+        <select id="fYear">
+          <option value="">All Years</option>
+        </select>
+      </label>
+
+      <button type="button" class="btn solid" id="toggleUpload">+ Share Slides</button>
+    </section>
+
+    <!-- Upload form (hidden until the button is clicked) -->
+    <form class="upload-box" id="uploadForm" hidden>
+      <h2>Share lecture slides</h2>
+      <p class="rules">PDF, PPT or PPTX only (max 20 MB). Your slides will appear after they are reviewed.</p>
+
+      <div class="upload-grid">
+        <label>
+          Subject *
+          <select id="uSubject" required></select>
+        </label>
+
+        <label>
+          Title *
+          <input type="text" id="uTitle" placeholder="e.g. Data Structures - Trees" maxlength="100" required>
+        </label>
+
+        <label>
+          Year *
+          <input type="number" id="uYear" min="2000" max="2100" placeholder="e.g. 2026" required>
+        </label>
+
+        <label>
+          Slides File *
+          <input type="file" id="uFile" accept=".pdf,.ppt,.pptx" required>
+        </label>
+      </div>
+
+      <p class="form-msg" id="uMsg"></p>
+      <button type="submit" class="btn solid">Submit for review</button>
+      <button type="button" class="btn" id="cancelUpload">Cancel</button>
+    </form>
+
+    <p class="note" id="note"></p>
+    <div class="lectures-grid" id="list"></div>
+    <p class="empty" id="empty" hidden>No lectures found for these filters.</p>
+
+  </main>
+
+  <script src="../js/lecture.js"></script>
+</body>
+</html>
