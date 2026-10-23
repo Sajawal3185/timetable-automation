@@ -86,6 +86,22 @@ def test_elective_group_exemption_and_hard_clashes():
     assert [v.kind for v in check_hard_clashes(regular, existing)] == ["section_clash"]
 
 
+def test_cross_table_id_collision_not_skipped():
+    # TimetableEntry(id=1) and MakeupClass(id=1) share entry_id=1 but have different entry_type
+    existing_makeup = [ScheduleSlot(
+        day_of_week="Monday", start_time=time(9, 0), end_time=time(10, 0),
+        section_id=2, course_id=10, teacher_id=1, room_id=5,
+        entry_id=1, entry_type="makeup",
+    )]
+    candidate_timetable = ScheduleSlot(
+        day_of_week="Monday", start_time=time(9, 0), end_time=time(10, 0),
+        section_id=3, course_id=11, teacher_id=1, room_id=6,
+        entry_id=1, entry_type="timetable",
+    )
+    clashes = check_hard_clashes(candidate_timetable, existing_makeup)
+    assert [v.kind for v in clashes] == ["teacher_clash"]
+
+
 def test_unknown_capacity_and_lab_type_rejected():
     v_unknown = check_room_suitability(student_count=40, room_capacity=None)
     assert v_unknown and v_unknown[0].kind == "unknown_capacity"

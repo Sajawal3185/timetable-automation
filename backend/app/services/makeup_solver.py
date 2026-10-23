@@ -1,6 +1,7 @@
 """Makeup Slot Solver with room-capacity fallback (Sajawal) - proposal 2.3."""
+from collections.abc import Sequence
 from dataclasses import dataclass
-from datetime import time, timedelta
+from datetime import time
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -65,7 +66,7 @@ def _load_active_slots(db: Session, term: str) -> list[ScheduleSlot]:
             day_of_week=e.day_of_week, start_time=e.start_time, end_time=e.end_time,
             section_id=e.section_id, course_id=e.course_id, teacher_id=e.teacher_id,
             room_id=e.room_id, elective_group=e.elective_group, group_label=e.group_label,
-            entry_id=e.id,
+            entry_id=e.id, entry_type="timetable",
         ))
 
     makeups = db.execute(
@@ -75,7 +76,7 @@ def _load_active_slots(db: Session, term: str) -> list[ScheduleSlot]:
         slots.append(ScheduleSlot(
             day_of_week=m.day_of_week, start_time=m.start_time, end_time=m.end_time,
             section_id=m.section_id, course_id=m.course_id, teacher_id=m.teacher_id,
-            room_id=m.room_id, entry_id=m.id,
+            room_id=m.room_id, entry_id=m.id, entry_type="makeup",
         ))
     return slots
 

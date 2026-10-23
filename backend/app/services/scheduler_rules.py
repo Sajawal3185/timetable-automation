@@ -3,11 +3,13 @@
 Pure functions with zero database or HTTP dependencies so conflict_checker.py
 and makeup_solver.py can call them directly.
 """
+from collections.abc import Sequence
 from dataclasses import dataclass
 from datetime import time
-from typing import Literal, Sequence
+from typing import Literal
 
 RuleLevel = Literal["hard", "soft"]
+EntryType = Literal["timetable", "makeup"]
 RuleKind = Literal[
     "teacher_clash",
     "room_clash",
@@ -32,6 +34,7 @@ class ScheduleSlot:
     elective_group: str | None = None
     group_label: str = ""
     entry_id: int | None = None
+    entry_type: EntryType = "timetable"
 
 
 @dataclass(frozen=True)
@@ -58,13 +61,18 @@ def check_hard_clashes(
     """Hard Rules: teacher, room, or section cannot be double-booked at overlapping times.
 
     Exemptions:
+    - Self-comparison when both `entry_type` and `entry_id` match.
     - Parallel electives sharing a non-empty `elective_group` in the same section.
     - Split lab groups of the same section where `group_label` differs (e.g. Group A vs Group B)
       in different rooms with different teachers.
     """
     violations: list[RuleViolation] = []
     for slot in existing_slots:
-        if candidate.entry_id is not None and slot.entry_id == candidate.entry_id:
+        if (
+            candidate.entry_id is not None
+            and slot.entry_id == candidate.entry_id
+            and slot.entry_type == candidate.entry_type
+        ):
             continue
         if slot.day_of_week != candidate.day_of_week:
             continue
