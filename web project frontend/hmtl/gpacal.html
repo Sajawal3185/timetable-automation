@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GPA & CGPA Calculator | NUML Archive</title>
+  <link rel="stylesheet" href="../css/gpacal.css">
+</head>
+
+<body>
+  <header class="navbar">
+    <a class="brand" href="#">NUML Archive</a>
+    <nav><a href="#">Timetable</a><a href="#">Archive</a><a href="#">Tools</a></nav>
+  </header>
+  <main class="page">
+    <section class="hero">
+      <div class="hero-icon">▦</div>
+      <div>
+        <p class="eyebrow">STUDENT TOOLS</p>
+        <h1>GPA &amp; CGPA Calculator</h1>
+        <p>Calculate your semester GPA and cumulative CGPA.</p>
+      </div>
+    </section>
+    <div class="tabs"><button class="tab active" data-tab="gpa" type="button">Semester GPA</button><button class="tab"
+        data-tab="cgpa" type="button">Cumulative CGPA</button></div>
+
+    <section class="panel grading-panel">
+      <div class="section-heading">
+        <div>
+          <h2>NUML Grading Scale</h2>
+          <p>For students admitted in Fall 2021 and onwards</p>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table class="grading-table">
+          <thead>
+            <tr>
+              <th>Grade</th>
+              <th>A+</th>
+              <th>A</th>
+              <th>B+</th>
+              <th>B</th>
+              <th>C+</th>
+              <th>C</th>
+              <th>D+</th>
+              <th>D</th>
+              <th>F</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th>%age</th>
+              <td>≥90</td>
+              <td>80–89</td>
+              <td>75–79</td>
+              <td>70–74</td>
+              <td>65–69</td>
+              <td>60–64</td>
+              <td>55–59</td>
+              <td>50–54</td>
+              <td>&lt;50</td>
+            </tr>
+            <tr>
+              <th>GPA</th>
+              <td>4.00</td>
+              <td>4.00</td>
+              <td>3.50–3.99</td>
+              <td>3.00–3.49</td>
+              <td>2.50–2.99</td>
+              <td>2.00–2.49</td>
+              <td>1.50–1.99</td>
+              <td>1.00–1.49</td>
+              <td>0.00</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="note">For grades with a GPA range, this calculator uses the lower end by default: B+ 3.50, B 3.00, C+
+        2.50, C 2.00, D+ 1.50, and D 1.00.</p>
+    </section>
+
+    <section id="gpa-panel" class="panel">
+      <div class="section-heading">
+        <div>
+          <h2>Enter Your Courses</h2>
+          <p>Add each course, select its grade, and enter credit hours.</p>
+        </div><span class="tag">Semester GPA</span>
+      </div>
+      <div class="table-wrap">
+        <table class="course-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Course Name</th>
+              <th>Grade</th>
+              <th>Credit Hours</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="course-rows"></tbody>
+        </table>
+      </div>
+      <div class="actions"><button id="add-course" class="button secondary" type="button">＋ Add Course</button><button
+          id="calculate-gpa" class="button primary" type="button">Calculate Semester GPA</button></div>
+      <p id="gpa-error" class="error" role="alert"></p>
+      <div class="result-grid">
+        <div class="result-card main-result"><span class="result-label">Your Semester GPA</span><strong
+            id="gpa-result">—</strong><span id="gpa-message">Enter your courses to calculate your GPA.</span></div>
+        <div class="result-card"><span class="result-label">Total Credit Hours</span><strong
+            id="total-credits">0</strong></div>
+        <div class="result-card"><span class="result-label">Total Grade Points × Credits</span><strong
+            id="total-quality-points">0.00</strong></div>
+      </div>
+    </section>
+
+    <section id="cgpa-panel" class="panel hidden">
+      <div class="section-heading">
+        <div>
+          <h2>Calculate Your Cumulative CGPA</h2>
+          <p>Combine your previous academic record with your current semester.</p>
+        </div><span class="tag">CGPA</span>
+      </div>
+      <form id="cgpa-form" class="cgpa-form">
+        <label>Previous CGPA<input id="previous-cgpa" type="number" min="0" max="4" step="0.01" placeholder="e.g. 3.56"
+            required></label>
+        <label>Previously Completed Credit Hours<input id="previous-credits" type="number" min="0" step="0.5"
+            placeholder="e.g. 48" required></label>
+        <label>Current Semester GPA<input id="current-gpa" type="number" min="0" max="4" step="0.01"
+            placeholder="Calculate GPA above or enter it" required></label>
+        <label>Current Semester Credit Hours<input id="current-credits" type="number" min="0.5" step="0.5"
+            placeholder="e.g. 16" required></label>
+        <div class="form-actions"><button class="button primary" type="submit">Calculate CGPA</button><button
+            id="use-current-gpa" class="button secondary" type="button">Use Calculated Semester GPA</button></div>
+      </form>
+      <p id="cgpa-error" class="error" role="alert"></p>
+      <div class="cgpa-result"><span class="result-label">Estimated Cumulative CGPA</span><strong
+          id="cgpa-result">—</strong>
+        <p id="cgpa-message">Enter your previous results and current semester details.</p>
+      </div>
+    </section>
+  </main>
+  <footer>NUML Archive <span>—</span> Student Learning Resources</footer>
+  <script src="../js/gpacal.js"></script>
+</body>
+
+</html>

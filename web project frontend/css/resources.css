@@ -1,0 +1,271 @@
+/* ===== Basics ===== */
+:root {
+  --bg: #f5f7fb;
+  --card: #ffffff;
+  --text: #1f2937;
+  --muted: #6b7280;
+  --primary: #2563eb;
+  --primary-dark: #1d4ed8;
+  --border: #e5e7eb;
+  --radius: 12px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+}
+
+main {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 24px 16px 48px;
+}
+
+/* ===== Navbar ===== */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 14px 24px;
+  background: var(--card);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.logo {
+  font-size: 1.2rem;
+  color: var(--primary);
+}
+
+.nav-links {
+  display: flex;
+  gap: 8px;
+}
+
+.nav-links a {
+  text-decoration: none;
+  color: var(--muted);
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-weight: 500;
+}
+
+.nav-links a:hover {
+  background: var(--bg);
+  color: var(--text);
+}
+
+.nav-links a.active {
+  background: var(--primary);
+  color: #fff;
+}
+
+/* ===== Page header ===== */
+.page-header {
+  text-align: center;
+  padding: 32px 0 24px;
+}
+
+.eyebrow {
+  display: inline-block;
+  font-size: 0.75rem;
+  letter-spacing: 2px;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.page-header h1 {
+  margin: 8px 0;
+  font-size: 2.2rem;
+}
+
+.subtitle {
+  margin: 0;
+  color: var(--muted);
+}
+
+/* ===== Filters ===== */
+.filter-box {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  margin-bottom: 24px;
+}
+
+.filter-box h2 {
+  margin: 0 0 12px;
+  font-size: 1.1rem;
+}
+
+.filters {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  gap: 12px;
+}
+
+.filters input,
+.filters select {
+  width: 100%;
+  padding: 10px 12px;
+  font-size: 0.95rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--text);
+}
+
+.filters input:focus,
+.filters select:focus {
+  outline: 2px solid var(--primary);
+  border-color: transparent;
+}
+
+/* ===== Results header ===== */
+.results-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 12px;
+}
+
+.results-header h2 {
+  margin: 0;
+  font-size: 1.3rem;
+}
+
+.results-header p {
+  margin: 0;
+  color: var(--muted);
+}
+
+/* ===== Cards grid ===== */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+}
+
+.card h3 {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.card p {
+  margin: 0;
+}
+
+.small {
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+/* Operating system tags */
+.os-label {
+  display: inline-block;
+  margin: 4px 6px 0 0;
+  padding: 2px 10px;
+  font-size: 0.78rem;
+  background: #eff6ff;
+  color: var(--primary-dark);
+  border-radius: 999px;
+}
+
+/* Installation steps */
+details {
+  border-top: 1px solid var(--border);
+  padding-top: 10px;
+}
+
+summary {
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--primary);
+}
+
+details ol {
+  margin: 10px 0 0;
+  padding-left: 20px;
+  font-size: 0.92rem;
+}
+
+/* Download button */
+.button {
+  margin-top: auto;
+  text-align: center;
+  text-decoration: none;
+  background: var(--primary);
+  color: #fff;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-weight: 600;
+}
+
+.button:hover {
+  background: var(--primary-dark);
+}
+
+/* Empty message */
+.empty {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 40px 0;
+  color: var(--muted);
+}
+
+/* ===== Footer ===== */
+.footer {
+  text-align: center;
+  padding: 20px;
+  color: var(--muted);
+  font-size: 0.9rem;
+  border-top: 1px solid var(--border);
+}
+
+/* ===== Mobile ===== */
+@media (max-width: 800px) {
+  .filters {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .filters input {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 480px) {
+  .filters {
+    grid-template-columns: 1fr;
+  }
+
+  .page-header h1 {
+    font-size: 1.7rem;
+  }
+}

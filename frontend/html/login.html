@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,28 +8,32 @@
   <link rel="stylesheet" href="../css/master.css">
   <link rel="stylesheet" href="../css/auth.css">
 </head>
-
 <body class="auth-page">
 
   <div class="card">
     <h2>NUML Archive</h2>
     <p>National University of Modern Languages</p>
 
-   <form onsubmit="login(event)">
-  <label>Email</label>
-  <input type="email" id="email" placeholder="you@numls.edu.pk" required>
+    <form id="loginForm" onsubmit="login(event)">
+      <label for="email">University Email</label>
+      <input type="email" id="email"
+        placeholder="numl-f24-12345@numls.edu.pk" required>
 
-  <label>Password</label>
-  <input type="password" id="password" placeholder="Enter password" required>
+      <label for="password">Password</label>
+      <input type="password" id="password"
+        placeholder="Enter password" required>
 
+      <button type="submit">Log in</button>
+      <p class="msg" id="msg"></p>
+    </form>
 
-  <button>Log in</button>
-</form>
- <a href="forgetpassword.html" class="forgot">Forgot password?</a>
+    <a href="forgetpassword.html" class="forgot">Forgot password?</a>
+
     <div class="signup">
       New here? <a href="signup.html">Create an account</a>
     </div>
   </div>
+
   <script src="../js/auth.js"></script>
 </body>
 </html>

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>NUML Archive - Sign up</title>
+  <link rel="stylesheet" href="../css/signup.css">
+  <link rel="stylesheet" href="../css/auth.css">
+</head>
+
+<body class="auth-page">
+
+  <div class="card">
+    <h2>NUML Archive</h2>
+    <p>Create your student account</p>
+
+    <form id="signupForm" onsubmit="signup(event)" novalidate>
+      <label>Full name</label>
+      <input type="text" id="name" placeholder="Your full name" required>
+
+      <label>University email</label>
+      <input type="email" id="email" placeholder="you@numls.edu.pk" required>
+<small class="hint" id="emailHint">
+  Enter your official student email address exactly as assigned by the university.
+</small>
+      <label>Department</label>
+      <select id="department" required>
+        <option value="">Select department</option>
+        <option>Software Engineering</option>
+        <option>Computer Science</option>
+        <option>Artificial Intelligence</option>
+        <option>Information Technology</option>
+      </select>
+
+      <label>Password</label>
+      <input type="password" id="password" placeholder="At least 8 characters" required>
+
+      <label>Confirm password</label>
+      <input type="password" id="confirm" placeholder="Re-enter password" required>
+
+      <button type="submit">Sign up</button>
+      <p class="msg" id="msg"></p>
+    </form>
+
+    <div class="signup">
+      Already have an account? <a href="login.html">Log in</a>
+    </div>
+  </div>
+
+  <script src="../js/signup.js"></script>
+</body>
+</html>

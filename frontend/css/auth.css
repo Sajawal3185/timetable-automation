@@ -1,4 +1,17 @@
+/* =========================================================
+   AUTH.CSS: login, signup and forgot password pages
+   Body class : <body class="auth-page">
+   Link order : master.css first, then auth.css
+   From master: --blue, --muted
+   ========================================================= */
+
+/* ----- Page setup ----- */
 body.auth-page {
+  --blue-dark: #154a96;           /* hover color for the button */
+  --field-bg: #e8f0fb;            /* background of inputs and selects */
+  --error: #b91c1c;
+  --success: #15803d;
+
   min-height: 100vh;
   display: flex;
   justify-content: center;
@@ -7,78 +20,86 @@ body.auth-page {
               url("../images/numl.webp") center / cover;
 }
 
+
+/* ----- White card in the middle ----- */
 .card {
-  background: white;
   width: 330px;
   padding: 30px;
+  background: white;
   border-radius: 15px;
 }
 
-.card h2 { text-align: center; color: #1e5fbf; margin: 0; }
-.card p { text-align: center; font-size: 13px; color: gray; margin: 5px 0 20px; }
+.card h2 { margin: 0; text-align: center; color: var(--blue); }
+.card p  { margin: 5px 0 20px; text-align: center; font-size: 13px; color: gray; }
 
+
+/* ----- Form fields ----- */
 label { font-size: 13px; font-weight: bold; }
 
-input {
+input,
+select {
   width: 100%;
-  padding: 10px;
   margin: 5px 0 15px;
+  padding: 10px;
+  background: var(--field-bg);
   border: 2px solid transparent;
   border-radius: 6px;
-  background: #e8f0fb;
 }
-input:focus { outline: none; border-color: #1e5fbf; }
 
-.forgot {
+select { font-size: 14px; }
+
+input:focus,
+select:focus { outline: none; border-color: var(--blue); }
+
+input.invalid { border-color: var(--error); }
+
+
+/* ----- Helper text under a field ----- */
+.hint {
   display: block;
-  text-align: right;
-  font-size: 13px;
-  color: #1e5fbf;
-  margin-bottom: 15px;
+  margin: -10px 0 15px;
+  font-size: 12px;
+  color: gray;
 }
 
+.hint.error { color: var(--error); }
+.hint.ok    { color: var(--success); }
+
+
+/* ----- Button ----- */
 button {
   width: 100%;
   padding: 11px;
-  background: #1e5fbf;
-  color: white;
   font-size: 15px;
+  color: white;
+  background: var(--blue);
   border: none;
   border-radius: 6px;
   cursor: pointer;
 }
-button:hover { background: #154a96; }
 
-.signup { text-align: center; font-size: 13px; margin-top: 15px; }
-.signup a { color: #1e5fbf; }
-.card .msg { font-size: 13px; margin: 12px 0 0; color: #15803d; }
-.card .msg.error { color: #b91c1c; }
+button:hover { background: var(--blue-dark); }
+
+
+/* ----- Links and messages ----- */
+.forgot {
+  display: block;
+  margin-bottom: 15px;
+  text-align: right;
+  font-size: 13px;
+  color: var(--blue);
+}
+
+.signup { margin-top: 15px; text-align: center; font-size: 13px; }
+.signup a { color: var(--blue); }
 
 .back-btn {
   display: block;
+  margin-top: 15px;
   text-align: center;
   font-size: 13px;
-  color: #1e5fbf;
-  margin-top: 15px;
+  color: var(--blue);
 }
-select {
-  width: 100%;
-  padding: 10px;
-  margin: 5px 0 15px;
-  border: 2px solid transparent;
-  border-radius: 6px;
-  background: #e8f0fb;
-  font-size: 14px;
-}
-select:focus { outline: none; border-color: #1e5fbf; }
 
-.hint {
-  display: block;
-  font-size: 12px;
-  color: gray;
-  margin: -10px 0 15px;
-}
-.hint.error { color: #b91c1c; }
-.hint.ok { color: #15803d; }
-
-input.invalid { border-color: #b91c1c; }
+.card .msg { margin: 12px 0 0; font-size: 13px; color: var(--success); }
+.card .msg.error { color: var(--error); }
