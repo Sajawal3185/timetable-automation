@@ -1,0 +1,1166 @@
+/* =========================================================
+   APP.CSS: pages that need login
+   1. Shared app parts (used by more than one app page)
+   2. Past Papers
+   3. Lectures
+   4. Resources & Tools
+   5. GPA Calculator
+   6. Dashboard (keep last)
+   ========================================================= */
+
+
+/* =========================================================
+   1. SHARED APP PARTS
+   ========================================================= */
+
+/* ----- Blue banner at the top of every app page ----- */
+.page-head {
+  background: linear-gradient(rgba(10, 40, 100, 0.85), rgba(10, 40, 100, 0.75)),
+              url("../images/numl.webp");   /* ../ = one folder up, out of css/ */
+  background-size: cover;
+  background-position: center;
+  color: white;
+  text-align: center;
+  padding: 22px 20px 90px;                  /* extra bottom space for the overlap */
+}
+
+.page-head h1 {
+  margin: 22px 0 8px;
+  font-size: 34px;
+}
+
+.page-head p {
+  margin: 0;
+}
+
+.back-link {
+  display: block;
+  text-align: left;
+  color: white;
+  font-size: 14px;
+}
+
+.back-link:hover {
+  text-decoration: underline;
+}
+
+
+/* ----- Main content area, pulled up over the banner ----- */
+.page-body {
+  max-width: 1000px;
+  margin: -55px auto 40px;                  /* negative top margin = overlap */
+  padding: 0 16px;
+}
+
+
+/* ----- White box that holds filters or search ----- */
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 14px;
+  background: white;
+  padding: 18px;
+  border-radius: 14px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+  margin-bottom: 20px;
+}
+
+.filters label {
+  font-size: 13px;
+  font-weight: bold;
+}
+
+/* Description line at the top of the filters box (full width) */
+.filters .section-description {
+  flex-basis: 100%;
+  margin: 0;
+}
+
+
+/* ----- Form fields (filters and upload forms) ----- */
+.filters select,
+.filters input,
+.upload-box select,
+.upload-box input,
+.upload-grid select,
+.upload-grid input {
+  display: block;
+  min-width: 150px;
+  margin-top: 6px;
+  padding: 10px;
+  font-size: 14px;
+  background: #f5f8fe;
+  border: 2px solid #d6e0f3;
+  border-radius: 8px;
+}
+
+.filters select:focus,
+.filters input:focus,
+.upload-box select:focus,
+.upload-box input:focus,
+.upload-grid select:focus,
+.upload-grid input:focus {
+  outline: none;
+  border-color: var(--blue);
+  background: white;
+}
+
+
+/* ----- Upload box (past papers, lectures and resources all use it) ----- */
+.upload-box {
+  background: white;
+  padding: 22px;
+  border-radius: 14px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+  margin-bottom: 20px;
+}
+
+.upload-box h2 {
+  margin: 0 0 8px;
+  font-size: 20px;
+  color: var(--navy);
+}
+
+.upload-box label {
+  font-size: 13px;
+  font-weight: bold;
+}
+
+/* Two fields per row inside the upload box */
+.upload-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin: 18px 0;
+}
+
+.upload-grid label {
+  display: block;
+  font-size: 14px;
+  color: var(--navy);
+}
+
+/* Fields inside the grid fill their column (overrides min-width above) */
+.upload-grid input,
+.upload-grid select {
+  width: 100%;
+  min-width: 0;
+  margin-top: 8px;
+  padding: 12px;
+}
+
+.rules {
+  margin: 6px 0 0;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+
+/* ----- Section headings (view / upload parts of a page) ----- */
+.view-heading,
+.upload-heading {
+  margin: 24px 0 14px;
+}
+
+.view-heading h2,
+.upload-heading h2 {
+  margin: 0 0 8px;
+  font-size: 24px;
+  color: var(--navy);
+}
+
+.view-heading p,
+.upload-heading p,
+.section-description {
+  margin: 0 0 14px;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.upload-heading .btn {
+  margin-top: 4px;
+}
+
+
+/* ----- Buttons used inside app pages ----- */
+/* Master styles .btn for links; a real <button> needs these small resets.
+   The transparent border keeps buttons the same height as .btn.dark */
+button.btn {
+  border: 2px solid transparent;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+/* Light button for white backgrounds (master .btn.outline is white) */
+.btn.dark {
+  color: var(--blue);
+  background: white;
+  border-color: var(--blue);
+}
+
+.btn.dark:hover { background: var(--bg); }
+
+
+/* ----- Messages ----- */
+.form-msg {
+  min-height: 20px;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.form-msg.error { color: #dc2626; }
+.form-msg.ok    { color: #16a34a; }
+
+.note {
+  color: #16a34a;
+  font-weight: bold;
+}
+
+.empty {
+  text-align: center;
+  margin-top: 30px;
+  color: var(--muted);
+}
+
+/* Small helper text under the filters */
+.hint {
+  margin: 14px 0;
+  font-size: 14px;
+  text-align: center;
+  color: var(--muted);
+}
+
+/* Yellow warning box */
+.warn {
+  margin: 0 0 16px;
+  padding: 10px 14px;
+  font-size: 14px;
+  font-weight: bold;
+  color: #92400e;
+  background: #fef3c7;
+  border-radius: 8px;
+}
+
+
+/* ----- Mobile ----- */
+@media (max-width: 600px) {
+  .page-head h1 { font-size: 26px; }
+  .filters { flex-direction: column; align-items: stretch; }
+  .filters select, .filters input { width: 100%; }
+  .upload-grid { grid-template-columns: 1fr; }          /* one field per row */
+  .view-heading h2,
+  .upload-heading h2 { font-size: 21px; }
+}
+
+
+/* =========================================================
+   2. PAGE: PAST PAPERS  (pastpapers.html)
+   Headings and upload box come from section 1.
+   ========================================================= */
+
+.papers-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+  gap: 16px;
+}
+
+.paper-card {
+  background: white;
+  padding: 20px;
+  border-radius: 14px;
+  border-top: 4px solid var(--blue);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.paper-card h3 { margin: 12px 0 4px; color: var(--navy); }
+.paper-card p  { margin: 0 0 14px; color: var(--muted); font-size: 14px; }
+
+/* Midterm / Final label on each card */
+.badge { padding: 3px 12px; border-radius: 12px; font-size: 12px; font-weight: bold; color: white; }
+.badge.mid { background: #2563eb; }
+.badge.fin { background: #7c3aed; }
+
+/* Buttons row at the bottom of each card */
+.actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.report  { margin-left: auto; border: 0; background: none; color: #94a3b8; font-size: 12px; cursor: pointer; text-decoration: underline; }
+
+
+/* =========================================================
+   3. PAGE: LECTURES  (uni-lecs.html)
+   The upload box, upload grid and headings come from
+   section 1. Add lectures-only CSS below this comment.
+   ========================================================= */
+
+
+/* =========================================================
+   4. PAGE: RESOURCES & TOOLS  (tools-resources.html)
+
+   Body class : <body class="res-page">
+   From master: --blue, --navy, --muted, --bg, --ink
+   From sec. 1: .empty (small overrides below)
+   Every rule starts with .res-page, so nothing here can
+   change any other page.
+   ========================================================= */
+
+/* ----- Page setup: page-only colors and spacing ----- */
+body.res-page {
+  --res-border: #e5e7eb;          /* light grey lines around boxes */
+  --res-blue-dark: #154a96;       /* hover color for buttons */
+  --res-tag-bg: #eff6ff;          /* background of the OS tags */
+  --res-radius: 12px;             /* corner roundness of boxes */
+
+  padding-top: 72px;              /* space for the fixed master navbar */
+  background: var(--bg);
+  line-height: 1.6;
+}
+
+/* Centered content column */
+.res-page main {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 24px 16px 48px;
+}
+
+
+/* ----- Page header (small label, title, subtitle) ----- */
+.res-page .page-header {
+  text-align: center;
+  padding: 32px 0 24px;
+}
+
+.res-page .eyebrow {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: var(--blue);
+}
+
+.res-page .page-header h1 {
+  margin: 8px 0;
+  font-size: 2.2rem;
+  color: var(--navy);
+}
+
+.res-page .subtitle {
+  margin: 0;
+  color: var(--muted);
+}
+
+
+/* ----- Filter box (search + dropdowns) ----- */
+.res-page .filter-box {
+  margin-bottom: 24px;
+  padding: 20px;
+  background: white;
+  border: 1px solid var(--res-border);
+  border-radius: var(--res-radius);
+}
+
+.res-page .filter-box h2 {
+  margin: 0 0 12px;
+  font-size: 1.1rem;
+  color: var(--navy);
+}
+
+/* Section 1 styles .filters as a white flex box.
+   Here the box is .filter-box, so .filters becomes a plain grid:
+   search takes 2 parts, each dropdown takes 1 part. */
+.res-page .filters {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  align-items: stretch;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  background: none;
+  box-shadow: none;
+}
+
+/* Fields: reset the section 1 spacing, then apply this page's look */
+.res-page .filters input,
+.res-page .filters select {
+  width: 100%;
+  min-width: 0;
+  margin: 0;
+  padding: 10px 12px;
+  font-size: 0.95rem;
+  color: var(--ink);
+  background: white;
+  border: 1px solid var(--res-border);
+  border-radius: 8px;
+}
+
+.res-page .filters input:focus,
+.res-page .filters select:focus {
+  outline: 2px solid var(--blue);
+  border-color: transparent;
+  background: white;
+}
+
+
+/* ----- Results header ("Results" on the left, count on the right) ----- */
+.res-page .results-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 12px;
+}
+
+.res-page .results-header h2 {
+  margin: 0;
+  font-size: 1.3rem;
+  color: var(--navy);
+}
+
+.res-page .results-header p {
+  margin: 0;
+  color: var(--muted);
+}
+
+
+/* ----- Cards grid (as many 280px+ columns as fit the screen) ----- */
+.res-page .grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.res-page .card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 20px;
+  background: white;
+  border: 1px solid var(--res-border);
+  border-radius: var(--res-radius);
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+/* Card lifts up a little on hover */
+.res-page .card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+}
+
+.res-page .card h3 {
+  margin: 0;
+  font-size: 1.25rem;
+  color: var(--navy);
+}
+
+.res-page .card p { margin: 0; }
+
+/* Small grey helper text (version, size, etc.) */
+.res-page .small {
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+
+/* ----- Operating system tags (Windows, Linux, Mac...) ----- */
+.res-page .os-label {
+  display: inline-block;
+  margin: 4px 6px 0 0;
+  padding: 2px 10px;
+  font-size: 0.78rem;
+  color: var(--res-blue-dark);
+  background: var(--res-tag-bg);
+  border-radius: 999px;
+}
+
+
+/* ----- Installation steps (click to open) ----- */
+.res-page details {
+  padding-top: 10px;
+  border-top: 1px solid var(--res-border);
+}
+
+.res-page summary {
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--blue);
+}
+
+.res-page details ol {
+  margin: 10px 0 0;
+  padding-left: 20px;
+  font-size: 0.92rem;
+}
+
+
+/* ----- Download button (margin-top:auto pushes it to the card bottom) ----- */
+.res-page .button {
+  margin-top: auto;
+  padding: 10px 16px;
+  text-align: center;
+  font-weight: 600;
+  color: white;
+  background: var(--blue);
+  border-radius: 8px;
+}
+
+.res-page .button:hover { background: var(--res-blue-dark); }
+
+
+/* ----- "Nothing found" message ----- */
+/* Extends the section 1 .empty: spans the full grid width */
+.res-page .empty {
+  grid-column: 1 / -1;
+  margin-top: 0;
+  padding: 40px 0;
+}
+
+
+/* ----- Mobile ----- */
+@media (max-width: 800px) {
+  .res-page .filters { grid-template-columns: 1fr 1fr; }
+  .res-page .filters input { grid-column: 1 / -1; }   /* search on its own row */
+}
+
+@media (max-width: 480px) {
+  .res-page .filters { grid-template-columns: 1fr; }  /* one field per row */
+  .res-page .page-header h1 { font-size: 1.7rem; }
+}
+
+
+/* =========================================================
+   5. PAGE: GPA CALCULATOR  (gpa-calculator.html)
+
+   Body class : <body class="gpa-page">
+   From master: --blue, --navy, --muted, --ink
+   Every rule starts with .gpa-page, so nothing here can
+   change any other page.
+   ========================================================= */
+
+/* ----- Page setup: page-only colors and background ----- */
+body.gpa-page {
+  --gpa-blue-dark: #154a96;       /* hover color for buttons */
+  --gpa-light: #eaf2ff;           /* light blue backgrounds */
+  --gpa-border: #d7e5fb;          /* light blue lines around boxes */
+  --gpa-danger: #d72f48;          /* red for the remove button */
+
+  min-height: 100vh;
+  padding-top: 72px;              /* space for the fixed master navbar */
+  background: linear-gradient(180deg, #edf4ff 0, #f9fbff 340px, #f4f8ff 100%);
+}
+
+/* Centered content column */
+.gpa-page .page {
+  width: min(1200px, 92%);
+  margin: 30px auto;
+}
+
+/* JavaScript adds/removes this class to show or hide things.
+   !important makes sure it always wins over display:flex etc. */
+.gpa-page .hidden { display: none !important; }
+
+
+/* ----- Hero (icon + title at the top) ----- */
+.gpa-page .hero {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin-bottom: 24px;
+}
+
+.gpa-page .hero-icon {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 62px;
+  height: 62px;
+  font-size: 34px;
+  color: white;
+  background: var(--blue);
+  border-radius: 17px;
+}
+
+.gpa-page .eyebrow {
+  margin: 0 0 5px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  color: var(--blue);
+}
+
+/* Headings. clamp() makes the h1 grow and shrink with screen width */
+.gpa-page h1 {
+  margin: 0 0 7px;
+  font-size: clamp(25px, 3vw, 36px);
+  color: var(--navy);
+}
+
+.gpa-page h2 {
+  margin: 0 0 6px;
+  font-size: 20px;
+  color: var(--navy);
+}
+
+/* Grey description text under the title and under each panel heading */
+.gpa-page .hero p:last-child,
+.gpa-page .section-heading p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+
+/* ----- Tabs (Semester GPA / CGPA) ----- */
+.gpa-page .tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+  padding: 5px;
+  background: #eaf1fd;
+  border: 1px solid var(--gpa-border);
+  border-radius: 12px;
+}
+
+.gpa-page .tab {
+  flex: 1;
+  padding: 13px 16px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink);
+  background: transparent;
+  border: 0;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+/* The tab that is currently selected */
+.gpa-page .tab.active {
+  color: white;
+  background: var(--blue);
+  box-shadow: 0 4px 10px rgba(30, 95, 191, 0.25);
+}
+
+
+/* ----- Panel (white box that holds each part of the page) ----- */
+.gpa-page .panel {
+  margin-bottom: 18px;
+  padding: 22px;
+  background: white;
+  border: 1px solid var(--gpa-border);
+  border-radius: 15px;
+  box-shadow: 0 8px 24px rgba(24, 61, 117, 0.06);
+}
+
+/* Panel heading row: title on the left, small tag on the right */
+.gpa-page .section-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.gpa-page .tag {
+  padding: 8px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+  color: var(--gpa-blue-dark);
+  background: var(--gpa-light);
+  border-radius: 20px;
+}
+
+
+/* ----- Tables (courses table and grading table) ----- */
+/* .table-wrap lets the table scroll sideways on small screens */
+.gpa-page .table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  border: 1px solid var(--gpa-border);
+  border-radius: 9px;
+}
+
+.gpa-page table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.gpa-page th,
+.gpa-page td {
+  padding: 11px 12px;
+  text-align: left;
+  font-size: 13px;
+  border-bottom: 1px solid #e9f0fc;
+}
+
+.gpa-page thead th {
+  font-weight: 700;
+  color: #536b95;
+  background: #f0f5fd;
+}
+
+/* No line under the last row */
+.gpa-page tbody tr:last-child th,
+.gpa-page tbody tr:last-child td { border-bottom: 0; }
+
+/* Courses table: first column (number) and last column (remove button) are narrow */
+.gpa-page .course-table { min-width: 700px; }
+
+.gpa-page .course-table th:first-child,
+.gpa-page .course-table td:first-child,
+.gpa-page .course-table th:last-child,
+.gpa-page .course-table td:last-child { text-align: center; }
+
+.gpa-page .course-table th:first-child,
+.gpa-page .course-table td:first-child { width: 42px; }
+
+.gpa-page .course-table th:last-child,
+.gpa-page .course-table td:last-child { width: 55px; }
+
+
+/* ----- Input fields ----- */
+.gpa-page input,
+.gpa-page select {
+  width: 100%;
+  min-width: 0;
+  padding: 10px 11px;
+  font: inherit;
+  color: var(--ink);
+  background: white;
+  border: 1px solid #cbdcf6;
+  border-radius: 7px;
+  outline: none;
+}
+
+.gpa-page input:focus,
+.gpa-page select:focus {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px rgba(30, 95, 191, 0.12);   /* soft blue glow */
+}
+
+/* Minimum widths so the fields do not get too narrow in the table */
+.gpa-page .course-name  { min-width: 190px; }
+.gpa-page .grade-select { min-width: 135px; }
+.gpa-page .credit-input { min-width: 95px; }
+
+/* Red "x" button that deletes a course row */
+.gpa-page .remove-course {
+  padding: 7px 9px;
+  font-size: 18px;
+  color: var(--gpa-danger);
+  background: #fff1f3;
+  border: 0;
+  border-radius: 7px;
+  cursor: pointer;
+}
+
+.gpa-page .remove-course:hover { background: #ffe0e5; }
+
+
+/* ----- Buttons (Add course, Calculate...) ----- */
+/* flex-wrap and align-items reset the past papers .actions from section 2 */
+.gpa-page .actions {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: stretch;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.gpa-page .button {
+  padding: 12px 17px;
+  font-size: 14px;
+  font-weight: 700;
+  border: 0;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: transform 0.15s, background 0.15s;
+}
+
+.gpa-page .button:hover { transform: translateY(-1px); }
+
+/* Main button: solid blue */
+.gpa-page .primary { color: white; background: var(--blue); }
+.gpa-page .primary:hover { background: var(--gpa-blue-dark); }
+
+/* Second button: light blue */
+.gpa-page .secondary { color: var(--gpa-blue-dark); background: var(--gpa-light); }
+
+/* Pushes the main button to the right side of the row */
+.gpa-page .actions .primary { margin-left: auto; }
+
+
+/* ----- Semester result (3 cards: GPA, credits, grade) ----- */
+.gpa-page .result-grid {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 1.2fr;     /* first card is a bit wider */
+  gap: 12px;
+  margin-top: 22px;
+}
+
+.gpa-page .result-card {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  min-height: 105px;
+  padding: 17px;
+  background: #f8fbff;
+  border: 1px solid var(--gpa-border);
+  border-radius: 10px;
+}
+
+/* The big GPA card gets a soft blue gradient */
+.gpa-page .main-result { background: linear-gradient(135deg, #eaf2ff, #f8fbff); }
+
+.gpa-page .result-label {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.gpa-page .result-card strong {
+  font-size: 29px;
+  color: var(--navy);
+}
+
+.gpa-page .main-result strong {
+  font-size: 35px;
+  color: var(--blue);
+}
+
+
+/* ----- Error message (hidden automatically when empty) ----- */
+.gpa-page .error {
+  margin: 10px 0 0;
+  font-size: 13px;
+  color: #c62842;
+}
+
+.gpa-page .error:empty { display: none; }
+
+
+/* ----- CGPA tab: form and result ----- */
+.gpa-page .cgpa-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));   /* two fields per row */
+  gap: 18px;
+}
+
+.gpa-page .cgpa-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+/* Buttons row takes the full width under the fields */
+.gpa-page .form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  grid-column: 1 / -1;
+}
+
+.gpa-page .cgpa-result {
+  margin-top: 22px;
+  padding: 22px;
+  text-align: center;
+  background: linear-gradient(135deg, #eaf2ff, #f8fbff);
+  border: 1px solid var(--gpa-border);
+  border-radius: 12px;
+}
+
+.gpa-page .cgpa-result strong {
+  display: block;
+  margin: 9px 0;
+  font-size: 42px;
+  color: var(--blue);
+}
+
+.gpa-page .cgpa-result p {
+  margin: 0;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+
+/* ----- Grading scale table (A, A-, B+ ... with points) ----- */
+.gpa-page .grading-panel .section-heading { margin-bottom: 15px; }
+
+.gpa-page .grading-table {
+  min-width: 780px;
+  text-align: center;
+}
+
+.gpa-page .grading-table th,
+.gpa-page .grading-table td {
+  padding: 12px 10px;
+  text-align: center;
+  white-space: nowrap;            /* keep each cell on one line */
+}
+
+.gpa-page .grading-table thead th {
+  color: white;
+  background: #174b86;
+}
+
+.gpa-page .grading-table tbody th {
+  color: var(--navy);
+  background: #edf4ff;
+}
+
+/* Small note under the grading table.
+   Overrides the section 1 .note (which is green and bold). */
+.gpa-page .note {
+  margin: 14px 0 0;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.6;
+  color: var(--muted);
+}
+
+
+/* ----- Mobile ----- */
+@media (max-width: 760px) {
+  .gpa-page .page { width: 94%; margin-top: 22px; }
+  .gpa-page .panel { padding: 15px; }
+  .gpa-page .section-heading { flex-direction: column; }
+  .gpa-page .result-grid { grid-template-columns: 1fr; }     /* cards stack */
+  .gpa-page .actions { flex-direction: column; }
+  .gpa-page .actions .primary { margin-left: 0; }
+  .gpa-page .cgpa-form { grid-template-columns: 1fr; }
+  .gpa-page .form-actions { flex-direction: column; }
+  .gpa-page .form-actions .button { width: 100%; }
+}
+
+
+/* =========================================================
+   6. PAGE: DASHBOARD  (dashboard.html)
+
+   Body class : <body class="dash-page">
+   Keep this section LAST in app.css.
+   The variables below are set on body.dash-page, so they
+   only change colors inside the dashboard, not other pages.
+   ========================================================= */
+
+/* ----- Page setup: dashboard colors, centered layout, background ----- */
+body.dash-page {
+  --navy: #262c5e;
+  --navy-light: #343b73;
+  --orange: #f47b3f;
+  --text: #1f2340;
+  --muted: #8a8fa8;
+  --shell: #eceef5;
+
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  font-family: "Poppins", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: var(--text);
+  background: linear-gradient(135deg, #c9cdf2 0%, #f9d9c9 50%, #fdeec7 100%);
+}
+
+
+/* ----- Shell (big rounded box: sidebar on the left, main on the right) ----- */
+.dash-page .shell {
+  display: grid;
+  grid-template-columns: 250px 1fr;
+  gap: 16px;
+  width: 100%;
+  max-width: 1100px;
+  min-height: 620px;
+  padding: 16px;
+  background: var(--shell);
+  border-radius: 36px;
+  box-shadow: 0 20px 50px rgba(38, 44, 94, 0.18);
+}
+
+
+/* ----- Sidebar (dark panel on the left) ----- */
+.dash-page .sidebar {
+  display: flex;
+  flex-direction: column;
+  padding: 24px 18px;
+  color: #fff;
+  background: var(--navy);
+  border-radius: 24px;
+}
+
+/* Logo area at the top of the sidebar */
+.dash-page .brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+
+.dash-page .brand-mark {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  font-weight: 700;
+  background: var(--orange);
+  border-radius: 9px;
+}
+
+
+/* ----- Profile button and its dropdown ----- */
+/* position:relative lets the dropdown sit right under the button */
+.dash-page .profile-wrap { position: relative; }
+
+.dash-page .profile {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  font: inherit;
+  text-align: left;
+  color: #fff;
+  background: var(--navy-light);
+  border: 0;
+  border-radius: 16px;
+  cursor: pointer;
+}
+
+.dash-page .profile:hover { background: #3c4480; }
+
+/* Round circle with the user's initial */
+.dash-page .avatar {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 42px;
+  height: 42px;
+  font-weight: 700;
+  color: var(--navy);
+  background: #b9bdf5;
+  border-radius: 50%;
+}
+
+/* Name (top) and role/email (bottom) */
+.dash-page .profile-text {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;                   /* lets long text shrink instead of overflowing */
+  line-height: 1.3;
+}
+
+.dash-page .profile-text strong { font-size: 0.9rem; }
+.dash-page .profile-text small  { font-size: 0.75rem; color: #aab0d6; }
+.dash-page .chev { color: #aab0d6; }                   /* small arrow icon */
+
+/* White dropdown that opens under the profile button */
+.dash-page .profile-menu {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(100% + 8px);
+  z-index: 5;
+  padding: 6px;
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+}
+
+/* The "hidden" attribute keeps the dropdown closed */
+.dash-page .profile-menu[hidden] { display: none; }
+
+/* Logout link (named dash-logout so it does not clash with other pages) */
+.dash-page .dash-logout {
+  display: block;
+  padding: 10px 12px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #d9381e;
+  border-radius: 10px;
+}
+
+.dash-page .dash-logout:hover { background: #fff1ee; }
+
+
+/* ----- Sidebar menu links ----- */
+.dash-page .menu-title {
+  margin: 32px 0 10px 8px;
+  font-size: 0.7rem;
+  letter-spacing: 1.5px;
+  color: #aab0d6;
+}
+
+.dash-page .menu {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.dash-page .menu a {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  font-size: 0.92rem;
+  color: #dfe2f7;
+  border-radius: 12px;
+}
+
+.dash-page .menu a:hover {
+  color: #fff;
+  background: var(--navy-light);
+}
+
+/* Menu icons: line style, color follows the text color */
+.dash-page .menu svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+
+/* ----- Main area (white box on the right) ----- */
+.dash-page .main {
+  display: grid;
+  place-items: center;
+  min-width: 0;
+  padding: 24px;
+  background: #fff;
+  border-radius: 24px;
+  /* two soft color glows in the corners */
+  background-image:
+    radial-gradient(circle at 85% 12%, #fde6da 0, transparent 38%),
+    radial-gradient(circle at 10% 90%, #e3e6ff 0, transparent 40%);
+}
+
+/* Centered welcome text */
+.dash-page .center {
+  width: 100%;
+  max-width: 560px;
+  text-align: center;
+}
+
+.dash-page .eyebrow {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: var(--orange);
+}
+
+.dash-page .center h1 {
+  margin: 10px 0;
+  font-size: 2.6rem;
+  line-height: 1.15;
+}
+
+
+/* ----- Mobile ----- */
+@media (max-width: 800px) {
+  .dash-page .shell { grid-template-columns: 1fr; }    /* sidebar goes on top */
+  .dash-page .main { min-height: 420px; }
+  .dash-page .center h1 { font-size: 1.9rem; }
+}

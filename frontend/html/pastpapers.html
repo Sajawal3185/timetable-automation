@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>NUML Archive - Past Papers</title>
+
+  <link rel="stylesheet" href="../css/master.css">
+  <link rel="stylesheet" href="../css/app.css">
+</head>
+<body>
+
+  <!-- Blue banner -->
+  <header class="page-head">
+    <a href="dashboard.html" class="back-link">← Back to dashboard</a>
+    <h1>Past Papers</h1>
+    <p>Midterm and final term papers. View online or download.</p>
+  </header>
+
+  <!-- Content area (pulled up over the banner) -->
+  <main class="page-body">
+
+    <!-- Filters -->
+    <section class="filters">
+      <p class="section-description">
+        Select your department, subject, year, and paper type to find past papers.
+      </p>
+
+      <label>
+        Department
+        <select id="fDept"></select>
+      </label>
+
+      <label>
+        Subject
+        <select id="fSubject"></select>
+      </label>
+
+      <label>
+        Year
+        <select id="fYear"></select>
+      </label>
+
+      <label>
+        Paper Type
+        <select id="fType"></select>
+      </label>
+    </section>
+
+    <!-- Upload heading and button -->
+    <div class="upload-heading">
+      <h2>Upload a Past Paper</h2>
+      <p>Share your midterm or final exam paper with other students.</p>
+      <button type="button" class="btn solid" id="toggleUpload">
+        + Upload a Paper
+      </button>
+    </div>
+
+    <!-- Warning message -->
+    <p class="warn" id="warn" hidden></p>
+
+    <!-- Upload form -->
+    <form class="upload-box" id="uploadForm" hidden>
+      <h2>Submit Your Paper</h2>
+
+      <p class="rules">
+        Upload a real midterm or final paper in PDF or image format
+        (JPG, JPEG, PNG, WEBP). You can upload up to 10 files,
+        with a maximum size of 10 MB per file. Your paper will
+        appear after it has been reviewed.
+      </p>
+
+      <div class="upload-grid">
+        <label>
+          Department *
+          <select id="uDept" required></select>
+        </label>
+
+        <label>
+          Subject *
+          <select id="uSubject" required></select>
+        </label>
+
+        <label>
+          Year *
+          <select id="uYear" required></select>
+        </label>
+
+        <label>
+          Paper Type *
+          <select id="uType" required></select>
+        </label>
+
+        <label>
+          Select Files *
+          <input
+            type="file"
+            id="uFile"
+            accept=".pdf,.jpg,.jpeg,.png,.webp"
+            multiple
+            required
+          >
+        </label>
+      </div>
+
+      <p class="form-msg" id="uMsg"></p>
+
+      <button type="submit" class="btn solid">Submit for Review</button>
+      <button type="button" class="btn dark" id="cancelUpload">Cancel</button>
+    </form>
+
+    <!-- Messages and past paper results -->
+    <p class="note" id="note"></p>
+
+    <p class="hint" id="hint">
+      Select a department first, then choose a subject, year, and paper type.
+    </p>
+
+    <div class="papers-grid" id="list"></div>
+
+    <p class="empty" id="empty" hidden>
+      No papers found for these filters.
+    </p>
+
+  </main>
+
+  <script src="../js/pastpaper.js"></script>
+
+</body>
+</html>
