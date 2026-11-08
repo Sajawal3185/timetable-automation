@@ -1348,3 +1348,64 @@ body.tt-page {
 @media (max-width: 640px) {
   .tt-page .tt-nav .who { flex-basis: 100%; order: 10; padding: 4px 12px 0; }
 }
+
+
+/* ----- Timetable page: 7-day week grid ----- */
+.tt-page .tt-summary { padding: 14px 18px; }
+
+.tt-page .tt-week {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.tt-page .tt-day {
+  min-height: 160px;
+  padding: 12px 10px;
+  background: white;
+  border-top: 4px solid var(--blue);
+  border-radius: 14px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.tt-page .tt-day h2 { margin: 0 0 10px; font-size: 15px; color: var(--navy); }
+.tt-page .tt-free { margin: 0; font-size: 13px; color: var(--muted); }
+
+.tt-page .tt-class {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin-bottom: 8px;
+  padding: 8px 10px;
+  font-size: 13px;
+  color: var(--ink);
+  background: var(--tt-tint);
+  border-left: 4px solid var(--blue);
+  border-radius: 8px;
+  overflow-wrap: anywhere;
+}
+
+.tt-page .tt-class strong { color: var(--navy); }
+.tt-page .tt-class .tt-time { font-weight: 700; color: var(--blue); }
+.tt-page .tt-class small { color: var(--muted); }
+.tt-page .tt-class.makeup { border-left-color: var(--tt-makeup); }
+.tt-page .tt-class.makeup .tt-time { color: var(--tt-makeup); }
+
+.tt-page .tt-tag {
+  align-self: flex-start;
+  padding: 1px 8px;
+  font-size: 11px;
+  font-weight: 700;
+  color: white;
+  background: var(--tt-makeup);
+  border-radius: 10px;
+}
+
+@media (max-width: 1100px) {
+  .tt-page .tt-week { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+
+@media (max-width: 640px) {
+  .tt-page .tt-week { grid-template-columns: 1fr; }
+  .tt-page .tt-day { min-height: 0; }
+}
