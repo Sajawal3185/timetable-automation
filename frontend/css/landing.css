@@ -70,3 +70,5 @@
   .head h2 { font-size: 32px; }
   .feature-grid { grid-template-columns: 1fr; }
 }
+/* ---------- Timetable Automation button (second hero button) ---------- */
+.hero .tt-entry { margin-top: 14px; }
