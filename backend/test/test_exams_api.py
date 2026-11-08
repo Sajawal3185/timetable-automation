@@ -77,7 +77,7 @@ def test_uploader_can_delete_own_paper(client, seed):
 
 def test_upload_size_limit(client, seed, monkeypatch):
     monkeypatch.setenv("MAX_UPLOAD_MB", "1")
-    big = pdf_file(data=b"x" * (1024 * 1024 + 10))
+    big = pdf_file(data=PDF + b"x" * (1024 * 1024 + 10))  # a real PDF start, so only the size is wrong
     r = client("teacher").post("/api/exam-papers", files=big, data={
         "course_id": seed.c1.id, "title": "t", "term": "Fall 2025", "exam_type": "final"})
     assert r.status_code == 413
