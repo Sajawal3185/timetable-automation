@@ -161,6 +161,7 @@ def download_material(material_id: int, db: Session = Depends(get_db)):
     return FileResponse(
         file_path, filename=m.original_filename,
         media_type=media_type or "application/octet-stream",
+        content_disposition_type="attachment",  # uploads are downloaded, never rendered in the page
     )
 
 
