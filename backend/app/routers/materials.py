@@ -1,4 +1,4 @@
-"""Lecture material archive (Wajiha) - proposal 4.2.
+"""Lecture material archive - proposal 4.2.
 
 Notes and slides from DIFFERENT instructors for the SAME course, side by side.
 

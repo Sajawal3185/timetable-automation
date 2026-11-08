@@ -1,4 +1,4 @@
-"""Database engine, session factory, and declarative Base (Sajawal)."""
+"""Database engine, session factory, and declarative Base."""
 from sqlalchemy import MetaData, create_engine, event
 from sqlalchemy.orm import DeclarativeBase, sessionmaker
 

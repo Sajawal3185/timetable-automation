@@ -1,4 +1,4 @@
-"""Course software resource directory (Wajiha) - proposal 4.4.
+"""Course software resource directory - proposal 4.4.
 
   GET    /api/software-resources        list (filter: course_id, category, q)
   GET    /api/software-resources/{id}

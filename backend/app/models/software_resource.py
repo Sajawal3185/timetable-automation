@@ -1,4 +1,4 @@
-"""software_resources table (Wajiha) - course software directory, proposal 4.4."""
+"""software_resources table - course software directory, proposal 4.4."""
 from datetime import datetime
 from sqlalchemy import DateTime, ForeignKey, String, Text, func
 from sqlalchemy.orm import Mapped, mapped_column

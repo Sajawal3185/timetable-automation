@@ -1,4 +1,4 @@
-"""Makeup Slot Solver with room-capacity fallback (Sajawal) - proposal 2.3."""
+"""Makeup Slot Solver with room-capacity fallback - proposal 2.3."""
 from collections.abc import Sequence
 from dataclasses import dataclass
 from datetime import time
