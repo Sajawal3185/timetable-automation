@@ -16,19 +16,19 @@
   "use strict";
 
   /* ---- 1. Page map: the ONLY place filenames live. Rename here if yours differ. ---- */
-  const PAGES = {
-    login: "login.html",
-    signup: "signup.html",
-    forgot: "forgot.html",
-    dashboard: "dashboard.html",
-    papers: "pastpaper.html",
-    lectures: "lecture.html",
-    resources: "resources.html",
-    gpa: "gpacal.html"
-  };
+const PAGES = {
+  home: "index.html",
+  login: "login.html",
+  forgot: "forgot-password.html",
+  dashboard: "dashboard.html",
+  papers: "pastpapers.html",
+  lectures: "lecture.html",
+  resources: "tools-resources.html",
+  gpa: "gpacal.html"
+};
 
   /* Pages that work WITHOUT being logged in. Everything else is protected. */
-  const PUBLIC_PAGES = [PAGES.login, PAGES.signup, PAGES.forgot, "forgot-password.html", "index.html"];
+const PUBLIC_PAGES = [PAGES.home, PAGES.login, PAGES.forgot];
 
   /* Links shown in the nav bar / dashboard quick-links, in this order. */
   const NAV_ITEMS = [
