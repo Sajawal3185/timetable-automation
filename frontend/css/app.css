@@ -1436,3 +1436,34 @@ body.tt-page {
 }
 
 .tt-page .paper-card input:focus { outline: none; border-color: var(--blue); background: white; }
+
+/* ----- Makeup page: free slot rows ----- */
+.tt-page .tt-slots h2 { font-size: 17px; }
+
+.tt-page .tt-slot {
+  display: grid;
+  grid-template-columns: 130px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 6px 12px;
+  padding: 10px 0;
+  border-top: 1px solid var(--tt-line);
+}
+
+.tt-page .tt-slot .tt-time { color: var(--blue); }
+.tt-page .tt-slot .form-msg,
+.tt-page .tt-slot .tt-soft { grid-column: 1 / -1; margin: 0; }
+.tt-page .tt-slot .form-msg:empty { display: none; }
+.tt-page .tt-soft { font-size: 13px; color: var(--tt-pending); }
+
+.tt-page .tt-slot select {
+  width: 100%;
+  padding: 9px;
+  font-size: 14px;
+  background: var(--tt-tint);
+  border: 2px solid var(--tt-field-line);
+  border-radius: 8px;
+}
+
+@media (max-width: 600px) {
+  .tt-page .tt-slot { grid-template-columns: 1fr; }
+}
