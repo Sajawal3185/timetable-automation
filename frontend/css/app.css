@@ -1326,6 +1326,9 @@ body.tt-page {
 .tt-page .tt-card p:last-child { margin-bottom: 0; }
 
 .tt-page .form-msg { margin: 10px 0 0; }
+/* Higher specificity than ".tt-card p" (muted grey) so status colors always show. */
+.tt-page .form-msg.error { color: var(--tt-error); }
+.tt-page .form-msg.ok    { color: var(--tt-ok); }
 .tt-page .form-msg ul { margin: 6px 0 0; padding-left: 20px; font-weight: normal; }
 
 
@@ -1409,3 +1412,11 @@ body.tt-page {
   .tt-page .tt-week { grid-template-columns: 1fr; }
   .tt-page .tt-day { min-height: 0; }
 }
+
+
+/* ----- Swap requests page ----- */
+.tt-page .upload-grid .tt-span { grid-column: 1 / -1; }
+.tt-page .tt-preview { min-height: 20px; margin: 0 0 14px; font-size: 14px; color: var(--navy); }
+.tt-page .paper-card .tt-status { margin-bottom: 4px; }
+.tt-page .paper-card .form-msg { margin: 0 0 8px; }
+.tt-page .paper-card .form-msg:empty { display: none; }
