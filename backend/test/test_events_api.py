@@ -48,3 +48,14 @@ def test_event_month_and_range_filters(client, seed):
     assert s.get("/api/events", params={"month": "2026-13"}).status_code == 422
     assert s.get("/api/events", params={"month": "bad"}).status_code == 422
     assert s.get("/api/events", params={"from_date": "2026-10-10", "to_date": "2026-10-01"}).status_code == 422
+
+
+def test_event_update_is_put_with_partial_body(client, seed):
+    """Contract: events are updated with PUT (like rooms and software), not PATCH."""
+    eid = client("admin").post("/api/events", json=ev(location="Main hall")).json()["id"]
+    assert client("admin").patch(f"/api/events/{eid}", json={"title": "x"}).status_code == 405
+    r = client("admin").put(f"/api/events/{eid}", json={"title": "Only the title"})
+    assert r.status_code == 200
+    body = r.json()
+    assert body["title"] == "Only the title"
+    assert body["start_date"] == "2026-10-20" and body["location"] == "Main hall"  # untouched fields stay
