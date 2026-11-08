@@ -15,7 +15,7 @@ from sqlalchemy import func, or_, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from database import get_db
+from app.database import get_db
 from app.models.department import Department
 from app.models.event import Event
 from app.routers.portal_deps import ADMINS, get_current_user, require_roles

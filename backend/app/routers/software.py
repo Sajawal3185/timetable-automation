@@ -10,7 +10,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from database import get_db
+from app.database import get_db
 from app.models.course import Course
 from app.models.software_resource import SoftwareResource
 from app.routers.portal_deps import STAFF, get_current_user, require_roles
