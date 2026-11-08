@@ -1420,3 +1420,19 @@ body.tt-page {
 .tt-page .paper-card .tt-status { margin-bottom: 4px; }
 .tt-page .paper-card .form-msg { margin: 0 0 8px; }
 .tt-page .paper-card .form-msg:empty { display: none; }
+
+/* ----- Swap approvals page ----- */
+.tt-page .tt-note-field { display: block; margin: 4px 0 6px; font-size: 13px; font-weight: bold; }
+
+.tt-page .paper-card input {
+  display: block;
+  width: 100%;
+  margin-bottom: 12px;
+  padding: 10px;
+  font-size: 14px;
+  background: var(--tt-tint);
+  border: 2px solid var(--tt-field-line);
+  border-radius: 8px;
+}
+
+.tt-page .paper-card input:focus { outline: none; border-color: var(--blue); background: white; }
