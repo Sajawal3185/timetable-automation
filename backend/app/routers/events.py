@@ -15,10 +15,11 @@ from sqlalchemy import func, or_, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
+from app.core.permissions import ADMINS, require_roles
 from app.database import get_db
+from app.dependencies import get_current_user
 from app.models.department import Department
 from app.models.event import Event
-from app.routers.portal_deps import ADMINS, get_current_user, require_roles
 from app.schemas.portal import EventIn, EventOut, EventType, EventUpdate
 
 router = APIRouter(prefix="/api/events", tags=["Event Calendar"])

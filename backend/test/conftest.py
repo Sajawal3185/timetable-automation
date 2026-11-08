@@ -16,8 +16,8 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
-from app.core.security import get_current_user
 from app.database import Base, get_db
+from app.dependencies import get_current_user
 
 # importing the modules registers every table on Base.metadata
 from app.models import (  # noqa: F401

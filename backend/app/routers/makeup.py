@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.core.permissions import STAFF, require_roles
 from app.database import get_db
 from app.dependencies import get_current_user
 from app.models.course import Course
@@ -23,20 +24,11 @@ from app.services.scheduler_rules import ScheduleSlot, check_hard_clashes, check
 
 router = APIRouter(prefix="/api/makeup", tags=["Makeup Classes"])
 
-STAFF_ROLES = {"teacher", "hod", "admin"}
-
-
-def _require_staff(user: User = Depends(get_current_user)) -> User:
-    if (user.role or "").lower() not in STAFF_ROLES:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Staff role required")
-    return user
-
-
 @router.post("/find-slots", response_model=list[MakeupSlotSuggestionOut])
 def search_makeup_slots(
     body: MakeupSearchIn,
     db: Session = Depends(get_db),
-    _user: User = Depends(_require_staff),
+    _user: User = Depends(require_roles(*STAFF)),
 ):
     days = body.days or list(WEEKDAYS)
     for d in days:
@@ -62,7 +54,7 @@ def search_makeup_slots(
 def book_makeup_class(
     body: MakeupBookIn,
     db: Session = Depends(get_db),
-    user: User = Depends(_require_staff),
+    user: User = Depends(require_roles(*STAFF)),
 ):
     if body.end_time <= body.start_time:
         raise HTTPException(status_code=422, detail="end_time must be after start_time")
