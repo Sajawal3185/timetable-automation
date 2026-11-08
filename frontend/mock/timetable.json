@@ -1,0 +1,5 @@
+{
+  "entries": [
+    { "day": "Monday", "start": "09:00", "end": "10:30", "course": "Software Design", "room": "R-1", "teacher": "Teacher A" }
+  ]
+}
