@@ -43,3 +43,14 @@ def test_material_permissions_download_delete(client, seed):
     pptx = client("teacher").post("/api/lecture-materials", files=pdf_file("a.pptx"), data={
         "course_id": seed.c1.id, "title": "ppt", "material_type": "slides"})
     assert pptx.status_code == 201  # slides are allowed here (not in exam papers)
+
+
+def test_material_instructor_name_rule(client, seed):
+    """Given name wins (even for a teacher uploading a colleague's file); otherwise the uploader's name."""
+    teacher = client("teacher")
+    name_of = lambda r: (r.status_code, r.json()["instructor_name"])  # noqa: E731
+    assert name_of(upload_material(teacher, seed, instructor_name="Ms. Sara")) == (201, "Ms. Sara")
+    assert name_of(upload_material(teacher, seed, instructor_name="  Ms. Sara  ")) == (201, "Ms. Sara")  # trimmed
+    assert name_of(upload_material(teacher, seed)) == (201, "Dr. Teacher")                                # omitted
+    assert name_of(upload_material(teacher, seed, instructor_name="   ")) == (201, "Dr. Teacher")        # blank
+    assert name_of(upload_material(client("admin"), seed, instructor_name="Dr. Ali")) == (201, "Dr. Ali")
