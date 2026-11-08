@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Software and Tools | NUML Archive</title>
+
+  <link rel="stylesheet" href="../css/master.css">
+  <link rel="stylesheet" href="../css/app.css">
+</head>
+<body class="res-page">
+
+  <!-- Navbar (master style) -->
+  <header class="navbar">
+    <a href="dashboard.html" class="logo">NUML <span>Archive</span></a>
+
+    <nav>
+      <a href="timetable.html" class="nl">Timetable</a>
+      <a href="archive.html" class="nl">Archive</a>
+      <a href="tools-resources.html" class="nl">Tools</a>
+    </nav>
+  </header>
+
+  <main>
+    <header class="page-header">
+      <span class="eyebrow">STUDENT RESOURCES</span>
+      <h1>Software and Tools</h1>
+      <p class="subtitle">
+        Find useful software for your courses and learn how to install it.
+      </p>
+    </header>
+
+    <section class="filter-box">
+      <h2>Find your tools</h2>
+
+      <div class="filters">
+        <input
+          id="search"
+          type="search"
+          placeholder="Search tools..."
+          aria-label="Search tools"
+        >
+
+        <select id="course" aria-label="Filter by course"></select>
+
+        <select id="category" aria-label="Filter by category"></select>
+
+        <select id="os" aria-label="Filter by operating system"></select>
+      </div>
+    </section>
+
+    <div class="results-header">
+      <h2>Available Tools</h2>
+      <p id="count" aria-live="polite"></p>
+    </div>
+
+    <div id="list" class="grid"></div>
+  </main>
+
+  <!-- Footer (master style) -->
+  <footer class="footer">
+    <b>NUML Archive</b>
+    <span>Student Learning Resources</span>
+  </footer>
+
+  <script src="../js/resources.js"></script>
+</body>
+</html>

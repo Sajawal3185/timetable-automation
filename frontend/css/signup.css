@@ -1,0 +1,84 @@
+body.auth-page {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(rgba(20, 90, 110, .65), rgba(20, 90, 110, .65)),
+              url("../images/numl.webp") center / cover;
+}
+
+.card {
+  background: white;
+  width: 330px;
+  padding: 30px;
+  border-radius: 15px;
+}
+
+.card h2 { text-align: center; color: #1e5fbf; margin: 0; }
+.card p { text-align: center; font-size: 13px; color: gray; margin: 5px 0 20px; }
+
+label { font-size: 13px; font-weight: bold; }
+
+input {
+  width: 100%;
+  padding: 10px;
+  margin: 5px 0 15px;
+  border: 2px solid transparent;
+  border-radius: 6px;
+  background: #e8f0fb;
+}
+input:focus { outline: none; border-color: #1e5fbf; }
+
+.forgot {
+  display: block;
+  text-align: right;
+  font-size: 13px;
+  color: #1e5fbf;
+  margin-bottom: 15px;
+}
+
+button {
+  width: 100%;
+  padding: 11px;
+  background: #1e5fbf;
+  color: white;
+  font-size: 15px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+button:hover { background: #154a96; }
+
+.signup { text-align: center; font-size: 13px; margin-top: 15px; }
+.signup a { color: #1e5fbf; }
+.card .msg { font-size: 13px; margin: 12px 0 0; color: #15803d; }
+.card .msg.error { color: #b91c1c; }
+
+.back-btn {
+  display: block;
+  text-align: center;
+  font-size: 13px;
+  color: #1e5fbf;
+  margin-top: 15px;
+}
+select {
+  width: 100%;
+  padding: 10px;
+  margin: 5px 0 15px;
+  border: 2px solid transparent;
+  border-radius: 6px;
+  background: #e8f0fb;
+  font-size: 14px;
+}
+select:focus { outline: none; border-color: #1e5fbf; }
+
+.hint {
+  display: block;
+  font-size: 12px;
+  color: gray;
+  margin: -10px 0 15px;
+}
+.hint.error { color: #b91c1c; }
+.hint.ok { color: #15803d; }
+
+input.invalid { border-color: #b91c1c; }
