@@ -1,5 +1,5 @@
 """API tests: lecture material archive."""
-from test.helpers import PDF, pdf_file
+from test.helpers import PDF, PPTX, any_file, pdf_file
 
 
 def upload_material(c, seed, **over):
@@ -40,7 +40,7 @@ def test_material_permissions_download_delete(client, seed):
     assert client("teacher2").delete(f"/api/lecture-materials/{mid}").status_code == 403
     assert client("admin").delete(f"/api/lecture-materials/{mid}").status_code == 204
     assert client("student").get(f"/api/lecture-materials/{mid}").status_code == 404
-    pptx = client("teacher").post("/api/lecture-materials", files=pdf_file("a.pptx"), data={
+    pptx = client("teacher").post("/api/lecture-materials", files=any_file("a.pptx", PPTX), data={
         "course_id": seed.c1.id, "title": "ppt", "material_type": "slides"})
     assert pptx.status_code == 201  # slides are allowed here (not in exam papers)
 
