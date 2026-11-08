@@ -1,5 +1,5 @@
 """API tests: lecture material archive."""
-from test.helpers import PDF, PPTX, any_file, pdf_file
+from tests.helpers import PDF, PPTX, any_file, pdf_file
 
 
 def upload_material(c, seed, **over):
