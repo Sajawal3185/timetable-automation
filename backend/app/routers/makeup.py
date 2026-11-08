@@ -1,4 +1,4 @@
-"""Makeup slot search and booking endpoints (Sajawal) - proposal 2.3."""
+"""Makeup slot search and booking endpoints - proposal 2.3."""
 from dataclasses import asdict
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import select

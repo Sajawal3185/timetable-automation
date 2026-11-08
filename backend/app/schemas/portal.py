@@ -1,4 +1,4 @@
-"""Pydantic request/response models for Wajiha's modules.
+"""Pydantic request/response models for the portal modules (rooms, timetable, exams, materials, GPA, software, events).
 
 (One file for the portal modules keeps the review small. Split per module later if it grows.)
 """

@@ -1,4 +1,4 @@
-"""Tests for PR #2: scheduler_rules.py, makeup_solver.py, and routers/makeup.py (Sajawal)."""
+"""Tests for PR #2: scheduler_rules.py, makeup_solver.py, and routers/makeup.py."""
 from datetime import time
 from types import SimpleNamespace
 import pytest

@@ -1,4 +1,4 @@
-"""Exam repository (Wajiha) - proposal 4.1.
+"""Exam repository - proposal 4.1.
 
   POST   /api/exam-papers                    upload (teacher / HOD / admin), multipart form
   GET    /api/exam-papers                    search + filter (course_id, term, exam_type, year, q)

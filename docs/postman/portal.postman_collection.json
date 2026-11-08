@@ -1,8 +1,8 @@
 {
   "info": {
-    "name": "Timetable Automation - Wajiha's endpoints",
+    "name": "Timetable Automation - portal endpoints (rooms, timetable, exams, materials, GPA, software, events)",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-    "description": "Set base_url (default http://127.0.0.1:8000) and token (JWT from Sajawal's login endpoint) as collection/environment variables. Never save a real token in this file."
+    "description": "Set base_url (default http://127.0.0.1:8000) and token (JWT from POST /api/auth/login) as collection/environment variables. Never save a real token in this file."
   },
   "variable": [
     {

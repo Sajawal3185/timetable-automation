@@ -1,11 +1,11 @@
-"""Shared test fixtures for Wajiha's tests.
+"""Shared test fixtures for the API tests.
 
 Tests run on an in-memory SQLite database, so they need no MySQL.  The logged-in
 user is faked by overriding get_current_user, so the tests do not depend on how
-Sajawal finally implements JWT.
+JWT is implemented.
 
-If Sajawal's real core models need extra required columns (e.g. a password hash
-on User), add them in the `seed` fixture below only.
+If the core models need extra required columns (e.g. a password hash on User),
+add them in the `seed` fixture below only.
 """
 from types import SimpleNamespace
 

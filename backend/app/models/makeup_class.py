@@ -1,4 +1,4 @@
-"""makeup_classes table (Sajawal) - booked makeup sessions (proposal 2.3)."""
+"""makeup_classes table - booked makeup sessions (proposal 2.3)."""
 from datetime import date, datetime, time
 from sqlalchemy import CheckConstraint, Date, DateTime, ForeignKey, Index, String, Text, Time, func
 from sqlalchemy.orm import Mapped, mapped_column

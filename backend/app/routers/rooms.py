@@ -1,7 +1,6 @@
-"""Rooms and reference data (Wajiha).
+"""Rooms and reference data.
 
-Needed by Amna's empty-room dashboard and by Sajawal's makeup solver
-(room capacities).  Endpoints:
+Needed by the empty-room dashboard and by the makeup solver (room capacities).  Endpoints:
 
   GET    /api/rooms                 list (filter: min_capacity, building, search)
   GET    /api/rooms/empty           rooms free on a day between two times  (dashboard)

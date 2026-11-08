@@ -1,5 +1,5 @@
 """
-routers/auth.py  (owner: Sajawal)
+routers/auth.py
 
 Endpoints:
     POST /api/auth/register   a student creates their own account (role forced to student)
