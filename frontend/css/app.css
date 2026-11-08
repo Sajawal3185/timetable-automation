@@ -305,23 +305,21 @@ button.btn {
 
 /* ----- Page setup: page-only colors and spacing ----- */
 body.res-page {
-  --res-border: #e5e7eb;          /* light grey lines around boxes */
-  --res-blue-dark: #154a96;       /* hover color for buttons */
-  --res-tag-bg: #eff6ff;          /* background of the OS tags */
-  --res-radius: 12px;             /* corner roundness of boxes */
+  --res-border: #e5e7eb;
+  --res-blue-dark: #154a96;
+  --res-tag-bg: #eff6ff;
+  --res-radius: 12px;
 
-  padding-top: 72px;              /* space for the fixed master navbar */
-  background: var(--bg);
+  padding-top: 0;
+  background: #fff;
   line-height: 1.6;
 }
 
-/* Centered content column */
 .res-page main {
   max-width: 1100px;
   margin: 0 auto;
-  padding: 24px 16px 48px;
+  padding: 0 16px 48px;
 }
-
 
 /* ----- Page header (small label, title, subtitle) ----- */
 .res-page .page-header {
@@ -351,11 +349,14 @@ body.res-page {
 
 /* ----- Filter box (search + dropdowns) ----- */
 .res-page .filter-box {
+  position: relative;
+  margin-top: -50px;
   margin-bottom: 24px;
   padding: 20px;
   background: white;
   border: 1px solid var(--res-border);
   border-radius: var(--res-radius);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
 }
 
 .res-page .filter-box h2 {
@@ -542,14 +543,14 @@ body.gpa-page {
   --gpa-danger: #d72f48;          /* red for the remove button */
 
   min-height: 100vh;
-  padding-top: 72px;              /* space for the fixed master navbar */
-  background: linear-gradient(180deg, #edf4ff 0, #f9fbff 340px, #f4f8ff 100%);
+  padding-top: 0;                 /* banner sits at the top, no fixed navbar */
+  background: #fff;               /* white, same as lecture page */
 }
 
 /* Centered content column */
 .gpa-page .page {
   width: min(1200px, 92%);
-  margin: 30px auto;
+  margin: 0 auto 30px;            /* no top margin so tabs can overlap the banner */
 }
 
 /* JavaScript adds/removes this class to show or hide things.
@@ -557,49 +558,14 @@ body.gpa-page {
 .gpa-page .hidden { display: none !important; }
 
 
-/* ----- Hero (icon + title at the top) ----- */
-.gpa-page .hero {
-  display: flex;
-  align-items: center;
-  gap: 18px;
-  margin-bottom: 24px;
-}
-
-.gpa-page .hero-icon {
-  display: grid;
-  place-items: center;
-  flex-shrink: 0;
-  width: 62px;
-  height: 62px;
-  font-size: 34px;
-  color: white;
-  background: var(--blue);
-  border-radius: 17px;
-}
-
-.gpa-page .eyebrow {
-  margin: 0 0 5px;
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: 1.5px;
-  color: var(--blue);
-}
-
-/* Headings. clamp() makes the h1 grow and shrink with screen width */
-.gpa-page h1 {
-  margin: 0 0 7px;
-  font-size: clamp(25px, 3vw, 36px);
-  color: var(--navy);
-}
-
+/* ----- Headings ----- */
 .gpa-page h2 {
   margin: 0 0 6px;
   font-size: 20px;
   color: var(--navy);
 }
 
-/* Grey description text under the title and under each panel heading */
-.gpa-page .hero p:last-child,
+/* Grey description text under each panel heading */
 .gpa-page .section-heading p {
   margin: 0;
   font-size: 14px;
@@ -608,15 +574,17 @@ body.gpa-page {
 }
 
 
-/* ----- Tabs (Semester GPA / CGPA) ----- */
+/* ----- Tabs (Semester GPA / CGPA), overlap the banner ----- */
 .gpa-page .tabs {
+  position: relative;
   display: flex;
   gap: 8px;
-  margin-bottom: 16px;
+  margin: -30px 0 16px;
   padding: 5px;
-  background: #eaf1fd;
+  background: white;
   border: 1px solid var(--gpa-border);
   border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
 }
 
 .gpa-page .tab {
@@ -756,7 +724,6 @@ body.gpa-page {
 
 
 /* ----- Buttons (Add course, Calculate...) ----- */
-/* flex-wrap and align-items reset the past papers .actions from section 2 */
 .gpa-page .actions {
   display: flex;
   flex-wrap: nowrap;
@@ -788,7 +755,7 @@ body.gpa-page {
 .gpa-page .actions .primary { margin-left: auto; }
 
 
-/* ----- Semester result (3 cards: GPA, credits, grade) ----- */
+/* ----- Semester result (3 cards: GPA, credits, grade points) ----- */
 .gpa-page .result-grid {
   display: grid;
   grid-template-columns: 1.4fr 1fr 1.2fr;     /* first card is a bit wider */
@@ -883,7 +850,7 @@ body.gpa-page {
 }
 
 
-/* ----- Grading scale table (A, A-, B+ ... with points) ----- */
+/* ----- Grading scale table (A+, A, B+ ... with points) ----- */
 .gpa-page .grading-panel .section-heading { margin-bottom: 15px; }
 
 .gpa-page .grading-table {
@@ -908,8 +875,7 @@ body.gpa-page {
   background: #edf4ff;
 }
 
-/* Small note under the grading table.
-   Overrides the section 1 .note (which is green and bold). */
+/* Small note under the grading table. */
 .gpa-page .note {
   margin: 14px 0 0;
   font-size: 12px;
@@ -921,7 +887,7 @@ body.gpa-page {
 
 /* ----- Mobile ----- */
 @media (max-width: 760px) {
-  .gpa-page .page { width: 94%; margin-top: 22px; }
+  .gpa-page .page { width: 94%; }
   .gpa-page .panel { padding: 15px; }
   .gpa-page .section-heading { flex-direction: column; }
   .gpa-page .result-grid { grid-template-columns: 1fr; }     /* cards stack */
@@ -931,7 +897,6 @@ body.gpa-page {
   .gpa-page .form-actions { flex-direction: column; }
   .gpa-page .form-actions .button { width: 100%; }
 }
-
 
 /* =========================================================
    6. PAGE: DASHBOARD  (dashboard.html)
