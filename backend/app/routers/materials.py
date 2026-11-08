@@ -22,6 +22,7 @@ from app.models.lecture_material import LectureMaterial
 from app.routers.portal_deps import ADMINS, STAFF, get_current_user, require_roles
 from app.schemas.portal import LectureMaterialOut, MaterialsByCourse, MaterialsByInstructor, MaterialType
 from app.utils.file_storage import MATERIAL_EXTENSIONS, delete_file, resolve_path, save_upload
+from app.utils.instructor import resolve_instructor_name
 
 router = APIRouter(prefix="/api/lecture-materials", tags=["Lecture Material Archive"])
 
@@ -47,11 +48,7 @@ def upload_material(
     if course is None:
         raise HTTPException(404, "Course not found")
         
-    user_role = (getattr(user, "role", "") or "").lower()
-    if user_role == "teacher" or not instructor_name:
-        final_instructor_name = (getattr(user, "name", "") or "Unknown").strip()
-    else:
-        final_instructor_name = instructor_name.strip()
+    final_instructor_name = resolve_instructor_name(instructor_name, user)
 
     saved = save_upload(file, "lecture_materials", MATERIAL_EXTENSIONS)
     material = LectureMaterial(

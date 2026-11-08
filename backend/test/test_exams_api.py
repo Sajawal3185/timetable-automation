@@ -81,3 +81,23 @@ def test_upload_size_limit(client, seed, monkeypatch):
     r = client("teacher").post("/api/exam-papers", files=big, data={
         "course_id": seed.c1.id, "title": "t", "term": "Fall 2025", "exam_type": "final"})
     assert r.status_code == 413
+
+
+def test_exam_instructor_name_rule(client, seed):
+    """Given name wins (even for a teacher uploading a colleague's paper); otherwise the uploader's name."""
+    teacher, hod = client("teacher"), client("hod")
+    name_of = lambda r: (r.status_code, r.json()["instructor_name"])  # noqa: E731
+    assert name_of(upload_paper(teacher, seed, instructor_name="Ms. Sara")) == (201, "Ms. Sara")
+    assert name_of(upload_paper(teacher, seed, instructor_name="  Ms. Sara  ")) == (201, "Ms. Sara")  # trimmed
+    assert name_of(upload_paper(teacher, seed, instructor_name="   ")) == (201, "Dr. Teacher")        # blank
+    omitted = teacher.post("/api/exam-papers", files=pdf_file(), data={
+        "course_id": seed.c1.id, "title": "t", "term": "Fall 2025", "exam_type": "final"})
+    assert name_of(omitted) == (201, "Dr. Teacher")                                                     # omitted
+    assert name_of(upload_paper(hod, seed, instructor_name="Dr. Ali")) == (201, "Dr. Ali")
+    assert name_of(upload_paper(hod, seed, instructor_name="")) == (201, "HOD")
+
+
+def test_exam_search_finds_paper_by_given_instructor(client, seed):
+    upload_paper(client("teacher"), seed, instructor_name="Ms. Sara")
+    found = client("student").get("/api/exam-papers", params={"q": "sara"}).json()
+    assert [p["instructor_name"] for p in found] == ["Ms. Sara"]
