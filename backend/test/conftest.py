@@ -7,7 +7,15 @@ Sajawal finally implements JWT.
 If Sajawal's real core models need extra required columns (e.g. a password hash
 on User), add them in the `seed` fixture below only.
 """
+import os
 from types import SimpleNamespace
+
+# app.config refuses to start without these (no defaults, by design). Tests
+# use their own in-memory SQLite engine below and never sign real tokens, so
+# harmless placeholders are enough. setdefault keeps any value CI provides.
+# Must run BEFORE the first `from app...` import, which loads the settings.
+os.environ.setdefault("DATABASE_URL", "sqlite://")
+os.environ.setdefault("JWT_SECRET_KEY", "test-only-not-a-real-secret")
 
 import pytest
 from fastapi import FastAPI
@@ -16,8 +24,8 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
-from app.core.security import get_current_user
 from app.database import Base, get_db
+from app.dependencies import get_current_user
 
 # importing the modules registers every table on Base.metadata
 from app.models import (  # noqa: F401
