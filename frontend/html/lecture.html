@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>NUML Archive - Lecture Slides</title>
+  <link rel="stylesheet" href="../css/master.css">
+  <link rel="stylesheet" href="../css/app.css">
+</head>
+<body>
+
+  <header class="page-head">
+    <a href="dashboard.html" class="back-link">← Back to dashboard</a>
+    <h1>Lecture Slides</h1>
+    <p>Lecture slides by course. View online or download.</p>
+  </header>
+
+  <main class="page-body">
+
+    <!-- Filters -->
+    <section class="filters">
+      <label>Title <input type="search" id="fTitle" placeholder="Search by title"></label>
+      <label>Subject <select id="fSubject"></select></label>
+      <label>Year <select id="fYear"></select></label>
+      <button type="button" class="btn solid" id="toggleUpload">+ Upload (demo only)</button>
+    </section>
+
+    <!-- Upload form (hidden until the button is clicked) -->
+    <form class="upload-box" id="uploadForm" hidden>
+      <h2>Upload lecture slides (demo only)</h2>
+
+      <div class="upload-grid">
+        <label>Title * <input type="text" id="uTitle" required></label>
+        <label>Subject * <select id="uSubject" required></select></label>
+        <label>Year * <input type="number" id="uYear" min="2000" max="2100" required></label>
+        <label>File * <input type="file" id="uFile" required></label>
+      </div>
+
+      <p class="form-msg" id="uMsg"></p>
+      <button type="submit" class="btn solid">Submit</button>
+      <button type="button" class="btn" id="cancelUpload">Cancel</button>
+    </form>
+
+    <div class="papers-grid" id="list"></div>
+    <p class="empty" id="empty" hidden>No lectures found for these filters.</p>
+
+  </main>
+
+  <script src="../js/common.js"></script>
+  <script src="../js/lecture.js"></script>
+</body>
+</html>
