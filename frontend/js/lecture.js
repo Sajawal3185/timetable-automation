@@ -188,7 +188,7 @@ function setupUpload() {
       status: "pending"
     });
 
-    message.textContent = "Slides submitted for review. They will appear after approval.";
+    message.textContent = "Demo only: nothing was uploaded. Uploads will work once the backend is connected.";
     message.classList.add("ok");
 
     form.reset();

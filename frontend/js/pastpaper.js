@@ -567,10 +567,9 @@ $("uploadForm").addEventListener("submit", event => {
   });
 
   resetUploadForm();
-
   message.className = "form-msg ok";
   message.textContent =
-    "Paper submitted for review. It is awaiting approval.";
+    "Demo only: nothing was uploaded. Uploads will work once the backend is connected.";
 });
 
 // ---------- Start ----------
