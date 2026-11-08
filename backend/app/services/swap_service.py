@@ -85,8 +85,8 @@ def _lock_rooms(db: Session, room_ids: set[int]) -> None:
 def build_swap_slots(a: TimetableEntry, b: TimetableEntry) -> list[ProposedSlot]:
     """The POST-swap state: a takes b's time and b takes a's time."""
     return [
-        ProposedSlot(b.day, b.start_time, b.end_time, a.teacher_id, a.section_id, a.room_id, a.id),
-        ProposedSlot(a.day, a.start_time, a.end_time, b.teacher_id, b.section_id, b.room_id, b.id),
+       ProposedSlot(b.day_of_week, b.start_time, b.end_time, a.teacher_id, a.section_id, a.room_id, a.id),
+        ProposedSlot(a.day_of_week, a.start_time, a.end_time, b.teacher_id, b.section_id, b.room_id, b.id),
     ]
 
 
@@ -168,7 +168,7 @@ def approve_swap(db: Session, swap_id: int, approver_id: int, note: str | None =
             raise SwapConflictError(hard)
 
         # 5. apply: exchange the time fields, record the decision.
-        entry.day, target.day = target.day, entry.day
+          entry.day_of_week, target.day_of_week = target.day_of_week, entry.day_of_week
         entry.start_time, target.start_time = target.start_time, entry.start_time
         entry.end_time, target.end_time = target.end_time, entry.end_time
         swap.status = SwapStatus.approved
