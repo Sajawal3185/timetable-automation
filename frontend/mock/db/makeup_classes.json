@@ -1,0 +1,5 @@
+[
+  {"id": 1, "course_id": 4, "section_id": 1, "teacher_id": 3, "room_id": 3, "class_date": "2026-11-14",
+   "day_of_week": "Saturday", "start_time": "10:00:00", "end_time": "11:30:00",
+   "reason": "Replaces the class missed on 6 November", "status": "scheduled", "created_by": 3}
+]
