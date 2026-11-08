@@ -16,10 +16,11 @@ from fastapi.responses import FileResponse
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
+from app.core.permissions import ADMINS, STAFF, require_roles, role_of
 from app.database import get_db
+from app.dependencies import get_current_user
 from app.models.course import Course
 from app.models.lecture_material import LectureMaterial
-from app.routers.portal_deps import ADMINS, STAFF, get_current_user, require_roles
 from app.schemas.portal import LectureMaterialOut, MaterialsByCourse, MaterialsByInstructor, MaterialType
 from app.utils.file_storage import MATERIAL_EXTENSIONS, delete_file, resolve_path, save_upload
 
@@ -170,7 +171,7 @@ def download_material(material_id: int, db: Session = Depends(get_db)):
 @router.delete("/{material_id}", status_code=204)
 def delete_material(material_id: int, db: Session = Depends(get_db), user=Depends(get_current_user)):
     m = _get_or_404(db, material_id)
-    if m.uploaded_by != user.id and user.role not in ADMINS:
+    if m.uploaded_by != user.id and role_of(user) not in ADMINS:
         raise HTTPException(403, "Only the uploader or an admin/HOD can delete this material")
     path = m.file_path
     db.delete(m)

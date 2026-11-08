@@ -47,7 +47,6 @@ app.add_middleware(
 # --- Routers -----------------------------------------------------------------
 # Each router already carries its own /api/... prefix and tag, so they are
 # included as-is. Keep this list alphabetical to make merges painless.
-# (routers/portal_deps.py is a helper module, not a router.)
 for module in (
     auth,
     events,

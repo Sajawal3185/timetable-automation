@@ -5,6 +5,7 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
+from app.core.permissions import STAFF, require_roles, role_of
 from app.database import get_db
 from app.dependencies import get_current_user
 from app.models.course import Course
@@ -24,14 +25,7 @@ from app.services.scheduler_rules import ScheduleSlot, check_hard_clashes, check
 
 router = APIRouter(prefix="/api/makeup", tags=["Makeup Classes"])
 
-STAFF_ROLES = {"teacher", "hod", "admin"}
 VALID_DAYS = (*WEEKDAYS, "Saturday", "Sunday")
-
-
-def _require_staff(user: User = Depends(get_current_user)) -> User:
-    if (user.role or "").lower() not in STAFF_ROLES:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Staff role required")
-    return user
 
 
 def _check_books_for(user: User, teacher: Teacher) -> None:
@@ -41,7 +35,7 @@ def _check_books_for(user: User, teacher: Teacher) -> None:
     - an HOD for themselves or any teacher in their own department
     - an admin for anyone
     """
-    role = (user.role or "").lower()
+    role = role_of(user)
     if role == "admin" or teacher.user_id == user.id:
         return
     dept = getattr(user, "department_id", None)
@@ -70,7 +64,7 @@ def _lock_booking_rows(db: Session, body: MakeupBookIn) -> None:
 def search_makeup_slots(
     body: MakeupSearchIn,
     db: Session = Depends(get_db),
-    user: User = Depends(_require_staff),
+    user: User = Depends(require_roles(*STAFF)),
 ):
     days = body.days or list(WEEKDAYS)
     for d in days:
@@ -99,7 +93,7 @@ def search_makeup_slots(
 def book_makeup_class(
     body: MakeupBookIn,
     db: Session = Depends(get_db),
-    user: User = Depends(_require_staff),
+    user: User = Depends(require_roles(*STAFF)),
 ):
     if body.end_time <= body.start_time:
         raise HTTPException(status_code=422, detail="end_time must be after start_time")
