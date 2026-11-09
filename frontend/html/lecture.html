@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="../css/master.css">
   <link rel="stylesheet" href="../css/app.css">
 </head>
-<body>
+<body class="lectures-page">
 
   <header class="page-head">
     <a href="dashboard.html" class="back-link">← Back to dashboard</a>
@@ -17,21 +17,60 @@
 
   <main class="page-body">
 
-    <!-- Filters -->
-    <section class="filters">
-      <label>Title <input type="search" id="fTitle" placeholder="Search by title"></label>
-      <label>Subject <select id="fSubject"></select></label>
-      <label>Year <select id="fYear"></select></label>
-      <button type="button" class="btn solid" id="toggleUpload">+ Upload (demo only)</button>
-    </section>
+    <!-- Filters: each one unlocks after the one before it -->
+
+<!-- Filters: each filter unlocks after the previous selection -->
+<section class="filters">
+
+  <label>
+    Department
+    <select id="fDept">
+    </select>
+  </label>
+
+  <label>
+    Subject
+    <select id="fSubject" disabled>
+    </select>
+  </label>
+
+  <label>
+    Teacher
+    <select id="fTeacher" disabled>
+    </select>
+  </label>
+
+  <label>
+    Year
+    <select id="fYear" disabled>
+    </select>
+  </label>
+
+  <label>
+    Title
+    <input
+      type="search"
+      id="fTitle"
+      placeholder="Search by title"
+      disabled
+    >
+  </label>
+
+  <button type="button" class="btn solid" id="toggleUpload">
+    + Upload (demo only)
+  </button>
+
+</section>
 
     <!-- Upload form (hidden until the button is clicked) -->
     <form class="upload-box" id="uploadForm" hidden>
       <h2>Upload lecture slides (demo only)</h2>
 
       <div class="upload-grid">
-        <label>Title * <input type="text" id="uTitle" required></label>
+        <label>Department * <select id="uDept" required></select></label>
         <label>Subject * <select id="uSubject" required></select></label>
+        <label>Teacher * <input type="text" id="uTeacher" required></label>
+        <label>Title * <input type="text" id="uTitle" required></label>
         <label>Year * <input type="number" id="uYear" min="2000" max="2100" required></label>
         <label>File * <input type="file" id="uFile" required></label>
       </div>
@@ -41,10 +80,17 @@
       <button type="button" class="btn" id="cancelUpload">Cancel</button>
     </form>
 
+    <p class="hint" id="hint">Select a department first, then choose a subject, teacher and year.</p>
     <div class="papers-grid" id="list"></div>
     <p class="empty" id="empty" hidden>No lectures found for these filters.</p>
 
   </main>
+
+  <!-- Footer (master style) -->
+  <footer class="footer">
+    <b>NUML Archive</b>
+    <span>Student Learning Resources</span>
+  </footer>
 
   <script src="../js/common.js"></script>
   <script src="../js/lecture.js"></script>
