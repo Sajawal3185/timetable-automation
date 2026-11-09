@@ -1,8 +1,10 @@
 /* ==========================================================================
-   auth.js  -  LOGIN and FORGOT-PASSWORD pages only.
+   auth.js  -  LOGIN page only.
    Signup now lives ONLY in signup.js. Having signup/checkEmail/EMAIL_PATTERN
    in both files was a landmine: load both on one page and the duplicate
    `const EMAIL_PATTERN` throws a SyntaxError and nothing works.
+   Forgot password has no code: that page tells users to contact their
+   department admin.
    Requires common.js to be loaded before this file.
    ========================================================================== */
 
@@ -38,22 +40,4 @@ function login(event) {
   });
 
   window.location.href = NUML.PAGES.dashboard;
-}
-
-// ---------- Forgot password ----------
-function forgotPassword(event) {
-  event.preventDefault();
-
-  const email = document.getElementById("email").value.trim();
-  const msg = document.getElementById("msg");
-
-  if (!email.toLowerCase().endsWith("@numls.edu.pk")) {
-    msg.textContent = "Please enter your NUML email";
-    msg.className = "msg error";
-    return;
-  }
-
-  // Same wording whether or not the account exists (no account enumeration).
-  msg.textContent = "If this email is registered, a reset link has been sent.";
-  msg.className = "msg";
 }

@@ -7,10 +7,11 @@
      -> bounced back to login (dashboard.js found no "numlUser").
    - Now: ONE place knows the page filenames, the session, and the nav bar.
 
-   LOAD ORDER (every page): <script src="common.js" defer></script> FIRST,
-   then the page's own script. Everything is wrapped in an IIFE and exposed as
-   window.NUML, so it cannot clash with the top-level `const $` / `SUBJECTS`
-   that pastpaper.js and lecture.js already declare.
+   LOAD ORDER (every page): <script src="common.js"></script> FIRST (no defer),
+   then api.js if the page calls the backend, then the page's own script.
+   Everything is wrapped in an IIFE and exposed as window.NUML, so it cannot
+   clash with the top-level `const $` / `SUBJECTS` that pastpaper.js and
+   lecture.js already declare.
    ========================================================================== */
 (function () {
   "use strict";

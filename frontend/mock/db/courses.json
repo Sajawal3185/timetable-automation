@@ -1,0 +1,8 @@
+[
+  {"id": 1, "code": "SE-311", "title": "Software Design and Architecture", "credit_hours": 3, "is_lab": false, "department_id": 1},
+  {"id": 2, "code": "SE-312", "title": "Software Quality Engineering", "credit_hours": 3, "is_lab": false, "department_id": 1},
+  {"id": 3, "code": "SE-313", "title": "Operating Systems Lab", "credit_hours": 1, "is_lab": true, "department_id": 1},
+  {"id": 4, "code": "SE-314", "title": "Database Systems", "credit_hours": 3, "is_lab": false, "department_id": 1},
+  {"id": 5, "code": "SE-315", "title": "Software Requirements Engineering", "credit_hours": 3, "is_lab": false, "department_id": 1},
+  {"id": 6, "code": "CS-201", "title": "Data Structures and Algorithms", "credit_hours": 3, "is_lab": false, "department_id": 2}
+]

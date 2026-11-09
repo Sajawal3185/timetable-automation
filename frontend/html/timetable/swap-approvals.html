@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Swap Approvals | NUML Timetable Automation</title>
+  <link rel="stylesheet" href="../../css/master.css">
+  <link rel="stylesheet" href="../../css/app.css">
+</head>
+<body class="tt-page">
+
+  <nav class="tt-nav" id="ttNav" aria-label="Timetable navigation"></nav>
+
+  <header class="page-head">
+    <a href="../index.html" class="back-link">← Back to NUML Archive</a>
+    <h1>Swap Approvals</h1>
+    <p>Pending swap requests from your department. Approving updates the timetable.</p>
+  </header>
+
+  <div class="page-body" id="ttGate">
+    <section class="tt-card"><p>Checking your session…</p></section>
+  </div>
+
+  <main class="page-body" id="ttMain" hidden>
+    <section class="filters">
+      <p class="section-description" id="apprSummary">Loading pending requests…</p>
+      <button type="button" class="btn dark" id="apprReload">Reload list</button>
+    </section>
+    <p class="form-msg" id="apprMsg" role="alert"></p>
+    <div class="papers-grid" id="apprList"></div>
+    <p class="empty" id="apprEmpty" hidden>No pending swap requests.</p>
+  </main>
+
+  <script src="../../js/timetable/tt-config.js"></script>
+  <script src="../../js/timetable/tt-mock.js"></script>
+  <script src="../../js/timetable/tt-api.js"></script>
+  <script src="../../js/timetable/tt-layout.js"></script>
+  <script src="../../js/timetable/tt-bell.js"></script>
+  <script src="../../js/timetable/tt-approvals.js"></script>
+</body>
+</html>

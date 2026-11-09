@@ -1,0 +1,5 @@
+[
+  {"id": 1, "name": "BSSE-5A", "department_id": 1, "semester": 5, "student_count": 45},
+  {"id": 2, "name": "BSSE-5B", "department_id": 1, "semester": 5, "student_count": 38},
+  {"id": 3, "name": "BSCS-3A", "department_id": 2, "semester": 3, "student_count": 50}
+]

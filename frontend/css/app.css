@@ -305,23 +305,21 @@ button.btn {
 
 /* ----- Page setup: page-only colors and spacing ----- */
 body.res-page {
-  --res-border: #e5e7eb;          /* light grey lines around boxes */
-  --res-blue-dark: #154a96;       /* hover color for buttons */
-  --res-tag-bg: #eff6ff;          /* background of the OS tags */
-  --res-radius: 12px;             /* corner roundness of boxes */
+  --res-border: #e5e7eb;
+  --res-blue-dark: #154a96;
+  --res-tag-bg: #eff6ff;
+  --res-radius: 12px;
 
-  padding-top: 72px;              /* space for the fixed master navbar */
-  background: var(--bg);
+  padding-top: 0;
+  background: #fff;
   line-height: 1.6;
 }
 
-/* Centered content column */
 .res-page main {
   max-width: 1100px;
   margin: 0 auto;
-  padding: 24px 16px 48px;
+  padding: 0 16px 48px;
 }
-
 
 /* ----- Page header (small label, title, subtitle) ----- */
 .res-page .page-header {
@@ -351,11 +349,14 @@ body.res-page {
 
 /* ----- Filter box (search + dropdowns) ----- */
 .res-page .filter-box {
+  position: relative;
+  margin-top: -50px;
   margin-bottom: 24px;
   padding: 20px;
   background: white;
   border: 1px solid var(--res-border);
   border-radius: var(--res-radius);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
 }
 
 .res-page .filter-box h2 {
@@ -542,14 +543,14 @@ body.gpa-page {
   --gpa-danger: #d72f48;          /* red for the remove button */
 
   min-height: 100vh;
-  padding-top: 72px;              /* space for the fixed master navbar */
-  background: linear-gradient(180deg, #edf4ff 0, #f9fbff 340px, #f4f8ff 100%);
+  padding-top: 0;                 /* banner sits at the top, no fixed navbar */
+  background: #fff;               /* white, same as lecture page */
 }
 
 /* Centered content column */
 .gpa-page .page {
   width: min(1200px, 92%);
-  margin: 30px auto;
+  margin: 0 auto 30px;            /* no top margin so tabs can overlap the banner */
 }
 
 /* JavaScript adds/removes this class to show or hide things.
@@ -557,49 +558,14 @@ body.gpa-page {
 .gpa-page .hidden { display: none !important; }
 
 
-/* ----- Hero (icon + title at the top) ----- */
-.gpa-page .hero {
-  display: flex;
-  align-items: center;
-  gap: 18px;
-  margin-bottom: 24px;
-}
-
-.gpa-page .hero-icon {
-  display: grid;
-  place-items: center;
-  flex-shrink: 0;
-  width: 62px;
-  height: 62px;
-  font-size: 34px;
-  color: white;
-  background: var(--blue);
-  border-radius: 17px;
-}
-
-.gpa-page .eyebrow {
-  margin: 0 0 5px;
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: 1.5px;
-  color: var(--blue);
-}
-
-/* Headings. clamp() makes the h1 grow and shrink with screen width */
-.gpa-page h1 {
-  margin: 0 0 7px;
-  font-size: clamp(25px, 3vw, 36px);
-  color: var(--navy);
-}
-
+/* ----- Headings ----- */
 .gpa-page h2 {
   margin: 0 0 6px;
   font-size: 20px;
   color: var(--navy);
 }
 
-/* Grey description text under the title and under each panel heading */
-.gpa-page .hero p:last-child,
+/* Grey description text under each panel heading */
 .gpa-page .section-heading p {
   margin: 0;
   font-size: 14px;
@@ -608,15 +574,17 @@ body.gpa-page {
 }
 
 
-/* ----- Tabs (Semester GPA / CGPA) ----- */
+/* ----- Tabs (Semester GPA / CGPA), overlap the banner ----- */
 .gpa-page .tabs {
+  position: relative;
   display: flex;
   gap: 8px;
-  margin-bottom: 16px;
+  margin: -30px 0 16px;
   padding: 5px;
-  background: #eaf1fd;
+  background: white;
   border: 1px solid var(--gpa-border);
   border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
 }
 
 .gpa-page .tab {
@@ -756,7 +724,6 @@ body.gpa-page {
 
 
 /* ----- Buttons (Add course, Calculate...) ----- */
-/* flex-wrap and align-items reset the past papers .actions from section 2 */
 .gpa-page .actions {
   display: flex;
   flex-wrap: nowrap;
@@ -788,7 +755,7 @@ body.gpa-page {
 .gpa-page .actions .primary { margin-left: auto; }
 
 
-/* ----- Semester result (3 cards: GPA, credits, grade) ----- */
+/* ----- Semester result (3 cards: GPA, credits, grade points) ----- */
 .gpa-page .result-grid {
   display: grid;
   grid-template-columns: 1.4fr 1fr 1.2fr;     /* first card is a bit wider */
@@ -883,7 +850,7 @@ body.gpa-page {
 }
 
 
-/* ----- Grading scale table (A, A-, B+ ... with points) ----- */
+/* ----- Grading scale table (A+, A, B+ ... with points) ----- */
 .gpa-page .grading-panel .section-heading { margin-bottom: 15px; }
 
 .gpa-page .grading-table {
@@ -908,8 +875,7 @@ body.gpa-page {
   background: #edf4ff;
 }
 
-/* Small note under the grading table.
-   Overrides the section 1 .note (which is green and bold). */
+/* Small note under the grading table. */
 .gpa-page .note {
   margin: 14px 0 0;
   font-size: 12px;
@@ -921,7 +887,7 @@ body.gpa-page {
 
 /* ----- Mobile ----- */
 @media (max-width: 760px) {
-  .gpa-page .page { width: 94%; margin-top: 22px; }
+  .gpa-page .page { width: 94%; }
   .gpa-page .panel { padding: 15px; }
   .gpa-page .section-heading { flex-direction: column; }
   .gpa-page .result-grid { grid-template-columns: 1fr; }     /* cards stack */
@@ -931,7 +897,6 @@ body.gpa-page {
   .gpa-page .form-actions { flex-direction: column; }
   .gpa-page .form-actions .button { width: 100%; }
 }
-
 
 /* =========================================================
    6. PAGE: DASHBOARD  (dashboard.html)
@@ -1163,4 +1128,307 @@ body.dash-page {
   .dash-page .shell { grid-template-columns: 1fr; }    /* sidebar goes on top */
   .dash-page .main { min-height: 420px; }
   .dash-page .center h1 { font-size: 1.9rem; }
+}
+
+/* =========================================================
+   7. TIMETABLE AUTOMATION  (html/timetable/*.html)
+
+   Body class : <body class="tt-page">
+   From master: --blue, --navy, --muted, --bg, --ink
+   From sec. 1: .page-head, .page-body, .filters, .upload-box,
+                .upload-grid, .papers-grid, .paper-card,
+                .btn.solid, .btn.dark, .form-msg, .empty, .hint
+   Every rule starts with .tt-page, so nothing here can change
+   an Archive page. The nav copies the look of the Archive nav
+   that common.js injects (white bar, dark pill for the active
+   item) but with variables instead of hardcoded colors.
+   ========================================================= */
+
+body.tt-page {
+  --tt-line: #dddddd;             /* nav bottom border, dividers */
+  --tt-pill: #222222;             /* active nav item (Archive look) */
+  --tt-hover: #f0f0f0;            /* nav hover */
+  --tt-soft-ink: #666666;         /* name and role next to Log out */
+  --tt-makeup: #7c3aed;           /* makeup classes (same purple as .badge.fin) */
+  --tt-error: #dc2626;            /* same red as .form-msg.error */
+  --tt-ok: #16a34a;               /* same green as .form-msg.ok */
+  --tt-pending: #b45309;
+  --tt-pending-bg: #fef3c7;
+  --tt-tint: #f5f8fe;             /* same field tint as section 1 inputs */
+  --tt-field-line: #d6e0f3;
+  --tt-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+
+  margin: 0;
+  background: white;
+}
+
+/* The [hidden] attribute must win over any display rule below. */
+.tt-page [hidden] { display: none !important; }
+
+/* Wider content column for the 7-day grid. */
+.tt-page .page-body.tt-wide { max-width: 1240px; }
+
+
+/* ----- Top nav (same look as the Archive's injected nav) ----- */
+.tt-page .tt-nav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  min-height: 56px;
+  padding: 10px 16px;
+  background: white;
+  border-bottom: 1px solid var(--tt-line);
+  font: 500 14px system-ui, sans-serif;
+}
+
+.tt-page .tt-nav a,
+.tt-page .tt-nav button {
+  padding: 8px 12px;
+  color: var(--tt-pill);
+  background: none;
+  border: 0;
+  border-radius: 8px;
+  font: inherit;
+  cursor: pointer;
+}
+
+.tt-page .tt-nav a:hover,
+.tt-page .tt-nav button:hover { background: var(--tt-hover); }
+
+.tt-page .tt-nav a.active { color: white; background: var(--tt-pill); }
+.tt-page .tt-nav .spacer { flex: 1; }
+.tt-page .tt-nav .who { padding: 0 8px; color: var(--tt-soft-ink); }
+
+
+/* ----- Notification bell ----- */
+.tt-page .tt-bell-wrap { position: relative; }
+
+.tt-page .tt-nav .tt-bell {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  padding: 0;
+}
+
+.tt-page .tt-bell svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.tt-page .tt-badge {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 18px;
+  text-align: center;
+  color: white;
+  background: var(--tt-error);
+  border-radius: 9px;
+}
+
+.tt-page .tt-bell-panel {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 8px);
+  z-index: 20;
+  width: 340px;
+  max-width: calc(100vw - 32px);
+  max-height: 420px;
+  overflow-y: auto;
+  padding: 10px;
+  background: white;
+  border-radius: 14px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+}
+
+.tt-page .tt-bell-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 6px 10px;
+  border-bottom: 1px solid var(--tt-line);
+}
+
+.tt-page .tt-bell-head strong { color: var(--navy); }
+.tt-page .tt-nav .tt-link-btn { padding: 4px 8px; font-size: 13px; color: var(--blue); }
+
+.tt-page .tt-note {
+  padding: 10px 6px;
+  border-bottom: 1px solid var(--tt-line);
+}
+
+.tt-page .tt-note:last-child { border-bottom: 0; }
+.tt-page .tt-note.unread { background: var(--tt-tint); border-radius: 8px; }
+.tt-page .tt-note p { margin: 0 0 4px; font-size: 14px; color: var(--ink); }
+.tt-page .tt-note small { color: var(--muted); }
+.tt-page .tt-bell-panel .empty { margin: 16px 0; }
+
+
+/* ----- Session check / refusal card ----- */
+.tt-page .tt-card {
+  background: white;
+  padding: 22px;
+  border-radius: 14px;
+  box-shadow: var(--tt-shadow);
+  margin-bottom: 20px;
+}
+
+.tt-page .tt-card h2 { margin: 0 0 8px; font-size: 20px; color: var(--navy); }
+.tt-page .tt-card p { margin: 0 0 12px; color: var(--muted); }
+.tt-page .tt-card p:last-child { margin-bottom: 0; }
+
+.tt-page .form-msg { margin: 10px 0 0; }
+/* Higher specificity than ".tt-card p" (muted grey) so status colors always show. */
+.tt-page .form-msg.error { color: var(--tt-error); }
+.tt-page .form-msg.ok    { color: var(--tt-ok); }
+.tt-page .form-msg ul { margin: 6px 0 0; padding-left: 20px; font-weight: normal; }
+
+
+/* ----- Status labels (swap requests) ----- */
+.tt-page .tt-status {
+  display: inline-block;
+  padding: 3px 12px;
+  font-size: 12px;
+  font-weight: bold;
+  border-radius: 12px;
+  text-transform: capitalize;
+}
+
+.tt-page .tt-status.pending   { color: var(--tt-pending); background: var(--tt-pending-bg); }
+.tt-page .tt-status.approved  { color: white; background: var(--tt-ok); }
+.tt-page .tt-status.rejected  { color: white; background: var(--tt-error); }
+.tt-page .tt-status.cancelled { color: white; background: var(--muted); }
+
+
+@media (max-width: 640px) {
+  .tt-page .tt-nav .who { flex-basis: 100%; order: 10; padding: 4px 12px 0; }
+}
+
+
+/* ----- Timetable page: 7-day week grid ----- */
+.tt-page .tt-summary { padding: 14px 18px; }
+
+.tt-page .tt-week {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.tt-page .tt-day {
+  min-height: 160px;
+  padding: 12px 10px;
+  background: white;
+  border-top: 4px solid var(--blue);
+  border-radius: 14px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.tt-page .tt-day h2 { margin: 0 0 10px; font-size: 15px; color: var(--navy); }
+.tt-page .tt-free { margin: 0; font-size: 13px; color: var(--muted); }
+
+.tt-page .tt-class {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin-bottom: 8px;
+  padding: 8px 10px;
+  font-size: 13px;
+  color: var(--ink);
+  background: var(--tt-tint);
+  border-left: 4px solid var(--blue);
+  border-radius: 8px;
+  overflow-wrap: anywhere;
+}
+
+.tt-page .tt-class strong { color: var(--navy); }
+.tt-page .tt-class .tt-time { font-weight: 700; color: var(--blue); }
+.tt-page .tt-class small { color: var(--muted); }
+.tt-page .tt-class.makeup { border-left-color: var(--tt-makeup); }
+.tt-page .tt-class.makeup .tt-time { color: var(--tt-makeup); }
+
+.tt-page .tt-tag {
+  align-self: flex-start;
+  padding: 1px 8px;
+  font-size: 11px;
+  font-weight: 700;
+  color: white;
+  background: var(--tt-makeup);
+  border-radius: 10px;
+}
+
+@media (max-width: 1100px) {
+  .tt-page .tt-week { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+
+@media (max-width: 640px) {
+  .tt-page .tt-week { grid-template-columns: 1fr; }
+  .tt-page .tt-day { min-height: 0; }
+}
+
+
+/* ----- Swap requests page ----- */
+.tt-page .upload-grid .tt-span { grid-column: 1 / -1; }
+.tt-page .tt-preview { min-height: 20px; margin: 0 0 14px; font-size: 14px; color: var(--navy); }
+.tt-page .paper-card .tt-status { margin-bottom: 4px; }
+.tt-page .paper-card .form-msg { margin: 0 0 8px; }
+.tt-page .paper-card .form-msg:empty { display: none; }
+
+/* ----- Swap approvals page ----- */
+.tt-page .tt-note-field { display: block; margin: 4px 0 6px; font-size: 13px; font-weight: bold; }
+
+.tt-page .paper-card input {
+  display: block;
+  width: 100%;
+  margin-bottom: 12px;
+  padding: 10px;
+  font-size: 14px;
+  background: var(--tt-tint);
+  border: 2px solid var(--tt-field-line);
+  border-radius: 8px;
+}
+
+.tt-page .paper-card input:focus { outline: none; border-color: var(--blue); background: white; }
+
+/* ----- Makeup page: free slot rows ----- */
+.tt-page .tt-slots h2 { font-size: 17px; }
+
+.tt-page .tt-slot {
+  display: grid;
+  grid-template-columns: 130px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 6px 12px;
+  padding: 10px 0;
+  border-top: 1px solid var(--tt-line);
+}
+
+.tt-page .tt-slot .tt-time { color: var(--blue); }
+.tt-page .tt-slot .form-msg,
+.tt-page .tt-slot .tt-soft { grid-column: 1 / -1; margin: 0; }
+.tt-page .tt-slot .form-msg:empty { display: none; }
+.tt-page .tt-soft { font-size: 13px; color: var(--tt-pending); }
+
+.tt-page .tt-slot select {
+  width: 100%;
+  padding: 9px;
+  font-size: 14px;
+  background: var(--tt-tint);
+  border: 2px solid var(--tt-field-line);
+  border-radius: 8px;
+}
+
+@media (max-width: 600px) {
+  .tt-page .tt-slot { grid-template-columns: 1fr; }
 }
