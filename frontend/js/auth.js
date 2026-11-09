@@ -1,43 +1,51 @@
 /* ==========================================================================
    auth.js  -  LOGIN page only.
-   Signup now lives ONLY in signup.js. Having signup/checkEmail/EMAIL_PATTERN
-   in both files was a landmine: load both on one page and the duplicate
-   `const EMAIL_PATTERN` throws a SyntaxError and nothing works.
-   Forgot password has no code: that page tells users to contact their
-   department admin.
-   Requires common.js to be loaded before this file.
+   The server decides who may log in. The browser never checks passwords.
+   Requires common.js, then api.js, to be loaded before this file.
    ========================================================================== */
 
 // Already logged in? Skip the login form.
-if (document.getElementById("loginForm") && NUML.getUser()) {
+if (document.getElementById("loginForm") && NUML.getUser() && NUML.getToken()) {
   window.location.replace(NUML.PAGES.dashboard);
 }
 
-// ---------- Login ----------
-function login(event) {
-  event.preventDefault();
+const loginForm = document.getElementById("loginForm");
 
-  const email = document.getElementById("email").value.trim().toLowerCase();
-  const password = document.getElementById("password").value;
+if (loginForm) {
+  loginForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
 
-  if (!email.endsWith("@numls.edu.pk") || password.length < NUML.MIN_PASSWORD) {
-    alert(`Invalid email or password. Password must be at least ${NUML.MIN_PASSWORD} characters.`);
-    return;
-  }
+    const identifier = document.getElementById("identifier").value.trim();
+    const password = document.getElementById("password").value;
+    const msg = document.getElementById("msg");
+    msg.textContent = "";
+    msg.className = "msg";
 
-  // Name/department were saved at signup (without the password).
-  const profile = NUML.findProfile(email);
-  const info = NUML.parseEmail(email);
-  const fallbackId = info ? info.systemId : email.split("@")[0];
+    if (!identifier || !password) {
+      msg.textContent = "Enter your roll number and password";
+      msg.className = "msg error";
+      return;
+    }
 
-  /* THE FIX for the login<->dashboard loop: dashboard.js refuses to open
-     without this saved user, and the old login never saved one. */
-  NUML.setUser({
-    name: profile ? profile.name : "Student " + fallbackId,
-    id: fallbackId,
-    email,
-    department: profile ? profile.department : ""
+    try {
+      const data = await NUML.api("/api/auth/login", {
+        method: "POST",
+        body: { identifier, password }
+      });
+      NUML.setToken(data.access_token);
+
+      const me = await NUML.api("/api/auth/me");
+      NUML.setUser(me);
+
+      // Every role goes to the dashboard for now. Role start pages come later.
+      window.location.href = NUML.PAGES.dashboard;
+    } catch (err) {
+      NUML.clearToken();
+      msg.textContent =
+        err.status === 401
+          ? "Invalid roll number or password"
+          : "Something went wrong. Try again.";
+      msg.className = "msg error";
+    }
   });
-
-  window.location.href = NUML.PAGES.dashboard;
 }
