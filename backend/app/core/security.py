@@ -33,6 +33,16 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
         return False
 
 
+# A real bcrypt hash of a throwaway password, computed once at import.
+# Why: login must take the same time whether or not the roll number exists.
+# If an unknown user returned instantly while a known user paid for a bcrypt
+# check (~100-300 ms), an attacker could time responses to list valid accounts.
+# auth.login therefore verifies against DUMMY_HASH when no user is found.
+# It is generated (not a hard-coded string) so it always matches the current
+# bcrypt cost factor and therefore takes exactly as long as a real check.
+DUMMY_HASH = hash_password("timing-dummy")
+
+
 def create_access_token(user_id: int, role: str, expires_delta: timedelta | None = None) -> str:
     """Create a signed JWT containing sub (user_id), lowercase role, and exp."""
     expire = datetime.now(timezone.utc) + (

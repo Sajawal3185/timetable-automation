@@ -1,0 +1,58 @@
+:root {
+  --navy: #0b1f4d;
+  --blue: #1e5fbf;
+  --bg: #eef3fb;
+  --ink: #1f2937;
+  --muted: #64748b;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  font-family: "Plus Jakarta Sans", "Segoe UI", Arial, sans-serif;
+  color: var(--ink);
+}
+a { text-decoration: none; }
+
+/* ---------- Buttons ---------- */
+.btn { display: inline-block; padding: 10px 20px; border-radius: 10px; font-weight: 600; font-size: 14px; transition: .2s; }
+.btn.lg { padding: 15px 34px; font-size: 16px; }
+.btn.solid { background: var(--blue); color: white; }
+.btn.solid:hover { background: #2f74dc; transform: translateY(-2px); }
+.btn.outline { color: white; border: 2px solid rgba(255, 255, 255, .7); }
+.btn.outline:hover { background: rgba(255, 255, 255, .16); }
+.btn.white { background: white; color: var(--blue); }
+.btn.white:hover { background: #e4edfb; transform: translateY(-2px); }
+
+/* ---------- Navbar ---------- */
+.navbar {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 50;
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 14px 48px;
+  background: rgba(8, 24, 70, .55);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255, 255, 255, .15);
+}
+.logo { font-size: 22px; font-weight: 800; color: white; }
+.logo span { color: #7cc4ff; }
+.navbar nav { display: flex; align-items: center; gap: 22px; }
+.nl { color: rgba(255, 255, 255, .9); font-size: 14px; font-weight: 500; }
+.nl:hover { color: white; }
+
+/* ---------- Footer ---------- */
+.footer {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 10px 24px;
+  padding: 24px 48px;
+  background: #07173c; color: rgba(255, 255, 255, .7); font-size: 14px;
+}
+.footer b { color: white; font-size: 17px; }
+
+/* ---------- Mobile (common parts) ---------- */
+@media (max-width: 640px) {
+  .navbar { padding: 12px 16px; }
+  .nl { display: none; }
+  .logo { font-size: 18px; }
+  .footer { padding: 20px 24px; }
+}

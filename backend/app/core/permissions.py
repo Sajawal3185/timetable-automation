@@ -1,10 +1,10 @@
 """Role checks as FastAPI dependencies, plus swap-specific permission rules.
 
-Depends on get_current_user from core/security.py (blocked until login is merged).
+Depends on get_current_user from app/dependencies.py (blocked until login is merged).
 """
 from fastapi import Depends, HTTPException
 
-from app.core.security import get_current_user
+from app.dependencies import get_current_user
 
 STUDENT, TEACHER, HOD, ADMIN = "student", "teacher", "hod", "admin"
 
