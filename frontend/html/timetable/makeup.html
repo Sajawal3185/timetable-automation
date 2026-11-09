@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Makeup Classes | NUML Timetable Automation</title>
+  <link rel="stylesheet" href="../../css/master.css">
+  <link rel="stylesheet" href="../../css/app.css">
+</head>
+<body class="tt-page">
+
+  <nav class="tt-nav" id="ttNav" aria-label="Timetable navigation"></nav>
+
+  <header class="page-head">
+    <a href="../index.html" class="back-link">← Back to NUML Archive</a>
+    <h1>Makeup Classes</h1>
+    <p>Find a time when you, the section and a suitable room are all free, then book it.</p>
+  </header>
+
+  <div class="page-body" id="ttGate">
+    <section class="tt-card"><p>Checking your session…</p></section>
+  </div>
+
+  <main class="page-body" id="ttMain" hidden>
+
+    <form class="upload-box" id="mkForm" novalidate>
+      <h2>Find free slots</h2>
+      <div class="upload-grid">
+        <label>Section and course *
+          <select id="mkClass" required></select>
+        </label>
+        <label>Duration *
+          <select id="mkDuration" required>
+            <option value="60">1 hour</option>
+            <option value="90" selected>1 hour 30 minutes</option>
+            <option value="120">2 hours</option>
+            <option value="180">3 hours</option>
+          </select>
+        </label>
+        <label>Day
+          <select id="mkDay">
+            <option value="">Any weekday (Monday to Friday)</option>
+            <option>Monday</option>
+            <option>Tuesday</option>
+            <option>Wednesday</option>
+            <option>Thursday</option>
+            <option>Friday</option>
+            <option>Saturday</option>
+            <option>Sunday</option>
+          </select>
+        </label>
+        <label>Reason (saved with the booking)
+          <input type="text" id="mkReason" maxlength="500" placeholder="For example: class missed on 6 November">
+        </label>
+      </div>
+      <button type="submit" class="btn solid" id="mkFind">Find free slots</button>
+      <p class="form-msg" id="mkMsg" role="alert"></p>
+    </form>
+
+    <div id="mkResults"></div>
+
+    <div class="view-heading">
+      <h2>My booked makeup classes</h2>
+    </div>
+    <p class="form-msg" id="mkBookedMsg" role="alert"></p>
+    <div class="papers-grid" id="mkBooked"></div>
+    <p class="empty" id="mkBookedEmpty" hidden>No makeup classes booked yet.</p>
+  </main>
+
+  <script src="../../js/timetable/tt-config.js"></script>
+  <script src="../../js/timetable/tt-mock.js"></script>
+  <script src="../../js/timetable/tt-api.js"></script>
+  <script src="../../js/timetable/tt-layout.js"></script>
+  <script src="../../js/timetable/tt-bell.js"></script>
+  <script src="../../js/timetable/tt-makeup.js"></script>
+</body>
+</html>

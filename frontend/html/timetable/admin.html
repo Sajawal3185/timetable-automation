@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Admin | NUML Timetable Automation</title>
+  <link rel="stylesheet" href="../../css/master.css">
+  <link rel="stylesheet" href="../../css/app.css">
+</head>
+<body class="tt-page">
+
+  <nav class="tt-nav" id="ttNav" aria-label="Timetable navigation"></nav>
+
+  <header class="page-head">
+    <a href="../index.html" class="back-link">← Back to NUML Archive</a>
+    <h1>Admin</h1>
+    <p>Timetable import and user accounts are managed from the backend's API page.</p>
+  </header>
+
+  <div class="page-body" id="ttGate">
+    <section class="tt-card"><p>Checking your session…</p></section>
+  </div>
+
+  <main class="page-body" id="ttMain" hidden>
+    <section class="tt-card">
+      <h2>Backend API page (/docs)</h2>
+      <p>Use it for: importing a department timetable sheet (POST /api/timetable/import, try
+        <strong>dry_run</strong> first), and creating teacher, HOD and admin accounts (POST /api/auth/users).</p>
+      <p>On that page, click <strong>Authorize</strong> and paste your login token to call admin endpoints.</p>
+      <div id="adminDocs"></div>
+    </section>
+    <section class="tt-card">
+      <h2>Swap requests</h2>
+      <p>Admins can approve or reject pending swaps from every department.</p>
+      <a class="btn solid" href="swap-approvals.html">Open swap approvals</a>
+    </section>
+  </main>
+
+  <script src="../../js/timetable/tt-config.js"></script>
+  <script src="../../js/timetable/tt-mock.js"></script>
+  <script src="../../js/timetable/tt-api.js"></script>
+  <script src="../../js/timetable/tt-layout.js"></script>
+  <script src="../../js/timetable/tt-bell.js"></script>
+  <script src="../../js/timetable/tt-admin.js"></script>
+</body>
+</html>

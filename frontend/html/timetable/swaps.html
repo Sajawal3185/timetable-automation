@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Swap Requests | NUML Timetable Automation</title>
+  <link rel="stylesheet" href="../../css/master.css">
+  <link rel="stylesheet" href="../../css/app.css">
+</head>
+<body class="tt-page">
+
+  <nav class="tt-nav" id="ttNav" aria-label="Timetable navigation"></nav>
+
+  <header class="page-head">
+    <a href="../index.html" class="back-link">← Back to NUML Archive</a>
+    <h1>Swap Requests</h1>
+    <p>Ask to trade the time of one of your classes. Your HOD approves or rejects it.</p>
+  </header>
+
+  <div class="page-body" id="ttGate">
+    <section class="tt-card"><p>Checking your session…</p></section>
+  </div>
+
+  <main class="page-body" id="ttMain" hidden>
+
+    <form class="upload-box" id="swapForm" novalidate>
+      <h2>New swap request</h2>
+      <p class="rules">A swap exchanges the day and time of two classes. Each class keeps its own room,
+        teacher and section. Clashes are checked before the request is saved.</p>
+
+      <div class="upload-grid">
+        <label>Your class *
+          <select id="swapEntry" required></select>
+        </label>
+        <label>Swap with (new day and time) *
+          <select id="swapTarget" required></select>
+        </label>
+        <label class="tt-span">Reason (optional)
+          <input type="text" id="swapReason" maxlength="500" placeholder="For example: faculty meeting on Monday">
+        </label>
+      </div>
+
+      <p class="tt-preview" id="swapPreview"></p>
+      <button type="submit" class="btn solid" id="swapSubmit">Send request</button>
+      <p class="form-msg" id="swapMsg" role="alert"></p>
+    </form>
+
+    <div class="view-heading">
+      <h2>My requests</h2>
+      <p>Pending requests can be cancelled until the HOD decides.</p>
+    </div>
+    <p class="form-msg" id="listMsg" role="alert"></p>
+    <div class="papers-grid" id="swapList"></div>
+    <p class="empty" id="swapEmpty" hidden>You have not sent any swap requests.</p>
+  </main>
+
+  <script src="../../js/timetable/tt-config.js"></script>
+  <script src="../../js/timetable/tt-mock.js"></script>
+  <script src="../../js/timetable/tt-api.js"></script>
+  <script src="../../js/timetable/tt-layout.js"></script>
+  <script src="../../js/timetable/tt-bell.js"></script>
+  <script src="../../js/timetable/tt-swaps.js"></script>
+</body>
+</html>

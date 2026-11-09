@@ -1,0 +1,6 @@
+[
+  {"id": 1, "name": "Dr. Ahmed Raza", "department_id": 1, "user_id": 2},
+  {"id": 2, "name": "Ms. Sara Khan", "department_id": 1, "user_id": 3},
+  {"id": 3, "name": "Mr. Bilal Ahmed", "department_id": 1, "user_id": null},
+  {"id": 4, "name": "Dr. Usman Ali", "department_id": 2, "user_id": 5}
+]

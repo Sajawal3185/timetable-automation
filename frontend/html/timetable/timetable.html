@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>My Timetable | NUML Timetable Automation</title>
+  <link rel="stylesheet" href="../../css/master.css">
+  <link rel="stylesheet" href="../../css/app.css">
+</head>
+<body class="tt-page">
+
+  <nav class="tt-nav" id="ttNav" aria-label="Timetable navigation"></nav>
+
+  <header class="page-head">
+    <a href="../index.html" class="back-link">← Back to NUML Archive</a>
+    <h1>My Timetable</h1>
+    <p>Your weekly classes, Monday to Sunday. Makeup classes are marked in purple.</p>
+  </header>
+
+  <div class="page-body" id="ttGate">
+    <section class="tt-card"><p>Checking your session…</p></section>
+  </div>
+
+  <main class="page-body tt-wide" id="ttMain" hidden>
+    <section class="filters tt-summary">
+      <p class="section-description" id="ttSummary">Loading your week…</p>
+    </section>
+    <p class="form-msg" id="ttMsg" role="alert"></p>
+    <div class="tt-week" id="ttWeek"></div>
+  </main>
+
+  <script src="../../js/timetable/tt-config.js"></script>
+  <script src="../../js/timetable/tt-mock.js"></script>
+  <script src="../../js/timetable/tt-api.js"></script>
+  <script src="../../js/timetable/tt-layout.js"></script>
+  <script src="../../js/timetable/tt-bell.js"></script>
+  <script src="../../js/timetable/tt-timetable.js"></script>
+</body>
+</html>

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Log in | NUML Timetable Automation</title>
+  <link rel="stylesheet" href="../../css/master.css">
+  <link rel="stylesheet" href="../../css/auth.css">
+</head>
+<body class="auth-page">
+
+  <div class="card">
+    <h2>Timetable Automation</h2>
+    <p>National University of Modern Languages</p>
+
+    <form id="ttLoginForm" novalidate>
+      <label for="identifier">Roll number / Staff ID</label>
+      <input type="text" id="identifier" name="identifier" autocomplete="username"
+        placeholder="Se-9244330" required>
+
+      <label for="password">Password</label>
+      <input type="password" id="password" name="password" autocomplete="current-password"
+        placeholder="At least 8 characters" minlength="8" required>
+
+      <button type="submit" id="ttLoginBtn">Log in</button>
+      <p class="msg" id="ttLoginMsg" role="alert"></p>
+    </form>
+
+    <p>Forgot your password? Contact your department admin to reset your password.</p>
+    <p class="msg" id="ttModeNote"></p>
+
+    <a href="../index.html" class="back-btn">← Back to NUML Archive</a>
+  </div>
+
+  <script src="../../js/timetable/tt-config.js"></script>
+  <script src="../../js/timetable/tt-mock.js"></script>
+  <script src="../../js/timetable/tt-api.js"></script>
+  <script src="../../js/timetable/tt-login.js"></script>
+</body>
+</html>
