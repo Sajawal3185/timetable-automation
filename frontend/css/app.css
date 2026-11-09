@@ -284,14 +284,51 @@ button.btn {
 /* Buttons row at the bottom of each card */
 .actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 .report  { margin-left: auto; border: 0; background: none; color: #94a3b8; font-size: 12px; cursor: pointer; text-decoration: underline; }
+/* Full-width footer on Past Papers page */
+.pastpapers-page .page-body {
+  margin-bottom: 0;
+}
 
+.pastpapers-page .footer {
+  width: 100%;
+  max-width: none;
+  box-sizing: border-box;
+  margin: 0;
+  border-radius: 0;
+}
 
 /* =========================================================
    3. PAGE: LECTURES  (uni-lecs.html)
    The upload box, upload grid and headings come from
    section 1. Add lectures-only CSS below this comment.
    ========================================================= */
+/* Locked (disabled) fields look greyed out */
+.filters select:disabled,
+.filters input:disabled,
+.upload-box select:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  background: #eef1f7;
+}
+/* Keep footer at the bottom of the screen */
+.lectures-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
 
+.lectures-page .page-body {
+  flex: 1;
+}
+
+.lectures-page .footer {
+  width: 100%;
+  max-width: none;
+  box-sizing: border-box;
+  margin-top: auto;
+  border-radius: 0;
+  flex-shrink: 0;
+}
 
 /* =========================================================
    4. PAGE: RESOURCES & TOOLS  (tools-resources.html)

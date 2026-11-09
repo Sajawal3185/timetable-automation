@@ -117,18 +117,26 @@ addSubjects("CS", [
 addSubjects("AI", [
   ["CSIT-107", "Application of Information and Communication Technology"],
   ["CSPF-121", "Programming Fundamentals"],
-  ["CSDT-110", "Discrete Structures"],
-  ["MTPM-161", "Math-I"],
+  ["ESFE-108", "Functional English"],
+  ["CSDT-110", "Applied Physics"],
+  ["EEAP-109", "Islamic Studies"],
+  ["SSIS-111", "Discrete Structures"],
+  ["MTPM-161", "Maths-I"],
   ["CSOO-122", "Object Oriented Programming"],
   ["MTCA-112", "Calculus and Analytical Geometry"],
   ["CSDL-123", "Digital Logic Design"],
-  ["MTPM-162", "Math-II"],
+  ["ESEW-113", "Expository Writing"],
+  ["SSCE-114", "Civics and Community Engagement"],
+  ["SSIP-115", "Ideology and Constitution of Pakistan"],
+  ["MTPM-162", "Pre-Maths-II"],
   ["CSDS-224", "Data Structures"],
   ["CSPA-241", "Programming for Artificial Intelligence"],
-  ["MTSP-201", "Statistics and Probability"],
+  ["CSPP-216", "Professional Practices"],
+  ["MTSP-201", "Statistics & Probability"],
   ["MTMC-202", "Multivariable Calculus"],
   ["CSCN-225", "Computer Networks"],
-  ["MTAS-263", "Advance Statistics"],
+  ["CSDM-217", "Digital Marketing"],
+  ["MTAS-263", "Advanced Statistics"],
   ["CSAA-226", "Analysis of Algorithms"],
   ["CSAI-227", "Artificial Intelligence"],
   ["CSDB-228", "Database Systems"],
@@ -136,68 +144,68 @@ addSubjects("AI", [
   ["CSNN-342", "Artificial Neural Network"],
   ["CSSE-329", "Software Engineering"],
   ["CSML-343", "Machine Learning"],
-  ["CSKR-344", "Knowledge Representation and Reasoning"],
-  ["CSCO-330", "Computer Organization and Assembly Language"],
+  ["CSKR-344", "Knowledge Representation & Reasoning"],
+  ["CSCO-330", "Computer Organization & Assembly Language"],
+  ["MSAF-376", "Accounting Fundamentals"],
   ["CSOS-331", "Operating System"],
   ["CSCV-345", "Computer Vision"],
   ["CSNL-364", "Natural Language Processing"],
   ["CSDM-365", "Data Mining"],
-  ["CSDC-446", "Parallel and Distributed Computing"],
-  ["CSCG-466", "HCI and Computer Graphics"],
+  ["ESTW-304", "Technical and Business Writing"],
+  ["CSDC-446", "Parallel & Distributed Computing"],
+  ["CSCG-466", "HCI & Computer Graphics"],
   ["CSTA-467", "Theory of Automata"],
   ["CSFS-468", "Fuzzy Systems"],
   ["CSRL-469", "Reinforcement Learning"],
-  ["CSIS-432", "Information Security"],
-  ["ESFE-108", "Functional English"],
-  ["EEAP-109", "Applied Physics"],
-  ["SSIS-111", "Islamic Studies"],
-  ["ESEW-113", "Expository Writing"],
-  ["SSCE-114", "Civics and Community Engagement"],
-  ["SSIP-115", "Ideology and Constitution of Pakistan"],
-  ["CSPP-216", "Professional Practices"],
-  ["CSDM-217", "Digital Marketing"],
-  ["MSAF-376", "Accounting Fundamentals"],
-  ["ESTW-304", "Technical and Business Writing"],
-  ["MSTE-418", "Technology Entrepreneurship"]
+  ["MSTE-418", "Technology Entrepreneurship"],
+  ["CSIS-432", "Information Security"]
 ]);
 
 addSubjects("IT", [
-  ["CSPF-101", "Programming Fundamentals"],
-  ["CSIT-111", "Introduction to Information and Communication Technology"],
-  ["CSOO-102", "Object Oriented Programming"],
-  ["CSDS-202", "Discrete Structures"],
-  ["CSSE-101", "Software Engineering"],
-  ["MTCA-101", "Calculus and Analytical Geometry"],
-  ["ITDA-226", "Data Structures"],
-  ["SESR-201", "Software Requirement Engineering"],
-  ["MTLA-124", "Linear Algebra"],
-  ["ITES-241", "Enterprise Systems"],
-  ["CSDB-203", "Database Systems"],
-  ["CSOS-301", "Operating Systems"],
-  ["SECN-301", "Computer Networks"],
-  ["ITPM-205", "IT Project Management"],
-  ["ITSN-308", "System and Network Administration"],
-  ["ITDA-303", "Database Administration and Management"],
-  ["MTST-215", "Probability and Statistics"],
-  ["CSIS-302", "Information Security"],
-  ["ITCY-301", "Cyber Security"],
-  ["ITII-307", "IT Infrastructure"],
-  ["ITWT-309", "Web Technologies"],
-  ["ITVS-407", "Virtual Systems and Services"],
-  ["MTOR-470", "Operations Research"],
-  ["ISIS-101", "Islamic Studies"],
-  ["MTPH-111", "Applied Physics"],
-  ["ITFE-114", "Functional English"],
-  ["MNHR-107", "Human Resource Management"],
-  ["ITEW-115", "Expository Writing"],
-  ["PS-118", "Ideology and Constitution of Pakistan"],
-  ["ITIP-273", "Introduction to Psychology"],
-  ["ENTB-201", "Technical and Business Writing"],
-  ["ITTE-370", "Technical Entrepreneurship"],
-  ["ITPP-416", "Professional Practices"],
-  ["FLFL-361", "Social Service / Foreign Language"],
-  ["math", "Math-I (for Pre-Medical students)"],
-  ["math2", "Math-II (for Pre-Medical students)"]
+  ["ITPF-121", "Programming Fundamentals"],
+  ["ITIT-111", "Application to Information & Communication Technology"],
+  ["IS-112", "Islamic Studies"],
+  ["NSAP-103", "Applied Physics"],
+  ["ESFE-104", "Functional English"],
+  ["ITHR-176", "Human Resource Management"],
+  ["ESEW-105", "Expository Writing"],
+  ["ITOO-127", "Object Oriented Programming"],
+  ["QRDS-106", "Discrete Structures"],
+  ["ITSE-128", "Software Engineering"],
+  ["QRCA-107", "Calculus & Analytical Geometry"],
+  ["SSPS-108", "Pakistan Studies"],
+  ["SSIP-209", "Introduction to Psychology"],
+  ["ITDA-229", "Data Structures"],
+  ["ITLA-218", "Linear Algebra"],
+  ["ITES-277", "Enterprise System"],
+  ["AHPP-210", "Professional Practices"],
+  ["ITCN-230", "Computer Networks"],
+  ["SSCP-211", "Ideology and Constitution of Pakistan"],
+  ["ITDB-231", "Database Systems"],
+  ["ITOS-232", "Operating Systems"],
+  ["ITSR-278", "Software Requirement Engineering"],
+  ["ITMV-219", "Multivariable Calculus"],
+  ["MSEP-212", "Entrepreneurship"],
+  ["SSCE-213", "Civics and Community Engagement"],
+  ["ITSN-333", "System & Network Administration"],
+  ["ITDM-334", "Database Administration & Management"],
+  ["ITDL-335", "Digital Logic Design"],
+  ["ITAO-336", "Analysis of Algorithm"],
+  ["ITIS-337", "Information Security"],
+  ["ITDK-379", "Digital Marketing"],
+  ["ITTB-320", "Technical & Business Writing"],
+  ["ITII-338", "IT Infrastructure"],
+  ["ITAI-339", "Artificial Intelligence"],
+  ["ITWT-340", "Web Technologies"],
+  ["ITPS-321", "Probability & Statistics"],
+  ["ITMA-380", "Mobile Application Development"],
+  ["ITPM-481", "Software Project Management"],
+  ["ITPC-441", "Parallel & Distributed Computing"],
+  ["ITCO-442", "Computer Organization & Assembly Language"],
+  ["ITVS-482", "Virtual Systems and Services"],
+  ["ITCS-443", "Cyber Security"],
+  ["ITDO-484", "Fundamentals of DevOps"],
+  ["ITFL-486", "Foreign Language"]
 ]);
 
 // ---------- Demo Papers ----------
@@ -206,6 +214,7 @@ const papers = [
     id: 1,
     dept: "SE",
     subjectCode: "SEDA-225",
+    teacher: "Sir Ali",
     year: 2024,
     type: "Midterm",
     status: "approved",
@@ -220,6 +229,7 @@ const papers = [
     id: 2,
     dept: "SE",
     subjectCode: "SEOS-226",
+    teacher: "Ms Sara",
     year: 2023,
     type: "Final",
     status: "approved",
@@ -238,6 +248,7 @@ const papers = [
     id: 3,
     dept: "SE",
     subjectCode: "SEDB-227",
+    teacher: "Sir Ahmed",
     year: 2023,
     type: "Final",
     status: "approved",
@@ -254,7 +265,6 @@ const papers = [
 function fill(select, items, placeholder) {
   select.replaceChildren();
 
-  // Placeholder is visible but cannot be selected as a valid choice.
   const firstOption = new Option(placeholder, "");
   firstOption.disabled = true;
   firstOption.selected = true;
@@ -296,7 +306,27 @@ function getSubjectName(dept, code) {
   return subject ? subject.name : code;
 }
 
-// ---------- Years: 2020 to Current Year ----------
+// ---------- Teacher Options ----------
+function getTeacherOptions(dept, subjectCode) {
+  const teachers = [...new Set(
+    papers
+      .filter(paper =>
+        paper.status === "approved" &&
+        paper.dept === dept &&
+        paper.subjectCode === subjectCode &&
+        paper.teacher &&
+        paper.teacher.trim() !== ""
+      )
+      .map(paper => paper.teacher.trim())
+  )];
+
+  return teachers.sort().map(teacher => ({
+    value: teacher,
+    label: teacher
+  }));
+}
+
+// ---------- Years ----------
 function getYears() {
   const years = [];
 
@@ -322,6 +352,7 @@ function getPaperTypes() {
 function initDropdowns() {
   fill($("fDept"), getDepartmentOptions(), "Choose Department");
   fill($("fSubject"), [], "Choose Subject");
+  fill($("fTeacher"), [], "Choose Teacher");
   fill($("fYear"), getYears(), "Choose Year");
   fill($("fType"), getPaperTypes(), "Choose Paper Type");
 
@@ -333,6 +364,7 @@ function initDropdowns() {
   // Filter sequence
   lock($("fDept"), false);
   lock($("fSubject"), true);
+  lock($("fTeacher"), true);
   lock($("fYear"), true);
   lock($("fType"), true);
 
@@ -347,13 +379,14 @@ function initDropdowns() {
 function show() {
   const dept = $("fDept").value;
   const subjectCode = $("fSubject").value;
+  const teacher = $("fTeacher").value;
   const year = $("fYear").value;
   const type = $("fType").value;
 
   const list = $("list");
   list.replaceChildren();
 
-  if (!dept || !subjectCode || !year || !type) {
+  if (!dept || !subjectCode || !teacher || !year || !type) {
     $("hint").hidden = false;
     $("empty").hidden = true;
     return;
@@ -365,6 +398,7 @@ function show() {
     .filter(paper => paper.status === "approved")
     .filter(paper => paper.dept === dept)
     .filter(paper => paper.subjectCode === subjectCode)
+    .filter(paper => paper.teacher === teacher)
     .filter(paper => String(paper.year) === year)
     .filter(paper => paper.type === type);
 
@@ -380,7 +414,7 @@ function show() {
 
     const details = document.createElement("p");
     details.textContent =
-      `${paper.dept} · ${paper.year} · ${paper.type}`;
+      `${paper.dept} · ${paper.teacher} · ${paper.year} · ${paper.type}`;
 
     const fileList = document.createElement("ul");
     fileList.className = "files";
@@ -420,10 +454,12 @@ $("fDept").addEventListener("change", () => {
   const dept = $("fDept").value;
 
   fill($("fSubject"), getSubjectOptions(dept), "Choose Subject");
+  fill($("fTeacher"), [], "Choose Teacher");
   fill($("fYear"), getYears(), "Choose Year");
   fill($("fType"), getPaperTypes(), "Choose Paper Type");
 
   lock($("fSubject"), !dept);
+  lock($("fTeacher"), true);
   lock($("fYear"), true);
   lock($("fType"), true);
 
@@ -431,10 +467,30 @@ $("fDept").addEventListener("change", () => {
 });
 
 $("fSubject").addEventListener("change", () => {
+  const dept = $("fDept").value;
+  const subject = $("fSubject").value;
+
+  fill(
+    $("fTeacher"),
+    getTeacherOptions(dept, subject),
+    "Choose Teacher"
+  );
+
   fill($("fYear"), getYears(), "Choose Year");
   fill($("fType"), getPaperTypes(), "Choose Paper Type");
 
-  lock($("fYear"), !$("fSubject").value);
+  lock($("fTeacher"), !subject);
+  lock($("fYear"), true);
+  lock($("fType"), true);
+
+  show();
+});
+
+$("fTeacher").addEventListener("change", () => {
+  fill($("fYear"), getYears(), "Choose Year");
+  fill($("fType"), getPaperTypes(), "Choose Paper Type");
+
+  lock($("fYear"), !$("fTeacher").value);
   lock($("fType"), true);
 
   show();
@@ -455,6 +511,8 @@ $("uDept").addEventListener("change", () => {
   const dept = $("uDept").value;
 
   fill($("uSubject"), getSubjectOptions(dept), "Choose Subject");
+  $("uTeacher").value = "";
+
   fill($("uYear"), getYears(), "Choose Year");
   fill($("uType"), getPaperTypes(), "Choose Paper Type");
 
@@ -464,10 +522,20 @@ $("uDept").addEventListener("change", () => {
 });
 
 $("uSubject").addEventListener("change", () => {
+  $("uTeacher").value = "";
+
   fill($("uYear"), getYears(), "Choose Year");
   fill($("uType"), getPaperTypes(), "Choose Paper Type");
 
-  lock($("uYear"), !$("uSubject").value);
+  lock($("uYear"), true);
+  lock($("uType"), true);
+});
+
+$("uTeacher").addEventListener("input", () => {
+  fill($("uYear"), getYears(), "Choose Year");
+  fill($("uType"), getPaperTypes(), "Choose Paper Type");
+
+  lock($("uYear"), !$("uTeacher").value.trim());
   lock($("uType"), true);
 });
 
@@ -512,13 +580,14 @@ $("uploadForm").addEventListener("submit", event => {
   const message = $("uMsg");
   const dept = $("uDept").value;
   const subjectCode = $("uSubject").value;
+  const teacher = $("uTeacher").value.trim();
   const year = Number($("uYear").value);
   const type = $("uType").value;
   const files = Array.from($("uFile").files);
 
   message.className = "form-msg error";
 
-  if (!dept || !subjectCode || !year || !type) {
+  if (!dept || !subjectCode || !teacher || !year || !type) {
     message.textContent = "Please complete all fields.";
     return;
   }
@@ -557,6 +626,7 @@ $("uploadForm").addEventListener("submit", event => {
     id: Date.now(),
     dept,
     subjectCode,
+    teacher,
     year,
     type,
     status: "pending",
@@ -567,6 +637,7 @@ $("uploadForm").addEventListener("submit", event => {
   });
 
   resetUploadForm();
+
   message.className = "form-msg ok";
   message.textContent =
     "Demo only: nothing was uploaded. Uploads will work once the backend is connected.";
