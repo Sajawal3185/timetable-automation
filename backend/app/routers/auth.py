@@ -2,7 +2,6 @@
 routers/auth.py  (owner: Sajawal)
 
 Endpoints:
-    POST /api/auth/register   a student creates their own account (role forced to student)
     POST /api/auth/login      any user logs in, gets a JWT + their role
     POST /api/auth/activate   a rostered student sets their first password
     GET  /api/auth/me         who am I (used by the frontend on page refresh)
@@ -11,8 +10,11 @@ Endpoints:
 Design rules this file enforces:
   * ONE login endpoint for every role. The role comes from the database row,
     never from the request body.
-  * There is NO public "register" endpoint that accepts a role. Students claim
-    a pre-imported account (activate); staff accounts are created by an admin.
+  * There is NO public sign-up at all. Students claim a pre-imported roster
+    account (activate); staff accounts are created by an admin (POST /users).
+    A self-signup endpoint was removed (BE-04, review item BR-M8): it let anyone
+    with a roll-number-shaped string create a student in any section, and the
+    server cannot prove a roll number belongs to the person typing it.
 """
 
 import re
@@ -30,7 +32,6 @@ from app.core.security import (
     hash_password,
     verify_password,
 )
-from app.models.section import Section
 from app.models.user import User
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
@@ -43,6 +44,8 @@ STAFF_ROLES = {"teacher", "hod", "admin"}
 # Matched AFTER lowercasing. This only checks the SHAPE, it cannot prove the
 # roll number really belongs to the person typing it (see README limitation).
 # Loosen or tighten the digit range if other departments format theirs differently.
+# Not used by any endpoint since self-signup was removed; kept for BE-13
+# (real roll-number format), which will validate roster imports with it.
 ROLL_NUMBER_PATTERN = re.compile(r"^[a-z]{2,4}-\d{6,8}$")
 
 
@@ -60,19 +63,8 @@ def _check_password_length(value: str) -> str:
 
 
 class LoginRequest(BaseModel):
-    identifier: str = Field(min_length=1)   # roll number or email
+    identifier: str = Field(min_length=1)   # roll number (students) or staff id; email is not a login key
     password: str = Field(min_length=1)
-
-
-class RegisterRequest(BaseModel):
-    name: str = Field(min_length=1, max_length=100)
-    identifier: str = Field(min_length=1)   # roll number
-    section_id: int                          # must exist in the section table
-    password: str = Field(min_length=8)
-    # NOTE: there is deliberately NO role field. Pydantic ignores extra keys,
-    # so even if a client sends {"role": "admin"} it is thrown away.
-
-    _pw_len = field_validator("password")(_check_password_length)
 
 
 class ActivateRequest(BaseModel):
@@ -96,6 +88,12 @@ class UserOut(BaseModel):
     id: int
     name: str
     role: str
+    identifier: str
+    # The frontend needs these to load "my" data without a second lookup:
+    # HODs see their own department's swaps (department_id), students see their
+    # own section's timetable (section_id). None for users who have neither.
+    department_id: int | None = None
+    section_id: int | None = None
 
     # lets Pydantic read straight from a SQLAlchemy User object
     model_config = {"from_attributes": True}
@@ -110,60 +108,6 @@ def _normalize(identifier: str) -> str:
     # Roll numbers / emails must match regardless of case or stray spaces,
     # otherwise "SE-123 " and "se-123" become two different users.
     return identifier.strip().lower()
-
-
-# ---------------------------------------------------------------------------
-# POST /api/auth/register  (student self-signup)
-# ---------------------------------------------------------------------------
-
-@router.post("/register", response_model=LoginResponse, status_code=status.HTTP_201_CREATED)
-def register(data: RegisterRequest, db: Session = Depends(get_db)):
-    identifier = _normalize(data.identifier)
-
-    # Shape check on the roll number. Rejects emails, junk, and staff-style
-    # identifiers, so this endpoint can only ever produce roll-number accounts.
-    if not ROLL_NUMBER_PATTERN.match(identifier):
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Roll number format is invalid (example: Se-9244330)",
-        )
-
-    # The section decides which timetable the student sees, so it must be a
-    # real row, not a number the client made up.
-    if db.get(Section, data.section_id) is None:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Unknown section")
-
-    if db.query(User).filter(User.identifier == identifier).first():
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="This roll number is already registered",
-        )
-
-    user = User(
-        name=data.name.strip(),
-        identifier=identifier,
-        password_hash=hash_password(data.password),
-        role="student",           # hardcoded: the ONLY way role is set on this path
-        section_id=data.section_id,
-        is_active=True,
-    )
-    db.add(user)
-    try:
-        db.commit()
-    except IntegrityError:
-        # Two requests with the same roll number can both pass the check above
-        # before either commits. The UNIQUE constraint on identifier catches the
-        # loser here, so we return a clean 409 instead of a 500.
-        db.rollback()
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="This roll number is already registered",
-        )
-    db.refresh(user)
-
-    # Log them in immediately so signup is one step for the student.
-    token = create_access_token(user_id=user.id, role=user.role)
-    return LoginResponse(token=token, user=UserOut.model_validate(user))
 
 
 # ---------------------------------------------------------------------------
@@ -253,6 +197,8 @@ def create_staff_user(
             detail=f"role must be one of: {', '.join(sorted(STAFF_ROLES))}",
         )
 
+    # Step 1: friendly early check, so the common duplicate case returns 409
+    # without hashing a password first.
     identifier = _normalize(data.identifier)
     if db.query(User).filter(User.identifier == identifier).first():
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Identifier already exists")
@@ -265,6 +211,15 @@ def create_staff_user(
         is_active=True,
     )
     db.add(user)
-    db.commit()
+
+    # Step 2: the check above is not enough on its own. Two parallel requests
+    # with the same identifier can both pass it before either commits; the
+    # UNIQUE constraint on users.identifier then rejects the second one. Catch
+    # that and return the same 409, instead of a 500 (review item BR-D6).
+    try:
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Identifier already exists")
     db.refresh(user)  # loads the generated id
     return user
