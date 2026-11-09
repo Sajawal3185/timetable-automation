@@ -17,59 +17,53 @@
 
   <main class="page-body">
 
-    <!-- Filters: each one unlocks after the one before it -->
+    <!-- Filters -->
+    <section class="filters">
 
-<!-- Filters: each filter unlocks after the previous selection -->
-<section class="filters">
+      <label>
+        Department
+        <select id="fDept"></select>
+      </label>
 
-  <label>
-    Department
-    <select id="fDept">
-    </select>
-  </label>
+      <label>
+        Subject
+        <select id="fSubject" disabled></select>
+      </label>
 
-  <label>
-    Subject
-    <select id="fSubject" disabled>
-    </select>
-  </label>
+      <label>
+        Year
+        <select id="fYear" disabled></select>
+      </label>
 
-  <label>
-    Teacher
-    <select id="fTeacher" disabled>
-    </select>
-  </label>
+      <label>
+        Title
+        <input
+          type="search"
+          id="fTitle"
+          placeholder="Search by title"
+          disabled
+        >
+      </label>
 
-  <label>
-    Year
-    <select id="fYear" disabled>
-    </select>
-  </label>
+    </section>
 
-  <label>
-    Title
-    <input
-      type="search"
-      id="fTitle"
-      placeholder="Search by title"
-      disabled
-    >
-  </label>
+    <!-- Upload heading and button -->
+    <div class="upload-heading">
+      <h2>Upload Lecture Slides</h2>
+      <p>Share your lecture slides with other NUML students and help them learn.</p>
 
-  <button type="button" class="btn solid" id="toggleUpload">
-    + Upload (demo only)
-  </button>
+      <button type="button" class="btn solid" id="toggleUpload">
+        + Upload Lecture Slides
+      </button>
+    </div>
 
-</section>
-
-    <!-- Upload form (hidden until the button is clicked) -->
+    <!-- Upload form -->
     <form class="upload-box" id="uploadForm" hidden>
       <h2>Upload lecture slides (demo only)</h2>
 
       <div class="upload-grid">
         <label>Department * <select id="uDept" required></select></label>
         <label>Subject * <select id="uSubject" required></select></label>
-        <label>Teacher * <input type="text" id="uTeacher" required></label>
         <label>Title * <input type="text" id="uTitle" required></label>
         <label>Year * <input type="number" id="uYear" min="2000" max="2100" required></label>
         <label>File * <input type="file" id="uFile" required></label>
@@ -80,13 +74,15 @@
       <button type="button" class="btn" id="cancelUpload">Cancel</button>
     </form>
 
-    <p class="hint" id="hint">Select a department first, then choose a subject, teacher and year.</p>
+    <p class="hint" id="hint">
+      Select a department, subject and year. You can also search by lecture title.
+    </p>
+
     <div class="papers-grid" id="list"></div>
     <p class="empty" id="empty" hidden>No lectures found for these filters.</p>
 
   </main>
 
-  <!-- Footer (master style) -->
   <footer class="footer">
     <b>NUML Archive</b>
     <span>Student Learning Resources</span>

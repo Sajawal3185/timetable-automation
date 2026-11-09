@@ -259,10 +259,16 @@ button.btn {
    Headings and upload box come from section 1.
    ========================================================= */
 
-.papers-grid {
+/* Keep results area at a stable height */
+/* Fixed-height scrollable results area */
+.pastpapers-page .papers-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
   gap: 16px;
+
+  height: 180px;
+  overflow-y: auto;
+  align-content: start;
 }
 
 .paper-card {
@@ -285,16 +291,28 @@ button.btn {
 .actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 .report  { margin-left: auto; border: 0; background: none; color: #94a3b8; font-size: 12px; cursor: pointer; text-decoration: underline; }
 /* Full-width footer on Past Papers page */
+/* Past Papers page layout */
+.pastpapers-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
 .pastpapers-page .page-body {
-  margin-bottom: 0;
+  flex: 1;
+  width: 100%;
+  box-sizing: border-box;
+  margin: -55px auto 40px;
+  padding: 0 16px;
 }
 
 .pastpapers-page .footer {
   width: 100%;
   max-width: none;
   box-sizing: border-box;
-  margin: 0;
+  margin-top: auto;
   border-radius: 0;
+  flex-shrink: 0;
 }
 
 /* =========================================================
@@ -302,23 +320,74 @@ button.btn {
    The upload box, upload grid and headings come from
    section 1. Add lectures-only CSS below this comment.
    ========================================================= */
-/* Locked (disabled) fields look greyed out */
-.filters select:disabled,
-.filters input:disabled,
-.upload-box select:disabled {
-  opacity: 0.55;
-  cursor: not-allowed;
-  background: #eef1f7;
-}
-/* Keep footer at the bottom of the screen */
+
 .lectures-page {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  overflow-x: hidden;
+  width: 100%;
+  max-width: 100%;
 }
 
 .lectures-page .page-body {
   flex: 1;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  margin: -55px auto 40px;
+  padding: 0 16px;
+  overflow-x: hidden;
+}
+
+.lectures-page .filters {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow-x: hidden;
+}
+
+.lectures-page .filters label {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.lectures-page .filters select,
+.lectures-page .filters input {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.lectures-page .filters select:disabled,
+.lectures-page .filters input:disabled,
+.lectures-page .upload-box select:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  background: #eef1f7;
+}
+
+.lectures-page .upload-heading,
+.lectures-page .upload-box {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow-x: hidden;
+}
+
+.lectures-page .papers-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+  gap: 16px;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .lectures-page .footer {
@@ -328,6 +397,28 @@ button.btn {
   margin-top: auto;
   border-radius: 0;
   flex-shrink: 0;
+}
+
+@media (max-width: 600px) {
+  .lectures-page {
+    overflow-x: hidden;
+  }
+
+  .lectures-page .page-body {
+    padding: 0 12px;
+  }
+
+  .lectures-page .papers-grid,
+  .lectures-page .upload-grid {
+    grid-template-columns: 1fr;
+    width: 100%;
+  }
+
+  .lectures-page .filters,
+  .upload-box {
+    width: 100%;
+    max-width: 100%;
+  }
 }
 
 /* =========================================================
