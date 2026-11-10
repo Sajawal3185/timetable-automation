@@ -1,4 +1,3 @@
-
 const $ = id => document.getElementById(id);
 const thisYear = new Date().getFullYear();
 
@@ -296,16 +295,9 @@ function approvedFor(dept, subjectName) {
 
 // ---------- Search Lecture Year Options ----------
 function getYearOptions(dept, subjectName) {
-  const years = [];
-
-  for (let year = thisYear; year >= 2020; year--) {
-    years.push({
-      value: year,
-      label: String(year)
-    });
-  }
-
-  return years;
+  return [...new Set(approvedFor(dept, subjectName).map(l => l.year))]
+    .sort((a, b) => b - a)
+    .map(y => ({ value: y, label: String(y) }));
 }
 
 // ---------- Upload Lecture Year Options ----------
@@ -493,9 +485,8 @@ function setupFilters() {
     lock($("fTitle"), true);
 
     $("hint").textContent = hasLectures
-      ? "Choose a year. You can also search by lecture title."
-      : "No lectures uploaded for this subject yet. You can still select a year.";
-
+  ? "Choose a year. You can also search by lecture title."
+  : "No lectures uploaded for this subject yet.";
     $("hint").hidden = false;
 
     showLectures();
