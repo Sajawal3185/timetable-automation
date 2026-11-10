@@ -21,6 +21,7 @@ import re
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field, field_validator
+from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
@@ -32,6 +33,7 @@ from app.core.security import (
     hash_password,
     verify_password,
 )
+from app.models.teacher import Teacher
 from app.models.user import User
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
@@ -94,9 +96,18 @@ class UserOut(BaseModel):
     # own section's timetable (section_id). None for users who have neither.
     department_id: int | None = None
     section_id: int | None = None
+    # The Teacher row linked to this account (teachers.user_id). The timetable
+    # pages filter "my classes" by it. None for students and unlinked staff.
+    teacher_id: int | None = None
 
     # lets Pydantic read straight from a SQLAlchemy User object
     model_config = {"from_attributes": True}
+
+
+def _user_out(db: Session, user: User) -> UserOut:
+    """UserOut plus teacher_id, which lives on the teachers table, not users."""
+    teacher_id = db.execute(select(Teacher.id).where(Teacher.user_id == user.id)).scalar_one_or_none()
+    return UserOut.model_validate(user).model_copy(update={"teacher_id": teacher_id})
 
 
 class LoginResponse(BaseModel):
@@ -135,7 +146,7 @@ def login(data: LoginRequest, db: Session = Depends(get_db)):
 
     # The role is read from the DB row and signed into the token.
     token = create_access_token(user_id=user.id, role=user.role)
-    return LoginResponse(token=token, user=UserOut.model_validate(user))
+    return LoginResponse(token=token, user=_user_out(db, user))
 
 
 # ---------------------------------------------------------------------------
@@ -161,7 +172,7 @@ def activate(data: ActivateRequest, db: Session = Depends(get_db)):
 
     # Log them straight in so the student doesn't have to type it all again.
     token = create_access_token(user_id=user.id, role=user.role)
-    return LoginResponse(token=token, user=UserOut.model_validate(user))
+    return LoginResponse(token=token, user=_user_out(db, user))
 
 
 # ---------------------------------------------------------------------------
@@ -169,10 +180,10 @@ def activate(data: ActivateRequest, db: Session = Depends(get_db)):
 # ---------------------------------------------------------------------------
 
 @router.get("/me", response_model=UserOut)
-def me(current_user: User = Depends(get_current_user)):
+def me(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     # The frontend calls this on page refresh to rebuild AuthContext
     # from the stored token.
-    return current_user
+    return _user_out(db, current_user)
 
 
 # ---------------------------------------------------------------------------
@@ -222,4 +233,4 @@ def create_staff_user(
         db.rollback()
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Identifier already exists")
     db.refresh(user)  # loads the generated id
-    return user
+    return _user_out(db, user)
