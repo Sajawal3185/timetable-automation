@@ -21,7 +21,7 @@ if (user) {
   };
 
   setText("userName", user.name);
-  setText("userId", user.id ? "@" + user.id : "");
+  setText("userId", user.identifier ? "@" + user.identifier : "");
   setText("userAvatar", initials);
   setText("greeting", "HEY, " + firstName.toUpperCase());
 }

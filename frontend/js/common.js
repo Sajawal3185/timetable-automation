@@ -17,19 +17,19 @@
   "use strict";
 
   /* ---- 1. Page map: the ONLY place filenames live. Rename here if yours differ. ---- */
-const PAGES = {
-  home: "index.html",
-  login: "login.html",
-  forgot: "forgot-password.html",
-  dashboard: "dashboard.html",
-  papers: "pastpapers.html",
-  lectures: "lecture.html",
-  resources: "tools-resources.html",
-  gpa: "gpacal.html"
-};
+  const PAGES = {
+    home: "index.html",
+    login: "login.html",
+    forgot: "forgot-password.html",
+    dashboard: "dashboard.html",
+    papers: "pastpapers.html",
+    lectures: "lecture.html",
+    resources: "tools-resources.html",
+    gpa: "gpacal.html"
+  };
 
   /* Pages that work WITHOUT being logged in. Everything else is protected. */
-const PUBLIC_PAGES = [PAGES.home, PAGES.login, PAGES.forgot];
+  const PUBLIC_PAGES = [PAGES.home, PAGES.login, PAGES.forgot];
 
   /* Links shown in the nav bar / dashboard quick-links, in this order. */
   const NAV_ITEMS = [
@@ -41,6 +41,7 @@ const PUBLIC_PAGES = [PAGES.home, PAGES.login, PAGES.forgot];
   ];
 
   const USER_KEY = "numlUser";          // same key dashboard.js already reads
+  const TOKEN_KEY = "numlToken";        // same key api.js uses
   const PROFILES_KEY = "numlProfiles";  // name/department saved at signup (NO passwords)
   const MIN_PASSWORD = 8;               // login and signup used 6 and 8; one rule now
 
@@ -95,12 +96,13 @@ const PUBLIC_PAGES = [PAGES.home, PAGES.login, PAGES.forgot];
 
   function logout() {
     localStorage.removeItem(USER_KEY);
+    localStorage.removeItem(TOKEN_KEY);
     window.location.href = PAGES.login;
   }
 
   /* Protected page + no session -> login. replace() so Back does not loop. */
   function requireLogin() {
-    if (!getUser()) {
+    if (!getUser() || !localStorage.getItem(TOKEN_KEY)) {
       window.location.replace(PAGES.login);
       return false;
     }
@@ -199,7 +201,7 @@ const PUBLIC_PAGES = [PAGES.home, PAGES.login, PAGES.forgot];
   /* ---- 5. Auto-run on every page that loads this file ---- */
   function init() {
     const here = currentPage();
-    if (PUBLIC_PAGES.includes(here)) return;       // login/signup/forgot: nothing to do
+    if (PUBLIC_PAGES.includes(here)) return;       // login/forgot: nothing to do
     if (!requireLogin()) return;                   // bounce to login, stop here
     if (here !== PAGES.dashboard) renderNav();     // dashboard has its own header + quick links
   }
