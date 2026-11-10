@@ -32,8 +32,7 @@ if (loginForm) {
         method: "POST",
         body: { identifier, password }
       });
-      NUML.setToken(data.access_token);
-
+NUML.setToken(data.token);
       const me = await NUML.api("/api/auth/me");
       NUML.setUser(me);
 

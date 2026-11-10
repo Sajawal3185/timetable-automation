@@ -1,1 +1,1 @@
-   { "id": "21-SE-001", "name": "Test Student", "role": "student", "department": "SE" }
+{ "id": 1, "name": "Test Student", "role": "student", "identifier": "21-SE-001", "department_id": 1, "section_id": 1 }

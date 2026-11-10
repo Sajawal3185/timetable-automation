@@ -1,1 +1,1 @@
-   { "access_token": "mock-token", "token_type": "bearer" }
+{ "token": "mock-token", "user": { "id": 1, "name": "Test Student", "role": "student", "identifier": "21-SE-001" } }
