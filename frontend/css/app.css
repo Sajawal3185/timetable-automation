@@ -327,12 +327,38 @@ button.btn {
    section 1. Add lectures-only CSS below this comment.
    ========================================================= */
 
+/* Page lock: on phones the page must not slide sideways, bounce or
+   pull-to-refresh when dragged past the edge. Up/down scrolling and
+   pinch-zoom still work. lecture.html puts .lectures-root on <html>. */
+.lectures-root,
+.lectures-page {
+  overflow-x: hidden;            /* fallback for browsers without clip */
+  overflow-x: clip;              /* nothing wider than the screen can be scrolled to */
+  overscroll-behavior: none;     /* no rubber-band bounce, no pull-to-refresh */
+}
+
 .lectures-page {
   min-height: 100vh;
+  min-height: 100dvh;            /* phones: does not jump when the address bar hides */
   display: flex;
   flex-direction: column;
   width: 100%;
   max-width: 100%;
+}
+
+/* Grid and flex children may shrink below their content width,
+   so a long option or title cannot widen the page. */
+.lectures-page .filters label,
+.lectures-page .filters select,
+.lectures-page .filters input,
+.lectures-page .paper-card {
+  min-width: 0;
+}
+
+/* Long titles or file names wrap instead of pushing the card wider */
+.lectures-page .paper-card h3,
+.lectures-page .paper-card p {
+  overflow-wrap: anywhere;
 }
 
 .lectures-page .page-body {
@@ -400,14 +426,22 @@ button.btn {
 
   .lectures-page .papers-grid,
   .lectures-page .upload-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);   /* one column that never grows past the screen */
     width: 100%;
   }
 
   .lectures-page .filters,
-  .upload-box {
+  .lectures-page .upload-box {
     width: 100%;
     max-width: 100%;
+  }
+
+  /* iPhone zooms in when a field under 16px is tapped; 16px stops that */
+  .lectures-page .filters select,
+  .lectures-page .filters input,
+  .lectures-page .upload-box select,
+  .lectures-page .upload-box input {
+    font-size: 16px;
   }
 }
 
