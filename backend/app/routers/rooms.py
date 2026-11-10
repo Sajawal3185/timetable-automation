@@ -15,7 +15,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import exists, select
 from sqlalchemy.orm import Session
 
-from database import get_db
+from app.database import get_db
 from app.models.course import Course
 from app.models.department import Department
 from app.models.room import Room

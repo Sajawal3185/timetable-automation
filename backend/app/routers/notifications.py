@@ -2,8 +2,8 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
-from app.core.security import get_current_user
 from app.database import get_db
+from app.dependencies import get_current_user
 from app.schemas.notification import NotificationOut, ReadAllOut, UnreadCountOut
 from app.services import notification_service as svc
 

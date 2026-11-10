@@ -12,7 +12,7 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from database import get_db
+from app.database import get_db
 from app.models.grade_record import GradeRecord
 from app.routers.portal_deps import get_current_user
 from app.schemas.portal import GpaRequest, GpaResponse, GradeRecordIn, GradeRecordOut, TermResultOut

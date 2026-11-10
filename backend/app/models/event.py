@@ -3,7 +3,7 @@ from datetime import date, datetime
 from enum import Enum as PyEnum
 from sqlalchemy import Date, DateTime, Enum, ForeignKey, String, Text, CheckConstraint, func
 from sqlalchemy.orm import Mapped, mapped_column
-from database import Base
+from app.database import Base
 
 
 class EventType(str, PyEnum):
