@@ -85,9 +85,21 @@ def _lock_rooms(db: Session, room_ids: set[int]) -> None:
 def build_swap_slots(a: TimetableEntry, b: TimetableEntry) -> list[ProposedSlot]:
     """The POST-swap state: a takes b's time and b takes a's time."""
     return [
-        ProposedSlot(b.day, b.start_time, b.end_time, a.teacher_id, a.section_id, a.room_id, a.id),
-        ProposedSlot(a.day, a.start_time, a.end_time, b.teacher_id, b.section_id, b.room_id, b.id),
+        ProposedSlot(b.day_of_week, b.start_time, b.end_time, a.teacher_id, a.section_id, a.room_id, a.id),
+        ProposedSlot(a.day_of_week, a.start_time, a.end_time, b.teacher_id, b.section_id, b.room_id, b.id),
     ]
+
+
+def _same_class(a: TimetableEntry, b: TimetableEntry) -> bool:
+    """Two sessions of one class (same term, section, course and group).
+
+    Swapping them changes nothing useful, and the row-by-row update would
+    trip uq_timetable_term_sec_course_slot_grp halfway through (500).
+    """
+    return (
+        a.term == b.term and a.section_id == b.section_id
+        and a.course_id == b.course_id and a.group_label == b.group_label
+    )
 
 
 def preview_swap_conflicts(db: Session, a: TimetableEntry, b: TimetableEntry) -> list[Conflict]:
@@ -128,6 +140,8 @@ def create_swap_request(db: Session, entry_id: int, target_entry_id: int, reason
             raise SwapStateError("A pending swap request already exists for one of these classes")
 
         entry, target = entries[entry_id], entries[target_entry_id]
+        if _same_class(entry, target):
+            raise SwapValidationError("Both classes are the same course for the same section; nothing to swap")
         swap = SwapRequest(
             requester_teacher_id=entry.teacher_id,  # the requester owns `entry`
             entry_id=entry_id, target_entry_id=target_entry_id,
@@ -162,13 +176,15 @@ def approve_swap(db: Session, swap_id: int, approver_id: int, note: str | None =
             raise SwapPermissionError("You may not decide this swap request")
 
         entry, target = entries[swap.entry_id], entries[swap.target_entry_id]
+        if _same_class(entry, target):                       # requests made before this check existed
+            raise SwapValidationError("Both classes are the same course for the same section; nothing to swap")
         conflicts = preview_swap_conflicts(db, entry, target)               # 4. re-check in lock
         hard = [c for c in conflicts if c.severity == "hard"]
         if hard:
             raise SwapConflictError(hard)
 
         # 5. apply: exchange the time fields, record the decision.
-        entry.day, target.day = target.day, entry.day
+        entry.day_of_week, target.day_of_week = target.day_of_week, entry.day_of_week
         entry.start_time, target.start_time = target.start_time, entry.start_time
         entry.end_time, target.end_time = target.end_time, entry.end_time
         swap.status = SwapStatus.approved

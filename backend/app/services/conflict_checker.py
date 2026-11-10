@@ -18,7 +18,7 @@ TEACHER, SECTION, ROOM = "teacher", "section", "room"
 @dataclass(frozen=True)
 class ProposedSlot:
     """One class as it WOULD be after the change (the post-change state)."""
-    day: object          # same type as TimetableEntry.day
+    day: object          # same type as TimetableEntry.day_of_week
     start_time: object   # same type as TimetableEntry.start_time
     end_time: object
     teacher_id: int
@@ -63,7 +63,7 @@ def check_conflicts(
     # 1) Proposed slot vs the entries already in the database.
     for slot in slots:
         stmt = select(TimetableEntry).where(
-            TimetableEntry.day == slot.day,
+            TimetableEntry.day_of_week == slot.day,
             TimetableEntry.start_time < slot.end_time,   # overlap test, not equality
             TimetableEntry.end_time > slot.start_time,
             or_(
