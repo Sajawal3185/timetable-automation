@@ -9,9 +9,11 @@ def upload_material(c, seed, **over):
 
 
 def test_materials_grouped_by_instructor(client, seed):
-    upload_material(client("teacher"), seed, instructor_name="Dr. Ali")
-    upload_material(client("teacher"), seed, title="Week 2 notes", material_type="notes", instructor_name="Dr. Ali")
-    upload_material(client("teacher2"), seed, title="My slides", instructor_name="Ms. Sara")
+    # Only HOD/admin may file material under another instructor's name (a teacher's
+    # upload is always filed under their own name, see test below).
+    upload_material(client("hod"), seed, instructor_name="Dr. Ali")
+    upload_material(client("hod"), seed, title="Week 2 notes", material_type="notes", instructor_name="Dr. Ali")
+    upload_material(client("admin"), seed, title="My slides", instructor_name="Ms. Sara")
     upload_material(client("teacher"), seed, course_id=seed.c2.id, title="Other course")
     r = client("student").get(f"/api/lecture-materials/by-course/{seed.c1.id}")
     assert r.status_code == 200
@@ -24,9 +26,12 @@ def test_materials_grouped_by_instructor(client, seed):
 def test_material_defaults_instructor_to_uploader_and_filters(client, seed):
     m = upload_material(client("teacher"), seed).json()
     assert m["instructor_name"] == "Dr. Teacher"
+    # a teacher cannot file material under someone else's name
+    m = upload_material(client("teacher"), seed, title="Spoof", instructor_name="Dr. Ali").json()
+    assert m["instructor_name"] == "Dr. Teacher"
     upload_material(client("teacher2"), seed, title="Notes", material_type="notes", term="Fall 2025")
     s = client("student")
-    assert len(s.get("/api/lecture-materials").json()) == 2
+    assert len(s.get("/api/lecture-materials").json()) == 3
     assert [x["title"] for x in s.get("/api/lecture-materials", params={"material_type": "notes"}).json()] == ["Notes"]
     assert len(s.get("/api/lecture-materials", params={"instructor_name": "dr. oth"}).json()) == 1
     assert len(s.get("/api/lecture-materials", params={"term": "fall 2025"}).json()) == 1
