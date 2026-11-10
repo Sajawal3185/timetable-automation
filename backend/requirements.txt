@@ -10,5 +10,7 @@ bcrypt==4.0.1
 PyJWT==2.9.0
 python-multipart==0.0.12
 openpyxl==3.1.5
+# Runtime, not dev-only: Render's start command runs `alembic upgrade head` (BE-10, BR-M7)
+alembic==1.13.3
 pytest==8.3.3
 httpx==0.27.2
