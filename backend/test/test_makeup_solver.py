@@ -56,7 +56,7 @@ def seed(db):
     r_fallback = Room(name="R-Fallback", capacity=60, room_type="lecture")
     r_unknown = Room(name="R-Unknown", capacity=None, room_type="lecture")
     r_lab = Room(name="Lab-1", capacity=50, room_type="lab")
-    u_teacher = User(name="Dr. Ali", email="ali@numl.edu.pk", password_hash="x", role="teacher")
+    u_teacher = User(name="Dr. Ali", identifier="t-ali", email="ali@numl.edu.pk", password_hash="x", role="teacher")
     db.add_all([sec, t1, t2, c_lec, c_lab, r_small, r_pref, r_fallback, r_unknown, r_lab, u_teacher])
     db.commit()
     return SimpleNamespace(

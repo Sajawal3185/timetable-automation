@@ -15,7 +15,7 @@ from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, Upload
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from database import get_db
+from app.database import get_db
 from app.models.section import Section
 from app.models.timetable_entry import TimetableEntry
 from app.routers.portal_deps import ADMINS, get_current_user, require_roles

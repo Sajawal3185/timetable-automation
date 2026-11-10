@@ -1,0 +1,1 @@
+{ "token": "mock-token", "user": { "id": 1, "name": "Test Student", "role": "student", "identifier": "21-SE-001" } }

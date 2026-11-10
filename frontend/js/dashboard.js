@@ -1,12 +1,10 @@
 /* ==========================================================================
    dashboard.js  -  needs common.js loaded first.
+   common.js already sends logged-out users to the login page.
    ========================================================================== */
 const user = NUML.getUser();
 
-/* Not logged in -> login page. */
-if (!user) {
-  window.location.replace(NUML.PAGES.login);
-} else {
+if (user) {
   const initials = user.name
     .trim()
     .split(/\s+/)
@@ -23,12 +21,9 @@ if (!user) {
   };
 
   setText("userName", user.name);
-  setText("userId", user.id ? "@" + user.id : "");
+  setText("userId", user.identifier ? "@" + user.identifier : "");
   setText("userAvatar", initials);
   setText("greeting", "HEY, " + firstName.toUpperCase());
-
-  /* Optional: only runs if common.js defines it. */
-  
 }
 
 /* ===== Profile menu (Log out) ===== */

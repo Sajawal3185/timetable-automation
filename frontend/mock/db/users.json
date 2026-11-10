@@ -1,0 +1,62 @@
+[
+  {
+    "id": 1,
+    "name": "Ali Hassan",
+    "identifier": "se-9244330",
+    "role": "student",
+    "department_id": 1,
+    "section_id": 1,
+    "password_sha256": "e91c244a64d487a2f0e8a78bc990e5b72e97e6f63c7381a31ec478ebd53aa644",
+    "is_active": true
+  },
+  {
+    "id": 2,
+    "name": "Dr. Ahmed Raza",
+    "identifier": "tr-100201",
+    "role": "teacher",
+    "department_id": 1,
+    "section_id": null,
+    "password_sha256": "4956916832f10547f0189cefa8c35546ffb116864024ad2f0712590efee107de",
+    "is_active": true
+  },
+  {
+    "id": 3,
+    "name": "Ms. Sara Khan",
+    "identifier": "hod-100301",
+    "role": "hod",
+    "department_id": 1,
+    "section_id": null,
+    "password_sha256": "438ef3a77e3c7e11c630e2b8849e7f96229f0d3a144320b794d07160958ce32d",
+    "is_active": true
+  },
+  {
+    "id": 4,
+    "name": "Admin Office",
+    "identifier": "adm-100001",
+    "role": "admin",
+    "department_id": null,
+    "section_id": null,
+    "password_sha256": "148db2a07637eada2c42c8e2051300efa590261bb346d2bb383117ceea15a253",
+    "is_active": true
+  },
+  {
+    "id": 5,
+    "name": "Dr. Usman Ali",
+    "identifier": "tr-200401",
+    "role": "teacher",
+    "department_id": 2,
+    "section_id": null,
+    "password_sha256": "a4bac7a59bba0ca6350509cab05c854c92026a69a0c6a681a556f4a632670b78",
+    "is_active": true
+  },
+  {
+    "id": 6,
+    "name": "Hina Malik",
+    "identifier": "cs-9255101",
+    "role": "student",
+    "department_id": 2,
+    "section_id": 3,
+    "password_sha256": "80655987eb9235fac865acd7b31a7bb9b4ba800f8a2cec8d92175fa7ec2bb51b",
+    "is_active": true
+  }
+]

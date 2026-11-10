@@ -12,7 +12,7 @@ from fastapi.responses import FileResponse
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
-from database import get_db
+from app.database import get_db
 from app.models.course import Course
 from app.models.exam_paper import ExamPaper
 from app.routers.portal_deps import ADMINS, STAFF, get_current_user, require_roles
