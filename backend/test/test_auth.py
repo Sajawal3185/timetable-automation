@@ -13,6 +13,7 @@ from app.core.security import hash_password
 from app.database import get_db
 from app.models.department import Department
 from app.models.section import Section
+from app.models.teacher import Teacher
 from app.models.user import User
 from app.routers import auth
 
@@ -174,6 +175,20 @@ def test_me_returns_the_new_fields(api, people):
     hod = api.get("/api/auth/me", headers=bearer(api, "h-sara")).json()
     assert hod["department_id"] == people["hod"].department_id
     assert hod["section_id"] is None
+
+
+def test_me_and_login_return_the_linked_teacher_id(api, people, db):
+    teacher_row = Teacher(name="Dr. Ali", user_id=people["teacher"].id, department_id=people["teacher"].department_id)
+    db.add(teacher_row)
+    db.commit()
+
+    me = api.get("/api/auth/me", headers=bearer(api, "t-ali")).json()
+    assert me["teacher_id"] == teacher_row.id
+    assert login(api, "t-ali").json()["user"]["teacher_id"] == teacher_row.id
+
+    # no Teacher row -> None, never someone else's id
+    assert api.get("/api/auth/me", headers=bearer(api, "se-123456")).json()["teacher_id"] is None
+    assert api.get("/api/auth/me", headers=bearer(api, "h-sara")).json()["teacher_id"] is None
 
 
 def test_me_without_a_token_is_401(api, people):
