@@ -3,9 +3,9 @@
    common.js already sends logged-out users to the login page.
 
    What it fills in:
-     1. Profile box and greeting (name, roll number, initials)
+     1. Greeting, profile button and "Your account" panel
      2. Today's date
-     3. Quick access cards (one per part of the archive)
+     3. Quick access cards (same look as the landing page feature cards)
      4. Upcoming events from GET /api/events (mock: mock/events.json)
      5. Profile menu and Log out
 
@@ -21,85 +21,54 @@ function el(tag, className, text) {
   return node;
 }
 
-const SVG_NS = "http://www.w3.org/2000/svg";
-
-/* Line icon from one or more path strings (same style as the sidebar icons) */
-function icon(paths) {
-  const svg = document.createElementNS(SVG_NS, "svg");
-  svg.setAttribute("viewBox", "0 0 24 24");
-  svg.setAttribute("aria-hidden", "true");
-  paths.forEach((d) => {
-    const p = document.createElementNS(SVG_NS, "path");
-    p.setAttribute("d", d);
-    svg.appendChild(p);
-  });
-  return svg;
+function setText(id, text) {
+  const node = document.getElementById(id);
+  if (node) node.textContent = text;
 }
 
 
-/* ===== 1. Profile box and greeting ===== */
+/* ===== 1. Greeting, profile button and "Your account" panel ===== */
+const ROLE_LABEL = { student: "Student", teacher: "Teacher", hod: "Head of Department", admin: "Admin" };
 const user = NUML.getUser();
 
 if (user) {
-  const initials = user.name
-    .trim()
+  const name = user.name.trim();
+  const initials = name
     .split(/\s+/)
     .slice(0, 2)
     .map((w) => w[0])
     .join("")
     .toUpperCase();
+  const firstName = name.split(/\s+/)[0];
+  const handle = user.identifier ? "@" + user.identifier : "";
 
-  const firstName = user.name.trim().split(/\s+/)[0];
-
-  const setText = (id, text) => {
-    const node = document.getElementById(id);
-    if (node) node.textContent = text;
-  };
-
-  setText("userName", user.name);
-  setText("userId", user.identifier ? "@" + user.identifier : "");
+  setText("greeting", "Hey " + firstName);
+  setText("userName", firstName);
   setText("userAvatar", initials);
-  setText("greeting", "HEY, " + firstName.toUpperCase());
+  setText("menuName", name);
+  setText("userId", handle);
+
+  setText("meAvatar", initials);
+  setText("meName", name);
+  setText("meId", handle);
+  setText("meRole", ROLE_LABEL[user.role] || user.role || "-");
 }
 
 
 /* ===== 2. Today's date ("Wednesday, 11 November 2026") ===== */
-const todayEl = document.getElementById("today");
-if (todayEl) {
-  todayEl.textContent = new Date().toLocaleDateString("en-GB", {
-    weekday: "long", day: "numeric", month: "long", year: "numeric"
-  });
-}
+setText("today", new Date().toLocaleDateString("en-GB", {
+  weekday: "long", day: "numeric", month: "long", year: "numeric"
+}));
 
 
 /* ===== 3. Quick access cards =====
-   Same pages and order as the sidebar. `tone` picks the icon tile color. */
+   Same pages as the top bar, same emoji as the landing page features. */
 const QUICK_CARDS = [
-  {
-    href: "lecture.html", label: "Uni Lecs", tone: "blue",
-    desc: "Lecture slides by department, subject and year.",
-    icon: ["M3 7l9-4 9 4-9 4-9-4z", "M7 10v5c0 1.5 2.2 3 5 3s5-1.5 5-3v-5"]
-  },
-  {
-    href: "pastpapers.html", label: "Past Papers", tone: "orange",
-    desc: "Midterm and final papers to practise with.",
-    icon: ["M7 3h7l5 5v13H7z", "M14 3v5h5M10 13h6M10 17h6"]
-  },
-  {
-    href: "tools-resources.html", label: "Resources", tone: "green",
-    desc: "Software for your courses, with setup steps.",
-    icon: ["M4 5h6a3 3 0 013 3v12a2 2 0 00-2-2H4z", "M20 5h-6a3 3 0 00-3 3v12a2 2 0 012-2h7z"]
-  },
-  {
-    href: "gpacal.html", label: "GPA Calculator", tone: "purple",
-    desc: "Work out your semester GPA and CGPA.",
-    icon: ["M7 3h10a2 2 0 012 2v14a2 2 0 01-2 2H7a2 2 0 01-2-2V5a2 2 0 012-2z", "M8 7h8M8 12h2M12 12h2M8 16h2M12 16h2"]
-  },
-  {
-    href: "timetable/timetable-login.html", label: "Timetable", tone: "navy",
-    desc: "Your weekly classes, swaps and makeup classes. Separate login.",
-    icon: ["M5 5h14a2 2 0 012 2v12a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2z", "M3 10h18M8 3v4M16 3v4"]
-  }
+  { href: "lecture.html", emoji: "🎓", label: "Lectures", desc: "Slides by department, subject and year." },
+  { href: "pastpapers.html", emoji: "📄", label: "Past Papers", desc: "Midterm and final papers to practise with." },
+  { href: "tools-resources.html", emoji: "💾", label: "Resources", desc: "Software links for your courses, with setup steps." },
+  { href: "gpacal.html", emoji: "🧮", label: "GPA & CGPA", desc: "Work out your results in seconds." },
+  { href: "timetable/timetable-login.html", emoji: "🗓️", label: "Timetable", desc: "Your week, swaps and makeup classes." }
 ];
 
 const quickCards = document.getElementById("quickCards");
@@ -108,16 +77,10 @@ if (quickCards) {
     const a = el("a", "dash-card");
     a.href = card.href;
 
-    const tile = el("span", "dash-card-icon tone-" + card.tone);
-    tile.appendChild(icon(card.icon));
+    const tile = el("span", "ic", card.emoji);
+    tile.setAttribute("aria-hidden", "true");
 
-    const text = el("span", "dash-card-text");
-    text.append(el("strong", "", card.label), el("span", "", card.desc));
-
-    const arrow = el("span", "dash-card-arrow", "→");
-    arrow.setAttribute("aria-hidden", "true");
-
-    a.append(tile, text, arrow);
+    a.append(tile, el("h3", "", card.label), el("p", "", card.desc), el("span", "dash-card-go", "Open →"));
     quickCards.appendChild(a);
   });
 }
@@ -238,8 +201,8 @@ if (profileBtn && profileMenu) {
 
 /* Log out: clear the session AND navigate.
    querySelectorAll, not querySelector: there are TWO logout links (profile
-   menu and sidebar). With querySelector only the first one cleared the
-   session; the sidebar link just opened login.html, which saw the saved
+   menu and the "Your account" panel). With querySelector only the first one
+   cleared the session; the other just opened login.html, which saw the saved
    session and bounced straight back here. */
 document.querySelectorAll(".dash-logout").forEach((link) => {
   link.addEventListener("click", (e) => {

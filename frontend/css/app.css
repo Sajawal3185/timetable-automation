@@ -1054,339 +1054,294 @@ body.gpa-page {
    6. PAGE: DASHBOARD  (dashboard.html)
 
    Body class : <body class="dash-page">
-   Keep this section LAST in app.css.
-   The variables below are set on body.dash-page, so they
-   only change colors inside the dashboard, not other pages.
+   Same look as the landing page and the timetable login:
+   the NUML campus photo under a navy overlay, white cards,
+   blue accents. From master: --navy, --blue, --bg, --ink,
+   --muted, .navbar, .logo, .nl, .btn, .footer.
+   Every rule starts with .dash-page, so nothing here can
+   change another page.
    ========================================================= */
 
-/* ----- Page setup: dashboard colors, centered layout, background ----- */
+/* ----- Page setup: campus photo under a navy overlay ----- */
 body.dash-page {
-  --navy: #262c5e;
-  --navy-light: #343b73;
-  --orange: #f47b3f;
-  --text: #1f2340;
-  --muted: #8a8fa8;
-  --shell: #eceef5;
+  --dash-card-shadow: 0 10px 30px rgba(4, 14, 42, 0.35);
+  --dash-line: #e3e9f5;
 
   min-height: 100vh;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 24px;
-  font-family: "Poppins", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  color: var(--text);
-  background: linear-gradient(135deg, #c9cdf2 0%, #f9d9c9 50%, #fdeec7 100%);
-}
-
-
-/* ----- Shell (big rounded box: sidebar on the left, main on the right) ----- */
-.dash-page .shell {
-  display: grid;
-  grid-template-columns: 250px 1fr;
-  gap: 16px;
-  width: 100%;
-  max-width: 1100px;
-  min-height: 620px;
-  padding: 16px;
-  background: var(--shell);
-  border-radius: 36px;
-  box-shadow: 0 20px 50px rgba(38, 44, 94, 0.18);
-}
-
-
-/* ----- Sidebar (dark panel on the left) ----- */
-.dash-page .sidebar {
-  display: flex;
   flex-direction: column;
-  padding: 24px 18px;
-  color: #fff;
-  background: var(--navy);
-  border-radius: 24px;
+  font-family: "Plus Jakarta Sans", "Segoe UI", Arial, sans-serif;
+  color: var(--ink);
+  background:
+    linear-gradient(rgba(8, 24, 70, 0.78), rgba(8, 24, 70, 0.9)),
+    url("../images/numl.webp");
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
 }
 
-/* Logo area at the top of the sidebar */
-.dash-page .brand {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 24px;
+.dash-page [hidden] { display: none !important; }
+
+
+/* ----- Top bar: master .navbar (glass navy), plus links and profile ----- */
+.dash-page .dash-bar { gap: 20px; }
+
+.dash-page .dash-links {
+  flex: 1;
+  justify-content: center;
+  gap: 6px;
 }
 
-.dash-page .brand-mark {
-  display: grid;
-  place-items: center;
-  width: 30px;
-  height: 30px;
+.dash-page .dash-links .nl {
+  padding: 8px 14px;
+  border-radius: 10px;
+  transition: background 0.2s;
+}
+
+.dash-page .dash-links .nl:hover { background: rgba(255, 255, 255, 0.12); }
+
+/* The page you are on */
+.dash-page .dash-links .nl.active {
+  color: var(--navy);
   font-weight: 700;
-  background: var(--orange);
-  border-radius: 9px;
+  background: white;
 }
 
 
 /* ----- Profile button and its dropdown ----- */
-/* position:relative lets the dropdown sit right under the button */
 .dash-page .profile-wrap { position: relative; }
 
 .dash-page .profile {
-  width: 100%;
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 12px;
+  padding: 5px 12px 5px 5px;
   font: inherit;
-  text-align: left;
-  color: #fff;
-  background: var(--navy-light);
-  border: 0;
-  border-radius: 16px;
+  font-size: 14px;
+  font-weight: 600;
+  color: white;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 30px;
   cursor: pointer;
 }
 
-.dash-page .profile:hover { background: #3c4480; }
+.dash-page .profile:hover { background: rgba(255, 255, 255, 0.2); }
+.dash-page .chev { font-size: 11px; opacity: 0.8; }
 
-/* Round circle with the user's initial */
+/* Round circle with the user's initials */
 .dash-page .avatar {
   display: grid;
   place-items: center;
   flex: none;
-  width: 42px;
-  height: 42px;
+  width: 32px;
+  height: 32px;
+  font-size: 13px;
   font-weight: 700;
-  color: var(--navy);
-  background: #b9bdf5;
+  color: white;
+  background: var(--blue);
   border-radius: 50%;
 }
 
-/* Name (top) and role/email (bottom) */
-.dash-page .profile-text {
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  min-width: 0;                   /* lets long text shrink instead of overflowing */
-  line-height: 1.3;
-}
+.dash-page .avatar.lg { width: 54px; height: 54px; font-size: 19px; }
 
-.dash-page .profile-text strong { font-size: 0.9rem; }
-.dash-page .profile-text small  { font-size: 0.75rem; color: #aab0d6; }
-.dash-page .chev { color: #aab0d6; }                   /* small arrow icon */
-
-/* White dropdown that opens under the profile button */
 .dash-page .profile-menu {
   position: absolute;
-  left: 0;
   right: 0;
-  top: calc(100% + 8px);
-  z-index: 5;
-  padding: 6px;
-  background: #fff;
+  top: calc(100% + 10px);
+  z-index: 60;
+  min-width: 220px;
+  padding: 8px;
+  background: white;
   border-radius: 14px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.3);
 }
 
-/* The "hidden" attribute keeps the dropdown closed */
-.dash-page .profile-menu[hidden] { display: none; }
+.dash-page .profile-menu-who {
+  display: flex;
+  flex-direction: column;
+  margin: 0 0 6px;
+  padding: 8px 10px 10px;
+  border-bottom: 1px solid var(--dash-line);
+}
 
-/* Logout link (named dash-logout so it does not clash with other pages) */
-.dash-page .dash-logout {
+.dash-page .profile-menu-who strong { color: var(--navy); font-size: 14px; }
+.dash-page .profile-menu-who small  { color: var(--muted); font-size: 12px; }
+
+.dash-page .profile-menu .dash-logout {
   display: block;
-  padding: 10px 12px;
-  font-size: 0.9rem;
+  padding: 10px;
+  font-size: 14px;
   font-weight: 600;
   color: #d9381e;
   border-radius: 10px;
 }
 
-.dash-page .dash-logout:hover { background: #fff1ee; }
+.dash-page .profile-menu .dash-logout:hover { background: #fff1ee; }
 
 
-/* ----- Sidebar menu links ----- */
-.dash-page .menu-title {
-  margin: 32px 0 10px 8px;
-  font-size: 0.7rem;
-  letter-spacing: 1.5px;
-  color: #aab0d6;
-}
-
-.dash-page .menu {
+/* ----- Hero: greeting over the photo (landing .hero style, shorter) ----- */
+.dash-page .dash-hero {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-}
-
-.dash-page .menu a {
-  display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 12px;
-  font-size: 0.92rem;
-  color: #dfe2f7;
-  border-radius: 12px;
+  padding: 120px 24px 56px;
+  color: white;
+  text-align: center;
 }
 
-.dash-page .menu a:hover {
-  color: #fff;
-  background: var(--navy-light);
-}
-
-/* Menu icons: line style, color follows the text color */
-.dash-page .menu svg {
-  width: 20px;
-  height: 20px;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 1.8;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
-
-/* The page you are on (Dashboard) stays highlighted in the menu */
-.dash-page .menu a.active {
-  color: #fff;
-  background: var(--navy-light);
-  box-shadow: inset 3px 0 0 var(--orange);
-}
-
-
-/* ----- Main area (white box on the right) ----- */
-.dash-page .main {
-  display: flex;
-  flex-direction: column;
-  gap: 28px;
-  min-width: 0;
-  padding: 32px;
-  background: #fff;
-  border-radius: 24px;
-  /* two soft color glows in the corners */
-  background-image:
-    radial-gradient(circle at 85% 12%, #fde6da 0, transparent 38%),
-    radial-gradient(circle at 10% 90%, #e3e6ff 0, transparent 40%);
-}
-
-/* Greeting row: hello + headline on the left, date on the right */
-.dash-page .dash-head {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 8px 24px;
-}
-
-.dash-page .eyebrow {
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 2px;
-  color: var(--orange);
-}
-
-.dash-page .dash-head h1 {
-  margin: 8px 0 0;
-  max-width: 460px;
-  font-size: 2.1rem;
-  line-height: 1.2;
-}
-
-.dash-page .dash-date {
-  margin: 0;
-  font-size: 0.85rem;
-  color: var(--muted);
-}
-
-
-/* ----- Section headings ("Quick access", "Upcoming") ----- */
-.dash-page .dash-title-row {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.dash-page .dash-title {
-  margin: 0 0 14px;
-  font-size: 1.05rem;
+/* .pill is the landing page's small rounded label */
+.dash-page .pill {
+  padding: 7px 18px;
+  font-size: 13px;
   font-weight: 600;
+  background: rgba(255, 255, 255, 0.16);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 30px;
 }
 
-.dash-page .dash-hint {
-  font-size: 0.8rem;
-  color: var(--muted);
+.dash-page .dash-hero h1 {
+  max-width: 900px;
+  margin: 22px 0 14px;
+  font-size: 46px;
+  font-weight: 800;
+  line-height: 1.12;
+  letter-spacing: -1px;
+}
+
+.dash-page .dash-hero h1 span { color: #7cc4ff; }   /* same light blue as the logo */
+
+.dash-page .dash-hero p {
+  max-width: 560px;
+  margin: 0;
+  font-size: 17px;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.88);
 }
 
 
-/* ----- Quick access cards (as many 200px+ columns as fit) ----- */
+/* ----- Content column ----- */
+.dash-page .dash-body {
+  flex: 1;
+  width: 100%;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 0 24px 72px;
+}
+
+.dash-page .dash-section-title {
+  margin: 0 0 16px;
+  font-size: 20px;
+  color: white;
+  letter-spacing: -0.3px;
+}
+
+
+/* ----- Quick access cards (landing .feature look) ----- */
 .dash-page .dash-cards {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 14px;
+  gap: 18px;
+  margin-bottom: 28px;
 }
 
 .dash-page .dash-card {
-  position: relative;
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  padding: 18px;
-  color: var(--text);
-  background: #fff;
-  border: 1px solid #e6e8f2;
-  border-radius: 18px;
-  transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+  padding: 24px 22px;
+  color: var(--ink);
+  background: white;
+  border-radius: 20px;
+  box-shadow: var(--dash-card-shadow);
+  transition: transform 0.25s, box-shadow 0.25s;
 }
 
 .dash-page .dash-card:hover,
 .dash-page .dash-card:focus-visible {
-  transform: translateY(-3px);
-  border-color: #d3d7ee;
-  box-shadow: 0 12px 24px rgba(38, 44, 94, 0.1);
+  transform: translateY(-6px);
+  box-shadow: 0 18px 38px rgba(0, 0, 0, 0.35);
 }
 
-.dash-page .dash-card:focus-visible { outline: 2px solid var(--navy); outline-offset: 2px; }
+.dash-page .dash-card:focus-visible { outline: 3px solid #7cc4ff; outline-offset: 3px; }
 
-/* Rounded icon tile; tone-* picks its color */
-.dash-page .dash-card-icon {
+/* Emoji tile (same as the landing .ic) */
+.dash-page .ic {
   display: grid;
-  flex: none;                   /* keeps the tile square when the card is a row (phones) */
   place-items: center;
-  width: 44px;
-  height: 44px;
-  border-radius: 13px;
+  width: 52px;
+  height: 52px;
+  margin-bottom: 16px;
+  font-size: 26px;
+  background: var(--bg);
+  border-radius: 14px;
 }
 
-.dash-page .dash-card-icon svg {
-  width: 22px;
-  height: 22px;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 1.8;
-  stroke-linecap: round;
-  stroke-linejoin: round;
+.dash-page .ic.sm {
+  display: inline-grid;
+  width: 34px;
+  height: 34px;
+  margin: 0;
+  font-size: 17px;
+  border-radius: 10px;
+  vertical-align: middle;
 }
 
-.dash-page .tone-blue   { color: #1e5fbf; background: #e4edfb; }
-.dash-page .tone-orange { color: #d8612a; background: #fde9df; }
-.dash-page .tone-green  { color: #1d8a5f; background: #ddf3ea; }
-.dash-page .tone-purple { color: #5b4fc9; background: #e9e6fb; }
-.dash-page .tone-navy   { color: var(--navy); background: #e3e5f2; }
+.dash-page .dash-card h3 { margin: 0 0 6px; font-size: 18px; color: var(--navy); }
 
-.dash-page .dash-card-text {
+.dash-page .dash-card p {
+  flex: 1;
+  margin: 0 0 16px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+.dash-page .dash-card-go {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--blue);
+}
+
+.dash-page .dash-card:hover .dash-card-go { text-decoration: underline; }
+
+
+/* ----- Lower row: Upcoming (wide) + Your account (narrow) ----- */
+.dash-page .dash-split {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.dash-page .dash-panel {
+  padding: 24px;
+  background: white;
+  border-radius: 20px;
+  box-shadow: var(--dash-card-shadow);
+}
+
+.dash-page .dash-panel-head {
   display: flex;
-  flex-direction: column;
-  gap: 4px;
-  padding-right: 18px;          /* room for the arrow */
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
 }
 
-.dash-page .dash-card-text strong { font-size: 0.98rem; }
-.dash-page .dash-card-text span   { font-size: 0.8rem; line-height: 1.45; color: var(--muted); }
-
-.dash-page .dash-card-arrow {
-  position: absolute;
-  top: 18px;
-  right: 18px;
-  color: #b4b8cc;
-  transition: color 0.2s, transform 0.2s;
+.dash-page .dash-panel-head h2 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  font-size: 18px;
+  color: var(--navy);
 }
 
-.dash-page .dash-card:hover .dash-card-arrow { color: var(--orange); transform: translateX(3px); }
+.dash-page .dash-hint {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--blue);
+}
 
 
 /* ----- Upcoming events list ----- */
@@ -1403,10 +1358,13 @@ body.dash-page {
   display: flex;
   align-items: center;
   gap: 14px;
-  padding: 12px 16px 12px 12px;
-  background: #f6f7fb;
+  padding: 12px 14px 12px 12px;
+  border: 1px solid var(--dash-line);
   border-radius: 16px;
+  transition: border-color 0.2s, background 0.2s;
 }
+
+.dash-page .dash-event:hover { background: #f8faff; border-color: #cfdcf3; }
 
 /* Date badge ("20 / NOV"); type-* picks its color */
 .dash-page .dash-event-date {
@@ -1415,19 +1373,19 @@ body.dash-page {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  width: 52px;
-  height: 52px;
+  width: 54px;
+  height: 54px;
   line-height: 1.1;
   border-radius: 14px;
 }
 
-.dash-page .dash-event-date strong { font-size: 1.15rem; }
-.dash-page .dash-event-date small  { font-size: 0.65rem; font-weight: 600; letter-spacing: 1px; }
+.dash-page .dash-event-date strong { font-size: 19px; }
+.dash-page .dash-event-date small  { font-size: 11px; font-weight: 700; letter-spacing: 1px; }
 
-.dash-page .type-deadline   { color: #d8612a; background: #fde9df; }
-.dash-page .type-event      { color: #1e5fbf; background: #e4edfb; }
-.dash-page .type-holiday    { color: #1d8a5f; background: #ddf3ea; }
-.dash-page .type-department { color: #5b4fc9; background: #e9e6fb; }
+.dash-page .type-event      { color: white; background: var(--blue); }
+.dash-page .type-deadline   { color: white; background: var(--navy); }
+.dash-page .type-department { color: var(--blue); background: #e4edfb; }
+.dash-page .type-holiday    { color: #15803d; background: #dcfce7; }
 
 .dash-page .dash-event-body {
   display: flex;
@@ -1437,58 +1395,112 @@ body.dash-page {
   min-width: 0;                 /* long titles wrap instead of widening the row */
 }
 
-.dash-page .dash-event-title { font-size: 0.92rem; overflow-wrap: break-word; }
-.dash-page .dash-event-meta  { font-size: 0.78rem; color: var(--muted); }
+.dash-page .dash-event-title { font-size: 15px; color: var(--navy); overflow-wrap: break-word; }
+.dash-page .dash-event-meta  { font-size: 13px; color: var(--muted); }
 
-/* "Tomorrow", "In 5 days" chip on the right */
+/* "Tomorrow", "In 5 days" chip */
 .dash-page .dash-event-when {
   flex: none;
-  padding: 5px 10px;
-  font-size: 0.72rem;
-  font-weight: 600;
-  color: var(--navy);
-  background: #fff;
-  border: 1px solid #e6e8f2;
-  border-radius: 999px;
+  padding: 5px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--blue);
+  background: #e4edfb;
+  border-radius: 30px;
   white-space: nowrap;
 }
 
 /* "Loading...", "Nothing coming up", errors */
 .dash-page .dash-events-msg {
-  padding: 18px;
-  font-size: 0.88rem;
+  padding: 22px;
+  font-size: 14px;
   text-align: center;
   color: var(--muted);
-  background: #f6f7fb;
+  background: var(--bg);
   border-radius: 16px;
 }
 
 
-/* ----- Mobile ----- */
-@media (max-width: 800px) {
-  .dash-page { padding: 12px; }
-  /* minmax(0, 1fr) + min-width: 0: a plain 1fr column never shrinks below its
-     content, which pushed the page wider than a phone screen. */
-  .dash-page .shell {
-    grid-template-columns: minmax(0, 1fr);
-    min-width: 0;
-    border-radius: 28px;
-  }                                                    /* sidebar goes on top */
-  .dash-page .main { padding: 22px 18px; }
-  .dash-page .dash-head h1 { font-size: 1.6rem; }
+/* ----- Your account panel ----- */
+.dash-page .dash-me-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px;
+  background: var(--bg);
+  border-radius: 16px;
 }
 
-@media (max-width: 480px) {
-  .dash-page .shell { padding: 10px; }
-  .dash-page .dash-cards { grid-template-columns: 1fr; gap: 10px; }
-  /* Phones: icon on the left, text on the right, so five cards stay short */
-  .dash-page .dash-card { flex-direction: row; align-items: center; padding: 14px; }
-  .dash-page .dash-card-arrow { top: 50%; right: 14px; transform: translateY(-50%); }
-  .dash-page .dash-card:hover .dash-card-arrow { transform: translate(3px, -50%); }
+.dash-page .dash-me-card div { display: flex; flex-direction: column; min-width: 0; }
+.dash-page .dash-me-card strong { font-size: 16px; color: var(--navy); overflow-wrap: break-word; }
+.dash-page .dash-me-card small  { font-size: 13px; color: var(--muted); }
+
+.dash-page .dash-me-facts {
+  margin: 14px 0 18px;
+  padding: 0;
+  list-style: none;
+}
+
+.dash-page .dash-me-facts li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 2px;
+  font-size: 14px;
+  border-bottom: 1px solid var(--dash-line);
+}
+
+.dash-page .dash-me-facts li:last-child { border-bottom: 0; }
+.dash-page .dash-me-facts span   { color: var(--muted); }
+.dash-page .dash-me-facts strong { color: var(--navy); text-align: right; }
+
+/* Full-width buttons; master .btn.solid is the blue one */
+.dash-page .dash-btn {
+  display: block;
+  width: 100%;
+  text-align: center;
+}
+
+.dash-page .dash-btn + .dash-btn { margin-top: 10px; }
+
+.dash-page .dash-btn.ghost {
+  color: var(--navy);
+  border: 2px solid var(--dash-line);
+}
+
+.dash-page .dash-btn.ghost:hover { border-color: var(--blue); color: var(--blue); }
+
+
+/* ----- Footer sits at the bottom (master .footer) ----- */
+.dash-page .footer { background: rgba(4, 14, 42, 0.85); }
+
+
+/* ----- Tablet ----- */
+@media (max-width: 980px) {
+  body.dash-page { background-attachment: scroll; }   /* fixed backgrounds jank on mobile */
+  .dash-page .dash-links { display: none; }           /* the cards below are the menu */
+  .dash-page .dash-bar { justify-content: space-between; }
+  .dash-page .dash-hero h1 { font-size: 36px; }
+  .dash-page .dash-split { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* ----- Phone ----- */
+@media (max-width: 640px) {
+  .dash-page .profile-name { display: none; }         /* avatar + arrow only */
+  .dash-page .dash-hero { padding: 96px 16px 36px; }
+  .dash-page .dash-hero h1 { font-size: 28px; }
+  .dash-page .dash-hero p { font-size: 15px; }
+  .dash-page .dash-body { padding: 0 16px 48px; }
+  .dash-page .dash-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .dash-page .dash-card { padding: 18px 16px; }
+  /* 5 cards in 2 columns: the last one spans the row instead of sitting alone */
+  .dash-page .dash-card:last-child:nth-child(odd) { grid-column: 1 / -1; }
+  .dash-page .dash-card p { font-size: 13px; }
+  .dash-page .dash-panel { padding: 18px 16px; }
   /* Events: the chip drops to its own line under the title */
   .dash-page .dash-event { flex-wrap: wrap; }
-  .dash-page .dash-event-body { flex-basis: calc(100% - 66px); }   /* 52px badge + 14px gap */
-  .dash-page .dash-event-when { margin-left: 66px; }               /* lines up under the title */
+  .dash-page .dash-event-body { flex-basis: calc(100% - 68px); }   /* 54px badge + 14px gap */
+  .dash-page .dash-event-when { margin-left: 68px; }
 }
 
 /* =========================================================
