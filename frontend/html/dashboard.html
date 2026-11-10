@@ -40,6 +40,10 @@
       <p class="menu-title">MAIN MENU</p>
 
       <nav class="menu">
+        <a href="dashboard.html" class="active" aria-current="page">
+          <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+          Dashboard
+        </a>
         <a href="lecture.html">
           <svg viewBox="0 0 24 24"><path d="M3 7l9-4 9 4-9 4-9-4z"/><path d="M7 10v5c0 1.5 2.2 3 5 3s5-1.5 5-3v-5"/></svg>
           Uni Lecs
@@ -70,14 +74,38 @@
 
     <!-- Main -->
     <main class="main">
-      <div class="center">
-        <span class="eyebrow" id="greeting">HEY</span>
-        <h1>What do you want<br>to explore today?</h1>
-      </div>
+
+      <!-- Greeting row: hello on the left, today's date on the right -->
+      <header class="dash-head">
+        <div>
+          <span class="eyebrow" id="greeting">HEY</span>
+          <h1>What do you want to explore today?</h1>
+        </div>
+        <p class="dash-date" id="today"></p>
+      </header>
+
+      <!-- Quick access: one card per part of the archive (filled by dashboard.js) -->
+      <section class="dash-section" aria-labelledby="quickTitle">
+        <h2 class="dash-title" id="quickTitle">Quick access</h2>
+        <div class="dash-cards" id="quickCards"></div>
+      </section>
+
+      <!-- Upcoming: deadlines, events and holidays from the university calendar -->
+      <section class="dash-section" aria-labelledby="eventsTitle">
+        <div class="dash-title-row">
+          <h2 class="dash-title" id="eventsTitle">Upcoming</h2>
+          <span class="dash-hint" id="eventsHint"></span>
+        </div>
+        <ul class="dash-events" id="eventsList" aria-live="polite">
+          <li class="dash-events-msg">Loading the calendar…</li>
+        </ul>
+      </section>
+
     </main>
   </div>
 
   <script src="../js/common.js"></script>
+  <script src="../js/api.js"></script>
   <script src="../js/dashboard.js"></script>
 </body>
 </html>

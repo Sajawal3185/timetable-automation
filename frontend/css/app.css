@@ -1240,12 +1240,21 @@ body.dash-page {
 }
 
 
+/* The page you are on (Dashboard) stays highlighted in the menu */
+.dash-page .menu a.active {
+  color: #fff;
+  background: var(--navy-light);
+  box-shadow: inset 3px 0 0 var(--orange);
+}
+
+
 /* ----- Main area (white box on the right) ----- */
 .dash-page .main {
-  display: grid;
-  place-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
   min-width: 0;
-  padding: 24px;
+  padding: 32px;
   background: #fff;
   border-radius: 24px;
   /* two soft color glows in the corners */
@@ -1254,11 +1263,13 @@ body.dash-page {
     radial-gradient(circle at 10% 90%, #e3e6ff 0, transparent 40%);
 }
 
-/* Centered welcome text */
-.dash-page .center {
-  width: 100%;
-  max-width: 560px;
-  text-align: center;
+/* Greeting row: hello + headline on the left, date on the right */
+.dash-page .dash-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 8px 24px;
 }
 
 .dash-page .eyebrow {
@@ -1268,18 +1279,216 @@ body.dash-page {
   color: var(--orange);
 }
 
-.dash-page .center h1 {
-  margin: 10px 0;
-  font-size: 2.6rem;
-  line-height: 1.15;
+.dash-page .dash-head h1 {
+  margin: 8px 0 0;
+  max-width: 460px;
+  font-size: 2.1rem;
+  line-height: 1.2;
+}
+
+.dash-page .dash-date {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+
+/* ----- Section headings ("Quick access", "Upcoming") ----- */
+.dash-page .dash-title-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.dash-page .dash-title {
+  margin: 0 0 14px;
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+.dash-page .dash-hint {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+
+/* ----- Quick access cards (as many 200px+ columns as fit) ----- */
+.dash-page .dash-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 14px;
+}
+
+.dash-page .dash-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 18px;
+  color: var(--text);
+  background: #fff;
+  border: 1px solid #e6e8f2;
+  border-radius: 18px;
+  transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+}
+
+.dash-page .dash-card:hover,
+.dash-page .dash-card:focus-visible {
+  transform: translateY(-3px);
+  border-color: #d3d7ee;
+  box-shadow: 0 12px 24px rgba(38, 44, 94, 0.1);
+}
+
+.dash-page .dash-card:focus-visible { outline: 2px solid var(--navy); outline-offset: 2px; }
+
+/* Rounded icon tile; tone-* picks its color */
+.dash-page .dash-card-icon {
+  display: grid;
+  flex: none;                   /* keeps the tile square when the card is a row (phones) */
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 13px;
+}
+
+.dash-page .dash-card-icon svg {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.dash-page .tone-blue   { color: #1e5fbf; background: #e4edfb; }
+.dash-page .tone-orange { color: #d8612a; background: #fde9df; }
+.dash-page .tone-green  { color: #1d8a5f; background: #ddf3ea; }
+.dash-page .tone-purple { color: #5b4fc9; background: #e9e6fb; }
+.dash-page .tone-navy   { color: var(--navy); background: #e3e5f2; }
+
+.dash-page .dash-card-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-right: 18px;          /* room for the arrow */
+}
+
+.dash-page .dash-card-text strong { font-size: 0.98rem; }
+.dash-page .dash-card-text span   { font-size: 0.8rem; line-height: 1.45; color: var(--muted); }
+
+.dash-page .dash-card-arrow {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  color: #b4b8cc;
+  transition: color 0.2s, transform 0.2s;
+}
+
+.dash-page .dash-card:hover .dash-card-arrow { color: var(--orange); transform: translateX(3px); }
+
+
+/* ----- Upcoming events list ----- */
+.dash-page .dash-events {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dash-page .dash-event {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 16px 12px 12px;
+  background: #f6f7fb;
+  border-radius: 16px;
+}
+
+/* Date badge ("20 / NOV"); type-* picks its color */
+.dash-page .dash-event-date {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  line-height: 1.1;
+  border-radius: 14px;
+}
+
+.dash-page .dash-event-date strong { font-size: 1.15rem; }
+.dash-page .dash-event-date small  { font-size: 0.65rem; font-weight: 600; letter-spacing: 1px; }
+
+.dash-page .type-deadline   { color: #d8612a; background: #fde9df; }
+.dash-page .type-event      { color: #1e5fbf; background: #e4edfb; }
+.dash-page .type-holiday    { color: #1d8a5f; background: #ddf3ea; }
+.dash-page .type-department { color: #5b4fc9; background: #e9e6fb; }
+
+.dash-page .dash-event-body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;                 /* long titles wrap instead of widening the row */
+}
+
+.dash-page .dash-event-title { font-size: 0.92rem; overflow-wrap: break-word; }
+.dash-page .dash-event-meta  { font-size: 0.78rem; color: var(--muted); }
+
+/* "Tomorrow", "In 5 days" chip on the right */
+.dash-page .dash-event-when {
+  flex: none;
+  padding: 5px 10px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--navy);
+  background: #fff;
+  border: 1px solid #e6e8f2;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+/* "Loading...", "Nothing coming up", errors */
+.dash-page .dash-events-msg {
+  padding: 18px;
+  font-size: 0.88rem;
+  text-align: center;
+  color: var(--muted);
+  background: #f6f7fb;
+  border-radius: 16px;
 }
 
 
 /* ----- Mobile ----- */
 @media (max-width: 800px) {
-  .dash-page .shell { grid-template-columns: 1fr; }    /* sidebar goes on top */
-  .dash-page .main { min-height: 420px; }
-  .dash-page .center h1 { font-size: 1.9rem; }
+  .dash-page { padding: 12px; }
+  /* minmax(0, 1fr) + min-width: 0: a plain 1fr column never shrinks below its
+     content, which pushed the page wider than a phone screen. */
+  .dash-page .shell {
+    grid-template-columns: minmax(0, 1fr);
+    min-width: 0;
+    border-radius: 28px;
+  }                                                    /* sidebar goes on top */
+  .dash-page .main { padding: 22px 18px; }
+  .dash-page .dash-head h1 { font-size: 1.6rem; }
+}
+
+@media (max-width: 480px) {
+  .dash-page .shell { padding: 10px; }
+  .dash-page .dash-cards { grid-template-columns: 1fr; gap: 10px; }
+  /* Phones: icon on the left, text on the right, so five cards stay short */
+  .dash-page .dash-card { flex-direction: row; align-items: center; padding: 14px; }
+  .dash-page .dash-card-arrow { top: 50%; right: 14px; transform: translateY(-50%); }
+  .dash-page .dash-card:hover .dash-card-arrow { transform: translate(3px, -50%); }
+  /* Events: the chip drops to its own line under the title */
+  .dash-page .dash-event { flex-wrap: wrap; }
+  .dash-page .dash-event-body { flex-basis: calc(100% - 66px); }   /* 52px badge + 14px gap */
+  .dash-page .dash-event-when { margin-left: 66px; }               /* lines up under the title */
 }
 
 /* =========================================================
