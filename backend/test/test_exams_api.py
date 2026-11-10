@@ -46,7 +46,8 @@ def test_exam_search_and_filters(client, seed):
     t = client("teacher")
     upload_paper(t, seed)
     upload_paper(t, seed, title="CS101 Final", exam_type="final", term="Spring 2025", year=2025)
-    upload_paper(t, seed, course_id=seed.c2.id, title="Design Quiz 1", exam_type="quiz", year=2024,
+    # A teacher's upload is always filed under their own name; only HOD/admin may name another instructor.
+    upload_paper(client("hod"), seed, course_id=seed.c2.id, title="Design Quiz 1", exam_type="quiz", year=2024,
                  instructor_name="Ms. Sara")
     s = client("student")
     get = lambda **p: s.get("/api/exam-papers", params=p).json()  # noqa: E731
