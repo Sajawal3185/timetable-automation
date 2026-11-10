@@ -1,5 +1,6 @@
 
 const $ = id => document.getElementById(id);
+const thisYear = new Date().getFullYear();
 
 // ---------- Departments ----------
 const DEPARTMENTS = [
@@ -18,6 +19,7 @@ function addSubjects(dept, list) {
   });
 }
 
+// ---------- Software Engineering ----------
 addSubjects("SE", [
   "Application of Information and Communication Technology",
   "Programming Fundamentals",
@@ -62,76 +64,78 @@ addSubjects("SE", [
   "Accounting Fundamentals"
 ]);
 
+// ---------- Computer Science ----------
 addSubjects("CS", [
-  "Application of Info. & Comm. Tech.",
-  "Functional English",
-  "Islamic Studies",
-  "Applied Physics",
-  "Pakistan Studies",
+  "Application of Information and Communication Technology",
   "Programming Fundamentals",
   "Math-I",
   "Calculus and Analytical Geometry",
-  "Expository Writing",
-  "Civics and Community Engagement",
   "Discrete Structures",
   "Object Oriented Programming",
-  "Ideology and Constitution of Pakistan",
   "Math-II",
-  "Digital Marketing",
-  "Fehm-e-Quran-I",
   "Digital Logic Design",
   "Data Structures",
   "Database System",
   "Linear Algebra",
-  "Professional Practices",
   "Artificial Intelligence",
   "Software Engineering",
-  "Comp. Org. & Assembly Language",
-  "Web-Technology",
-  "Technology Enterpreneurship",
-  "Fehm-e-Quran-II",
+  "Computer Organization and Assembly Language",
+  "Web Technology",
   "Computer Architecture",
   "Analysis of Algorithms",
   "Multi Variable Calculus",
-  "Statistics & Probability",
+  "Statistics and Probability",
   "Operating System",
   "Web Engineering",
   "Theory of Automata",
   "Computer Networks",
   "Numerical Analysis",
   "Advanced Programming (VP)",
-  "Adv. Database Management System",
-  "Technical & Business Writing",
-  "HCI & Computer Graphics",
+  "Advanced Database Management System",
+  "HCI and Computer Graphics",
   "Compiler Construction",
-  "Parallel & Distributed Computing",
-  "Software Testing & Quality Assurance",
+  "Parallel and Distributed Computing",
+  "Software Testing and Quality Assurance",
   "Mobile Application Development",
-  "Foreign Language (Chinese / Japanese / French / Arabic / German)",
   "Cloud Computing",
   "Information Security",
+  "Functional English",
+  "Islamic Studies",
+  "Applied Physics",
+  "Pakistan Studies",
+  "Expository Writing",
+  "Civics and Community Engagement",
+  "Ideology and Constitution of Pakistan",
+  "Digital Marketing",
+  "Fehm-e-Quran I",
+  "Professional Practices",
+  "Technology Entrepreneurship",
+  "Fehm-e-Quran II",
+  "Technical and Business Writing",
+  "Foreign Language",
   "Financial Management"
 ]);
 
+// ---------- Artificial Intelligence ----------
 addSubjects("AI", [
-  "Application of Information & Communication Technology",
+  "Application of Information and Communication Technology",
   "Programming Fundamentals",
   "Functional English",
-  "Discrete Structures",
   "Applied Physics",
   "Islamic Studies",
-  "Maths-I",
+  "Discrete Structures",
+  "Math-I",
   "Object Oriented Programming",
   "Calculus and Analytical Geometry",
   "Digital Logic Design",
   "Expository Writing",
-  "Civics & Community Engagement",
+  "Civics and Community Engagement",
   "Ideology and Constitution of Pakistan",
-  "Pre-Maths-II",
+  "Math-II",
   "Data Structures",
   "Programming for Artificial Intelligence",
   "Professional Practices",
-  "Statistics & Probability",
+  "Statistics and Probability",
   "Multivariable Calculus",
   "Computer Networks",
   "Digital Marketing",
@@ -160,9 +164,10 @@ addSubjects("AI", [
   "Information Security"
 ]);
 
+// ---------- Information Technology ----------
 addSubjects("IT", [
   "Programming Fundamentals",
-  "Application to Information & Communication Technology",
+  "Application of Information and Communication Technology",
   "Islamic Studies",
   "Applied Physics",
   "Functional English",
@@ -262,7 +267,7 @@ function lock(control, locked) {
   control.classList.toggle("locked", locked);
 }
 
-// Department names only.
+// ---------- Department Options ----------
 function getDepartmentOptions() {
   return DEPARTMENTS.map(dept => ({
     value: dept.code,
@@ -270,7 +275,7 @@ function getDepartmentOptions() {
   }));
 }
 
-// Subject names only. No course codes.
+// ---------- Subject Options ----------
 function getSubjectOptions(dept) {
   return SUBJECTS
     .filter(subject => subject.dept === dept)
@@ -289,21 +294,34 @@ function approvedFor(dept, subjectName) {
   );
 }
 
-// ---------- Year Options ----------
+// ---------- Search Lecture Year Options ----------
 function getYearOptions(dept, subjectName) {
-  const currentYear = new Date().getFullYear();
-
   const years = [];
 
-  for (let year = 2020; year <= currentYear; year++) {
+  for (let year = thisYear; year >= 2020; year--) {
     years.push({
       value: year,
       label: String(year)
     });
   }
 
-  return years.reverse();
+  return years;
 }
+
+// ---------- Upload Lecture Year Options ----------
+function getUploadYearOptions() {
+  const years = [];
+
+  for (let year = thisYear; year >= 2020; year--) {
+    years.push({
+      value: year,
+      label: String(year)
+    });
+  }
+
+  return years;
+}
+
 // ---------- Title Search ----------
 function normalizeWord(word) {
   let result = word.toLowerCase();
@@ -350,8 +368,6 @@ function titleMatches(lectureTitle, searchText) {
 
   const titleWords = normalizeTitle(lectureTitle);
 
-  // Search words can be in any order.
-  // Singular/plural and word beginnings are supported.
   return searchWords.every(searchWord =>
     titleWords.some(titleWord =>
       titleWord === searchWord ||
@@ -384,7 +400,6 @@ function showLectures() {
   const list = $("list");
   list.replaceChildren();
 
-  // Department, subject and year are required.
   if (!dept || !subjectName || !year) {
     $("hint").hidden = false;
     $("empty").hidden = true;
@@ -462,29 +477,29 @@ function setupFilters() {
 
     showLectures();
   });
-$("fSubject").addEventListener("change", () => {
-  const dept = $("fDept").value;
-  const subjectName = $("fSubject").value;
 
-  const years = getYearOptions(dept, subjectName);
+  $("fSubject").addEventListener("change", () => {
+    const dept = $("fDept").value;
+    const subjectName = $("fSubject").value;
 
-  fill($("fYear"), years, "Choose Year");
+    const years = getYearOptions(dept, subjectName);
+    const hasLectures = approvedFor(dept, subjectName).length > 0;
 
-  $("fTitle").value = "";
+    fill($("fYear"), years, "Choose Year");
 
-  // Unlock Year whenever a subject is selected.
-  lock($("fYear"), !subjectName);
+    $("fTitle").value = "";
 
-  lock($("fTitle"), true);
+    lock($("fYear"), !subjectName);
+    lock($("fTitle"), true);
 
-  $("hint").textContent = years.length === 0
-    ? "No lectures uploaded for this subject yet. Select a year if available."
-    : "Choose a year. You can also search by lecture title.";
+    $("hint").textContent = hasLectures
+      ? "Choose a year. You can also search by lecture title."
+      : "No lectures uploaded for this subject yet. You can still select a year.";
 
-  $("hint").hidden = false;
+    $("hint").hidden = false;
 
-  showLectures();
-});
+    showLectures();
+  });
 
   $("fYear").addEventListener("change", () => {
     $("fTitle").value = "";
@@ -494,34 +509,44 @@ $("fSubject").addEventListener("change", () => {
     showLectures();
   });
 
-  // Search lectures while the student types.
   $("fTitle").addEventListener("input", showLectures);
 }
 
-// ---------- Upload Form ----------
+// ---------- Upload Form Initial State ----------
 function initUploadSelects() {
   fill($("uDept"), getDepartmentOptions(), "Choose Department");
-  fill($("uSubject"), [], "Choose Subject");
 
-  lock($("uSubject"), true);
+  fill(
+    $("uSubject"),
+    SUBJECTS.map((subject, index) => ({
+      value: index,
+      label: `${subject.dept} - ${subject.name}`
+    })),
+    "Choose Subject"
+  );
+
+  fill($("uYear"), getUploadYearOptions(), "Choose Year");
+
+  // All upload fields remain editable.
+  lock($("uDept"), false);
+  lock($("uSubject"), false);
+  lock($("uYear"), false);
+
+  $("uTitle").disabled = false;
+  $("uFile").disabled = false;
 }
 
+// ---------- Upload Form ----------
 function setupUpload() {
   const form = $("uploadForm");
   const message = $("uMsg");
 
   initUploadSelects();
 
-  $("uDept").addEventListener("change", () => {
-    const dept = $("uDept").value;
-
-    fill($("uSubject"), getSubjectOptions(dept), "Choose Subject");
-
-    lock($("uSubject"), !dept);
-  });
-
   $("toggleUpload").addEventListener("click", () => {
     form.hidden = !form.hidden;
+    message.textContent = "";
+    message.className = "form-msg";
   });
 
   $("cancelUpload").addEventListener("click", () => {
@@ -537,7 +562,7 @@ function setupUpload() {
     event.preventDefault();
 
     const dept = $("uDept").value;
-    const subjectName = $("uSubject").value;
+    const subjectValue = $("uSubject").value;
     const title = $("uTitle").value.trim();
     const year = Number($("uYear").value);
     const file = $("uFile").files[0];
@@ -545,31 +570,68 @@ function setupUpload() {
     message.textContent = "";
     message.className = "form-msg";
 
-    if (!dept || !subjectName || !title || !year || !file) {
+    // Check all required fields.
+    if (
+      !dept ||
+      subjectValue === "" ||
+      !title ||
+      !year ||
+      !file
+    ) {
       message.textContent = "Please fill in all fields.";
       message.classList.add("error");
       return;
     }
 
-    if (!Number.isInteger(year) || year < 2000 || year > 2100) {
-      message.textContent = "Please enter a valid year.";
+    // Find selected subject.
+    const subjectIndex = Number(subjectValue);
+    const selectedSubject = SUBJECTS[subjectIndex];
+
+    if (!selectedSubject) {
+      message.textContent = "Please select a valid subject.";
       message.classList.add("error");
       return;
     }
 
+    // Check department and subject match.
+    if (selectedSubject.dept !== dept) {
+      message.textContent =
+        "Please select a subject belonging to the chosen department.";
+      message.classList.add("error");
+      return;
+    }
+
+    const subjectName = selectedSubject.name;
+
+    // Check year.
+    if (
+      !Number.isInteger(year) ||
+      year < 2020 ||
+      year > thisYear
+    ) {
+      message.textContent =
+        `Please select a year from 2020 to ${thisYear}.`;
+      message.classList.add("error");
+      return;
+    }
+
+    // Check file type.
     if (!/\.(pdf|ppt|pptx)$/i.test(file.name)) {
-      message.textContent = "Only PDF, PPT and PPTX files are allowed.";
+      message.textContent =
+        "Only PDF, PPT and PPTX files are allowed.";
       message.classList.add("error");
       return;
     }
 
+    // Check file size.
     if (file.size > 20 * 1024 * 1024) {
-      message.textContent = "Maximum file size is 20 MB.";
+      message.textContent =
+        "Maximum file size is 20 MB.";
       message.classList.add("error");
       return;
     }
 
-    // Demo upload: real API integration will be added later.
+    // Demo upload only.
     lectures.push({
       id: Date.now(),
       dept,

@@ -1,4 +1,3 @@
-
 const $ = id => document.getElementById(id);
 const thisYear = new Date().getFullYear();
 
@@ -124,18 +123,18 @@ addSubjects("AI", [
   "Applied Physics",
   "Islamic Studies",
   "Discrete Structures",
-  "Maths-I",
+  "Math-I",
   "Object Oriented Programming",
   "Calculus and Analytical Geometry",
   "Digital Logic Design",
   "Expository Writing",
   "Civics and Community Engagement",
   "Ideology and Constitution of Pakistan",
-  "Pre-Maths-II",
+  "Math-II",
   "Data Structures",
   "Programming for Artificial Intelligence",
   "Professional Practices",
-  "Statistics & Probability",
+  "Statistics and Probability",
   "Multivariable Calculus",
   "Computer Networks",
   "Digital Marketing",
@@ -167,7 +166,7 @@ addSubjects("AI", [
 // ---------- Information Technology ----------
 addSubjects("IT", [
   "Programming Fundamentals",
-  "Application to Information & Communication Technology",
+  "Application of Information and Communication Technology",
   "Islamic Studies",
   "Applied Physics",
   "Functional English",

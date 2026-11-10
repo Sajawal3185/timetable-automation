@@ -106,6 +106,15 @@
   background: white;
 }
 
+/* Locked (disabled) fields look greyed out on every page that uses them */
+.filters select:disabled,
+.filters input:disabled,
+.upload-box select:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  background: #eef1f7;
+}
+
 
 /* ----- Upload box (past papers, lectures and resources all use it) ----- */
 .upload-box {
@@ -259,15 +268,12 @@ button.btn {
    Headings and upload box come from section 1.
    ========================================================= */
 
-/* Keep results area at a stable height */
-/* Fixed-height scrollable results area */
+/* Results area keeps a minimum height so the page does not jump; it can grow with the cards */
 .pastpapers-page .papers-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
   gap: 16px;
-
-  height: 180px;
-  overflow-y: auto;
+  min-height: 180px;
   align-content: start;
 }
 
@@ -290,8 +296,8 @@ button.btn {
 /* Buttons row at the bottom of each card */
 .actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 .report  { margin-left: auto; border: 0; background: none; color: #94a3b8; font-size: 12px; cursor: pointer; text-decoration: underline; }
-/* Full-width footer on Past Papers page */
-/* Past Papers page layout */
+
+/* Past Papers page layout: footer stays at the bottom, full width */
 .pastpapers-page {
   min-height: 100vh;
   display: flex;
@@ -325,7 +331,6 @@ button.btn {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  overflow-x: hidden;
   width: 100%;
   max-width: 100%;
 }
@@ -337,7 +342,6 @@ button.btn {
   box-sizing: border-box;
   margin: -55px auto 40px;
   padding: 0 16px;
-  overflow-x: hidden;
 }
 
 .lectures-page .filters {
@@ -347,7 +351,6 @@ button.btn {
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
-  overflow-x: hidden;
 }
 
 .lectures-page .filters label {
@@ -365,20 +368,11 @@ button.btn {
   box-sizing: border-box;
 }
 
-.lectures-page .filters select:disabled,
-.lectures-page .filters input:disabled,
-.lectures-page .upload-box select:disabled {
-  opacity: 0.55;
-  cursor: not-allowed;
-  background: #eef1f7;
-}
-
 .lectures-page .upload-heading,
 .lectures-page .upload-box {
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
-  overflow-x: hidden;
 }
 
 .lectures-page .papers-grid {
@@ -400,10 +394,6 @@ button.btn {
 }
 
 @media (max-width: 600px) {
-  .lectures-page {
-    overflow-x: hidden;
-  }
-
   .lectures-page .page-body {
     padding: 0 12px;
   }

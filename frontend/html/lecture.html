@@ -47,32 +47,58 @@
 
     </section>
 
-    <!-- Upload heading and button -->
-    <div class="upload-heading">
-      <h2>Upload Lecture Slides</h2>
-      <p>Share your lecture slides with other NUML students and help them learn.</p>
+<!-- Upload heading and button -->
+<div class="upload-heading">
+  <h2>Upload Lecture Slides</h2>
+  <p>Demo only: You can try the submission form, but files will not be uploaded or saved.</p>
 
-      <button type="button" class="btn solid" id="toggleUpload">
-        + Upload Lecture Slides
-      </button>
-    </div>
+  <button type="button" class="btn solid" id="toggleUpload">
+    + Upload Lecture Slides (demo only)
+  </button>
+</div>
 
-    <!-- Upload form -->
-    <form class="upload-box" id="uploadForm" hidden>
-      <h2>Upload lecture slides (demo only)</h2>
+<!-- Upload form -->
+<form class="upload-box" id="uploadForm" hidden>
+  <h2>Submit Lecture Slides (Demo)</h2>
 
-      <div class="upload-grid">
-        <label>Department * <select id="uDept" required></select></label>
-        <label>Subject * <select id="uSubject" required></select></label>
-        <label>Title * <input type="text" id="uTitle" required></label>
-        <label>Year * <input type="number" id="uYear" min="2000" max="2100" required></label>
-        <label>File * <input type="file" id="uFile" required></label>
-      </div>
+  <div class="upload-grid">
+    <label>
+      Department *
+      <select id="uDept" required></select>
+    </label>
 
-      <p class="form-msg" id="uMsg"></p>
-      <button type="submit" class="btn solid">Submit</button>
-      <button type="button" class="btn" id="cancelUpload">Cancel</button>
-    </form>
+    <label>
+      Subject *
+      <select id="uSubject" required></select>
+    </label>
+
+    <label>
+      Title *
+      <input type="text" id="uTitle" required>
+    </label>
+
+  <label>
+  Year *
+  <select id="uYear" required></select>
+</label>
+
+   <label>
+  File *
+  <input
+    type="file"
+    id="uFile"
+    accept=".pdf,.ppt,.pptx"
+    required
+  >
+</label>
+  </div>
+
+  <p class="form-msg" id="uMsg"></p>
+
+  <button type="submit" class="btn solid">Submit (demo)</button>
+  <button type="button" class="btn" id="cancelUpload">Cancel</button>
+</form>
+
 
     <p class="hint" id="hint">
       Select a department, subject and year. You can also search by lecture title.
