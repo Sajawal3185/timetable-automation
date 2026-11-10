@@ -39,6 +39,7 @@ if (loginForm) {
       // Every role goes to the dashboard for now. Role start pages come later.
       window.location.href = NUML.PAGES.dashboard;
     } catch (err) {
+      console.error("Login failed:", err);
       NUML.clearToken();
       msg.textContent =
         err.status === 401
