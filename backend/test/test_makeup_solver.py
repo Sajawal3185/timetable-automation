@@ -46,8 +46,12 @@ def seed(db):
     dept = Department(name="Software Engineering", code="SE")
     db.add(dept)
     db.flush()
+    u_teacher = User(name="Dr. Ali", identifier="t-ali", email="ali@numl.edu.pk", password_hash="x", role="teacher")
+    db.add(u_teacher)
+    db.flush()
     sec = Section(name="BSSE-5A", department_id=dept.id, student_count=45)
-    t1 = Teacher(name="Dr. Ali", department_id=dept.id)
+    # Dr. Ali's teacher row is linked to his login, so he may book makeups for himself (B-8)
+    t1 = Teacher(name="Dr. Ali", department_id=dept.id, user_id=u_teacher.id)
     t2 = Teacher(name="Ms. Sara", department_id=dept.id)
     c_lec = Course(code="SE301", title="Web Eng", department_id=dept.id, is_lab=False)
     c_lab = Course(code="SE301L", title="Web Eng Lab", department_id=dept.id, is_lab=True)
@@ -56,8 +60,7 @@ def seed(db):
     r_fallback = Room(name="R-Fallback", capacity=60, room_type="lecture")
     r_unknown = Room(name="R-Unknown", capacity=None, room_type="lecture")
     r_lab = Room(name="Lab-1", capacity=50, room_type="lab")
-    u_teacher = User(name="Dr. Ali", identifier="t-ali", email="ali@numl.edu.pk", password_hash="x", role="teacher")
-    db.add_all([sec, t1, t2, c_lec, c_lab, r_small, r_pref, r_fallback, r_unknown, r_lab, u_teacher])
+    db.add_all([sec, t1, t2, c_lec, c_lab, r_small, r_pref, r_fallback, r_unknown, r_lab])
     db.commit()
     return SimpleNamespace(
         dept=dept, sec=sec, t1=t1, t2=t2, c_lec=c_lec, c_lab=c_lab,
@@ -158,3 +161,129 @@ def test_makeup_solver_room_fallback_and_booking(session_factory, db, seed):
     }
     assert client.post("/api/makeup", json=book_payload).status_code == 201
     assert client.post("/api/makeup", json=book_payload).status_code == 409
+
+# ---------------------------------------------------------------------------
+# B-8: makeup booking safety (right rooms, owner check, no double booking)
+# ---------------------------------------------------------------------------
+
+def _client_as(db, user):
+    app = FastAPI()
+    app.include_router(makeup.router)
+    app.dependency_overrides[get_db] = lambda: db
+    app.dependency_overrides[get_current_user] = lambda: user
+    return TestClient(app)
+
+
+def _booking(seed, **overrides):
+    payload = {
+        "course_id": seed.c_lec.id, "section_id": seed.sec.id, "teacher_id": seed.t1.id,
+        "room_id": seed.r_pref.id, "day_of_week": "Tuesday", "start_time": "11:00", "end_time": "12:00",
+    }
+    payload.update(overrides)
+    return payload
+
+
+def _staff_user(db, identifier, role, department_id=None):
+    user = User(name=identifier, identifier=identifier, password_hash="x", role=role, department_id=department_id)
+    db.add(user)
+    db.commit()
+    return user
+
+
+def test_lecture_course_refused_in_lab_room():
+    v = check_room_suitability(student_count=40, room_capacity=50, requires_lab=False, room_type="lab")
+    assert [x.kind for x in v] == ["room_type_mismatch"]
+    # a lab course in a lab and a lecture course in a lecture room are both fine
+    assert check_room_suitability(student_count=40, room_capacity=50, requires_lab=True, room_type="lab") == []
+    assert check_room_suitability(student_count=40, room_capacity=50, requires_lab=False, room_type="lecture") == []
+
+
+def test_find_slots_never_offers_a_lab_for_a_lecture_course(db, seed):
+    res = _client_as(db, seed.u_teacher).post("/api/makeup/find-slots", json={
+        "section_id": seed.sec.id, "teacher_id": seed.t1.id, "course_id": seed.c_lec.id,
+        "duration_minutes": 60, "days": ["Monday"],
+    })
+    assert res.status_code == 200 and res.json()
+    offered = {r["room_name"] for s in res.json() for r in [s["recommended_room"], *s["fallback_rooms"]]}
+    assert "Lab-1" not in offered
+
+
+def test_booking_lecture_course_in_lab_refused(db, seed):
+    res = _client_as(db, seed.u_teacher).post("/api/makeup", json=_booking(seed, room_id=seed.r_lab.id))
+    assert res.status_code == 409
+    assert "lab room" in res.json()["detail"]
+
+
+def test_lab_course_can_book_a_lab(db, seed):
+    res = _client_as(db, seed.u_teacher).post(
+        "/api/makeup", json=_booking(seed, course_id=seed.c_lab.id, room_id=seed.r_lab.id),
+    )
+    assert res.status_code == 201
+
+
+def test_teacher_cannot_search_or_book_for_another_teacher(db, seed):
+    client = _client_as(db, seed.u_teacher)  # Dr. Ali, trying to act for Ms. Sara (t2)
+    search = client.post("/api/makeup/find-slots", json={
+        "section_id": seed.sec.id, "teacher_id": seed.t2.id, "course_id": seed.c_lec.id, "duration_minutes": 60,
+    })
+    assert search.status_code == 403
+    book = client.post("/api/makeup", json=_booking(seed, teacher_id=seed.t2.id))
+    assert book.status_code == 403
+    assert db.query(MakeupClass).count() == 0
+
+
+def test_hod_books_only_within_own_department_admin_anywhere(db, seed):
+    other_dept = Department(name="Computer Science", code="CS")
+    db.add(other_dept)
+    db.commit()
+    hod_same = _staff_user(db, "hod-se", "hod", department_id=seed.dept.id)
+    hod_other = _staff_user(db, "hod-cs", "hod", department_id=other_dept.id)
+    admin = _staff_user(db, "admin-1", "admin")
+
+    assert _client_as(db, hod_other).post("/api/makeup", json=_booking(seed, teacher_id=seed.t2.id)).status_code == 403
+    assert _client_as(db, hod_same).post("/api/makeup", json=_booking(seed, teacher_id=seed.t2.id)).status_code == 201
+    assert _client_as(db, admin).post(
+        "/api/makeup", json=_booking(seed, teacher_id=seed.t1.id, day_of_week="Wednesday"),
+    ).status_code == 201
+
+
+def test_second_booking_of_same_slot_refused(db, seed):
+    client = _client_as(db, seed.u_teacher)
+    assert client.post("/api/makeup", json=_booking(seed)).status_code == 201
+    again = client.post("/api/makeup", json=_booking(seed))
+    assert again.status_code == 409
+    assert db.query(MakeupClass).count() == 1
+
+
+def test_database_refuses_double_booking_when_clash_check_is_bypassed(db, seed, monkeypatch):
+    """Simulates two requests racing past the clash check at the same moment:
+    the unique key still stops the second one, and the API answers 409, not 500."""
+    monkeypatch.setattr(makeup, "_load_active_slots", lambda *_a, **_k: [])
+    other_sec = Section(name="BSSE-5B", department_id=seed.dept.id, student_count=40)
+    db.add(other_sec)
+    db.commit()
+    client = _client_as(db, seed.u_teacher)
+    assert client.post("/api/makeup", json=_booking(seed)).status_code == 201
+    # same room, day and start time, different section: only the database can catch it now
+    res = client.post("/api/makeup", json=_booking(seed, section_id=other_sec.id))
+    assert res.status_code == 409
+    assert "just booked" in res.json()["detail"]
+    assert db.query(MakeupClass).count() == 1
+
+
+def test_cancelled_makeup_does_not_block_the_slot_in_the_database(db, seed):
+    from sqlalchemy.exc import IntegrityError
+
+    def row(status):
+        return MakeupClass(
+            course_id=seed.c_lec.id, section_id=seed.sec.id, teacher_id=seed.t1.id, room_id=seed.r_pref.id,
+            day_of_week="Thursday", start_time=time(9, 0), end_time=time(10, 0), status=status,
+        )
+
+    db.add_all([row("cancelled"), row("cancelled"), row("scheduled")])
+    db.commit()  # cancelled rows never collide, one scheduled row is fine
+
+    db.add(row("scheduled"))
+    with pytest.raises(IntegrityError):
+        db.commit()
+    db.rollback()
