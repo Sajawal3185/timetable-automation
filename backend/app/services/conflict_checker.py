@@ -63,7 +63,7 @@ def check_conflicts(
     # 1) Proposed slot vs the entries already in the database.
     for slot in slots:
         stmt = select(TimetableEntry).where(
-           TimetableEntry.day_of_week == slot.day,
+            TimetableEntry.day_of_week == slot.day,
             TimetableEntry.start_time < slot.end_time,   # overlap test, not equality
             TimetableEntry.end_time > slot.start_time,
             or_(
