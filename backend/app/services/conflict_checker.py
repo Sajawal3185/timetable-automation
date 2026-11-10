@@ -18,7 +18,7 @@ TEACHER, SECTION, ROOM = "teacher", "section", "room"
 @dataclass(frozen=True)
 class ProposedSlot:
     """One class as it WOULD be after the change (the post-change state)."""
-    day: object          # same type as TimetableEntry.day
+    day: object          # same type as TimetableEntry.day_of_week
     start_time: object   # same type as TimetableEntry.start_time
     end_time: object
     teacher_id: int

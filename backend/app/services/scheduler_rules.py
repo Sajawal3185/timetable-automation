@@ -20,6 +20,10 @@ RuleKind = Literal[
     "long_student_gap",
 ]
 
+# Clash types that block a change outright (conflict_checker.py reads this).
+# A teacher, a section or a room can only be in one place at a time.
+HARD_CONFLICT_TYPES = frozenset({"teacher", "section", "room"})
+
 
 @dataclass(frozen=True)
 class ScheduleSlot:
