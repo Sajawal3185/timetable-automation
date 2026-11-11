@@ -2,6 +2,7 @@
 from dataclasses import asdict
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.database import get_db
@@ -24,6 +25,7 @@ from app.services.scheduler_rules import ScheduleSlot, check_hard_clashes, check
 router = APIRouter(prefix="/api/makeup", tags=["Makeup Classes"])
 
 STAFF_ROLES = {"teacher", "hod", "admin"}
+VALID_DAYS = (*WEEKDAYS, "Saturday", "Sunday")
 
 
 def _require_staff(user: User = Depends(get_current_user)) -> User:
@@ -32,16 +34,51 @@ def _require_staff(user: User = Depends(get_current_user)) -> User:
     return user
 
 
+def _check_books_for(user: User, teacher: Teacher) -> None:
+    """403 unless `user` may book makeups for `teacher` (B-8).
+
+    - a teacher only for themselves (their Teacher row is linked by user_id)
+    - an HOD for themselves or any teacher in their own department
+    - an admin for anyone
+    """
+    role = (user.role or "").lower()
+    if role == "admin" or teacher.user_id == user.id:
+        return
+    dept = getattr(user, "department_id", None)
+    if role == "hod" and dept is not None and dept == teacher.department_id:
+        return
+    raise HTTPException(
+        status_code=status.HTTP_403_FORBIDDEN,
+        detail="You can only book makeup classes for yourself",
+    )
+
+
+def _lock_booking_rows(db: Session, body: MakeupBookIn) -> None:
+    """Lock the room, teacher and section rows until this booking commits (B-8).
+
+    Two requests for the same room (or teacher, or section) now run one after
+    the other: the second one waits here, then its clash check sees the first
+    booking. Always lock in the same order (room, teacher, section) so two
+    bookings can never wait on each other in a circle (deadlock).
+    SQLite ignores FOR UPDATE; there the unique key on makeup_classes is the guard.
+    """
+    for model, row_id in ((Room, body.room_id), (Teacher, body.teacher_id), (Section, body.section_id)):
+        db.execute(select(model.id).where(model.id == row_id).with_for_update())
+
+
 @router.post("/find-slots", response_model=list[MakeupSlotSuggestionOut])
 def search_makeup_slots(
     body: MakeupSearchIn,
     db: Session = Depends(get_db),
-    _user: User = Depends(_require_staff),
+    user: User = Depends(_require_staff),
 ):
     days = body.days or list(WEEKDAYS)
     for d in days:
-        if d not in WEEKDAYS and d not in ("Saturday", "Sunday"):
+        if d not in VALID_DAYS:
             raise HTTPException(status_code=422, detail=f"Invalid day_of_week: {d!r}")
+    teacher = db.get(Teacher, body.teacher_id)
+    if teacher is not None:  # a missing teacher is reported by the solver below (422)
+        _check_books_for(user, teacher)
     try:
         results = find_makeup_slots(
             db,
@@ -66,6 +103,8 @@ def book_makeup_class(
 ):
     if body.end_time <= body.start_time:
         raise HTTPException(status_code=422, detail="end_time must be after start_time")
+    if body.day_of_week not in VALID_DAYS:
+        raise HTTPException(status_code=422, detail=f"Invalid day_of_week: {body.day_of_week!r}")
 
     section = db.get(Section, body.section_id)
     teacher = db.get(Teacher, body.teacher_id)
@@ -73,6 +112,8 @@ def book_makeup_class(
     room = db.get(Room, body.room_id)
     if not all([section, teacher, course, room]):
         raise HTTPException(status_code=404, detail="Section, teacher, course, or room not found")
+
+    _check_books_for(user, teacher)
 
     suitability = check_room_suitability(
         student_count=section.student_count,
@@ -83,6 +124,14 @@ def book_makeup_class(
     if suitability:
         raise HTTPException(status_code=409, detail=suitability[0].message)
 
+    user_id = user.id
+    # End the read-only transaction so far before locking. On MySQL (REPEATABLE
+    # READ) a transaction keeps reading the snapshot from its first SELECT, so
+    # without this the clash check below could miss a booking that committed
+    # while we were waiting for the lock. Nothing has been written yet.
+    db.rollback()
+    _lock_booking_rows(db, body)
+
     existing = _load_active_slots(db, term=body.term)
     candidate = ScheduleSlot(
         day_of_week=body.day_of_week, start_time=body.start_time, end_time=body.end_time,
@@ -91,16 +140,25 @@ def book_makeup_class(
     )
     clashes = check_hard_clashes(candidate, existing)
     if clashes:
+        db.rollback()  # release the locks
         raise HTTPException(status_code=409, detail=clashes[0].message)
 
     makeup = MakeupClass(
         course_id=body.course_id, section_id=body.section_id, teacher_id=body.teacher_id,
         room_id=body.room_id, class_date=body.class_date, day_of_week=body.day_of_week,
         start_time=body.start_time, end_time=body.end_time, reason=body.reason,
-        status="scheduled", created_by=user.id,
+        status="scheduled", created_by=user_id,
     )
     db.add(makeup)
-    db.commit()
+    try:
+        db.commit()
+    except IntegrityError as exc:
+        # uq_makeup_room_slot: someone booked this room at this time a moment ago.
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="This room was just booked for that time. Search again for a free slot.",
+        ) from exc
     db.refresh(makeup)
     return makeup
 
