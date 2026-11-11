@@ -10,18 +10,22 @@
   <link rel="stylesheet" href="../css/master.css">
   <link rel="stylesheet" href="../css/app.css">
 </head>
-<!-- Same look as dashboard.html (dash-page), plus admin-page for the review list -->
+<!-- Same page as dashboard.html, plus "Review uploads" in the menus -->
 <body class="dash-page admin-page">
 
-  <!-- Top bar: same as the student dashboard, with an "Admin" tag on the logo -->
+  <!-- Top bar: same glass navy bar and logo as the landing page -->
   <header class="navbar dash-bar">
     <a href="admin-dashboard.html" class="logo">NUML <span>Archive</span> <small class="admin-tag">Admin</small></a>
 
     <nav class="dash-links" aria-label="Main menu">
-      <a href="admin-dashboard.html" class="nl active" aria-current="page">Review uploads</a>
+      <a href="admin-dashboard.html" class="nl active" aria-current="page">Dashboard</a>
+      <!-- TODO: link to timetable/review-uploads.html once that page is merged -->
+      <a class="nl soon" aria-disabled="true" title="Coming soon">Review uploads</a>
       <a href="lecture.html" class="nl">Lectures</a>
       <a href="pastpapers.html" class="nl">Past Papers</a>
       <a href="tools-resources.html" class="nl">Resources</a>
+      <a href="gpacal.html" class="nl">GPA</a>
+      <!-- Separate system with its own login (roll number), see html/timetable/ -->
       <a href="timetable/timetable-login.html" class="nl">Timetable</a>
     </nav>
 
@@ -45,9 +49,10 @@
 
   <div class="dash-main">
 
-    <!-- Side menu: icon + name, same as the student dashboard -->
-    <nav class="dash-side" aria-label="Admin menu">
-      <a href="admin-dashboard.html" class="active" aria-current="page">
+    <!-- Side menu: just an icon and a name for each part of the archive -->
+    <nav class="dash-side" aria-label="Quick access">
+      <!-- TODO: link to timetable/review-uploads.html once that page is merged -->
+      <a class="soon" aria-disabled="true" title="Coming soon">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
         Review uploads
       </a>
@@ -63,50 +68,24 @@
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5M12 15V3"/></svg>
         Resources
       </a>
+      <a href="gpacal.html">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M8 6h8M8 11h.01M12 11h.01M16 11h.01M8 15h.01M12 15h.01M16 15h.01M8 19h.01M12 19h.01M16 19h.01"/></svg>
+        GPA &amp; CGPA
+      </a>
+      <!-- Separate system with its own login (roll number), see html/timetable/ -->
       <a href="timetable/timetable-login.html">
         <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
         Timetable
       </a>
     </nav>
 
-    <!-- Review area: the page itself never scrolls, only the list inside it -->
-    <main class="admin-main">
+    <!-- Hero: greeting over the campus photo -->
+    <section class="dash-hero">
+      <span class="pill" id="today"></span>
+      <h1><span id="greeting">Welcome back</span>,<br>what do you want to explore today?</h1>
+      <p>Your past papers, lectures, software links and timetable, all in one place.</p>
+    </section>
 
-      <div class="admin-head">
-        <div>
-          <span class="pill" id="today"></span>
-          <h1><span id="greeting">Welcome back</span>, here is what students uploaded</h1>
-        </div>
-      </div>
-
-      <section class="admin-panel" aria-labelledby="reviewTitle">
-        <div class="admin-toolbar">
-          <h2 id="reviewTitle" class="sr-only">Uploads</h2>
-
-          <!-- Status tabs (counts filled by admin-dashboard.js) -->
-          <div class="admin-tabs" role="tablist" aria-label="Filter by status">
-            <button role="tab" class="admin-tab" data-status="pending" aria-selected="true">Pending <b id="countPending">0</b></button>
-            <button role="tab" class="admin-tab" data-status="approved" aria-selected="false">Accepted <b id="countApproved">0</b></button>
-            <button role="tab" class="admin-tab" data-status="rejected" aria-selected="false">Rejected <b id="countRejected">0</b></button>
-            <button role="tab" class="admin-tab" data-status="all" aria-selected="false">All <b id="countAll">0</b></button>
-          </div>
-
-          <label class="admin-filter">
-            <span class="sr-only">Type</span>
-            <select id="kindFilter">
-              <option value="all">All types</option>
-              <option value="lecture">Lecture slides</option>
-              <option value="paper">Past papers</option>
-            </select>
-          </label>
-        </div>
-
-        <ul class="admin-list" id="uploadList" aria-live="polite">
-          <li class="admin-msg">Loading uploads…</li>
-        </ul>
-      </section>
-
-    </main>
   </div>
 
   <!-- Footer: same as the landing page -->
