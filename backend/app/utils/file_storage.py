@@ -63,7 +63,10 @@ def _clean_name(name: str) -> str:
 def content_matches_extension(ext: str, head: bytes) -> bool:
     """True if the first bytes of a file are what a file with this extension starts with."""
     if ext == ".txt":
-        # plain text has no signature: refuse binary data (NUL bytes), allow UTF-16 text (it has a BOM)
+        # plain text has no signature: refuse binary data (NUL bytes), allow UTF-16 text (it has a BOM).
+        # Known limit (fine for the demo): a UTF-16 BOM followed by ANY binary data also passes as .txt,
+        # because UTF-16 text legitimately contains NUL bytes. Downloads are served as attachments, so
+        # such a file is only ever saved, never displayed in the page.
         return b"\x00" not in head or head.startswith((b"\xff\xfe", b"\xfe\xff"))
     return any(head.startswith(sig) for sig in SIGNATURES.get(ext, ()))
 
