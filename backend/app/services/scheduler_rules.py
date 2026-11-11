@@ -20,6 +20,10 @@ RuleKind = Literal[
     "long_student_gap",
 ]
 
+# Clash types that block a change outright (conflict_checker.py reads this).
+# A teacher, a section or a room can only be in one place at a time.
+HARD_CONFLICT_TYPES = frozenset({"teacher", "section", "room"})
+
 
 @dataclass(frozen=True)
 class ScheduleSlot:
@@ -122,13 +126,25 @@ def check_room_suitability(
     requires_lab: bool = False,
     room_type: str = "lecture",
 ) -> list[RuleViolation]:
-    """Hard Rules for room capacity and lab requirement (proposal 2.3 & 3.1)."""
+    """Hard Rules for room capacity and room type (proposal 2.3 & 3.1).
+
+    The room type must match the course both ways: a lab course needs a lab,
+    and a lecture course must not take a lab (labs are scarce and hold the
+    lab equipment, so a lecture there blocks a real lab class).
+    """
     violations: list[RuleViolation] = []
-    if requires_lab and room_type.lower() != "lab":
+    is_lab_room = (room_type or "lecture").lower() == "lab"
+    if requires_lab and not is_lab_room:
         violations.append(RuleViolation(
             level="hard",
             kind="room_type_mismatch",
             message="Lab course requires a room with room_type='lab'",
+        ))
+    elif not requires_lab and is_lab_room:
+        violations.append(RuleViolation(
+            level="hard",
+            kind="room_type_mismatch",
+            message="Lecture course cannot be booked in a lab room",
         ))
 
     if student_count is None or room_capacity is None:

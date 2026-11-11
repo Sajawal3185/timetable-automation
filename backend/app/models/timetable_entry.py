@@ -6,7 +6,7 @@ exemptions (same elective_group) are enforced by conflict_checker.py + row locks
 """
 from datetime import datetime, time
 from sqlalchemy import CheckConstraint, DateTime, ForeignKey, Index, Integer, String, Time, UniqueConstraint, func
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
 
@@ -37,6 +37,7 @@ class TimetableEntry(Base):
         ForeignKey("teachers.id", ondelete="SET NULL"),
         nullable=True,
     )
+    teacher: Mapped["Teacher | None"] = relationship("Teacher")
     room_id: Mapped[int | None] = mapped_column(
         ForeignKey("rooms.id", ondelete="SET NULL"),
         nullable=True,
