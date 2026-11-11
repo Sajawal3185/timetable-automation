@@ -5,8 +5,8 @@ FastAPI's live docs at `/docs` can be used to check it.
 
 ## Rules for everyone
 
-- **Auth:** every endpoint except `POST /api/auth/login`, `/activate`, `/register` and `GET /api/health` needs `Authorization: Bearer <JWT>`. Roles (lowercase): `student`, `teacher`, `hod`, `admin`. The role always comes from the database, never from the request.
-- **Errors** look like `{"detail": "message"}`. Validation errors (422) carry a list in `detail`. A role that is not allowed gets `403 {"detail": "You do not have permission for this action"}`. Swap conflicts (409) carry an object: `{"detail": {"message": "...", "conflicts": [...]}}`.
+- **Auth:** every endpoint except `POST /api/auth/login`, `POST /api/auth/activate` and `GET /api/health` needs `Authorization: Bearer <JWT>`. Roles (lowercase): `student`, `teacher`, `hod`, `admin`. The role always comes from the database, never from the request.
+- **Errors** look like `{"detail": "message"}`. Validation errors (422) carry a list in `detail`. A role that is not allowed gets `403` with a message in `detail`. Swap conflicts (409) carry an object: `{"detail": {"message": "...", "conflicts": [...]}}`.
 - **Formats:** dates `YYYY-MM-DD`; times `HH:MM` (24 hour); days `Monday` ... `Sunday` (short forms like `Mon` are accepted only in query strings); timestamps ISO 8601.
 - **Pagination:** list endpoints take `skip` and `limit`. Exam papers and materials also return `X-Total-Count`.
 - **Updates** use `PUT` with any subset of fields. The only `PATCH` is marking one notification read.
@@ -22,19 +22,22 @@ FastAPI's live docs at `/docs` can be used to check it.
 
 | Method | URL | Who | Body | Success | Errors |
 | --- | --- | --- | --- | --- | --- |
-| POST | `/api/auth/login` | anyone | `{identifier, password}` | `200 {token, user: {id, name, role}}` | `401 Invalid credentials` (same message for unknown user, wrong password, not activated, disabled) |
+| POST | `/api/auth/login` | anyone | `{identifier, password}` | `200 {token, user}` (user object below) | `401 Invalid credentials` (same message for unknown user, wrong password, not activated, disabled) |
 | POST | `/api/auth/activate` | anyone | `{identifier, new_password}` (8+ chars, max 72 bytes) | `200` same as login | `400 This account cannot be activated` (not on the roster, not a student, already has a password) |
-| POST | `/api/auth/register` | anyone | `{name, identifier, section_id, password}` | `201` same as login | `400` bad roll-number format or unknown section, `409` already registered |
-| GET | `/api/auth/me` | any user | | `200 {id, name, role}` | `401` |
-| POST | `/api/auth/users` | admin | `{name, identifier, password, role}` (`role` is `teacher`, `hod` or `admin`) | `201 {id, name, role}` | `403`, `400` bad role, `409` identifier exists |
+| GET | `/api/auth/me` | any user | | `200` user object | `401` |
+| POST | `/api/auth/users` | admin | `{name, identifier, password, role}` (password 8+ chars; `role` is `teacher`, `hod` or `admin`) | `201` user object | `403`, `400` bad role, `409` identifier exists |
 
 `identifier` is the login key: the roll number for students (for example `se-9244330`), and the staff identifier for staff. It is trimmed and lowercased before use. Send `Authorization: Bearer <token>` afterwards.
+
+There is no self-registration: students activate a roster account with `/activate`, and an admin creates staff accounts with `/users`.
+
+User object: `{id, name, role, identifier, department_id, section_id, teacher_id}`. `department_id`, `section_id` and `teacher_id` are `null` when they do not apply; `teacher_id` is the `Teacher` row linked to this account, used to load a teacher's own timetable.
 
 ## 3. Swap requests (`swaps.py`)
 
 | Method | URL | Who | Notes |
 | --- | --- | --- | --- |
-| POST | `/api/swap-requests` | teacher (owner of the class) | body `{entry_id, target_entry_id, reason?}`. `201` returns the swap plus `warnings: [{type, entry_id, detail, severity}]` (soft conflicts do not block). `400` same class twice, `403` not your class, `404` entry missing, `409` hard clash (with `conflicts`) or a pending swap already exists |
+| POST | `/api/swap-requests` | teacher (owner of the class) | body `{entry_id, target_entry_id, reason?}`. `201` returns the swap plus `warnings: [{type, entry_id, detail, severity}]` (soft conflicts do not block). `400` same class twice, or both classes are the same course for the same section, `403` not your class, `404` entry missing, `409` hard clash (with `conflicts`) or a pending swap already exists |
 | GET | `/api/swap-requests` | teacher, hod, admin | teacher: own requests; hod: pending requests of their department; admin: all pending |
 | POST | `/api/swap-requests/{id}/approve` | hod (same department as the requester), admin | optional body `{note?}`. `403` not allowed to decide (including your own request), `404`, `409` already decided or a hard clash now |
 | POST | `/api/swap-requests/{id}/reject` | hod (same department), admin | body `{note}` (required, not blank). Same errors as approve |
@@ -46,9 +49,11 @@ Swap object: `{id, requester_teacher_id, entry_id, target_entry_id, status (pend
 
 | Method | URL | Who | Notes |
 | --- | --- | --- | --- |
-| POST | `/api/makeup/find-slots` | teacher, hod, admin | body `{section_id, teacher_id, course_id, duration_minutes? (30-240, default 60), preferred_room_id?, days?, term?}`. Returns `[{day_of_week, start_time, end_time, recommended_room, fallback_rooms, soft_warnings}]`; room object `{room_id, room_name, capacity, room_type, building, is_preferred}`. `422` bad day or unknown section/teacher/course |
-| POST | `/api/makeup` | teacher, hod, admin | body `{course_id, section_id, teacher_id, room_id, day_of_week, start_time, end_time, class_date?, reason?, term?}`. `201` returns the makeup. `404` something not found, `409` room too small or capacity unknown, wrong room type, or a clash, `422` end before start |
+| POST | `/api/makeup/find-slots` | teacher, hod, admin | body `{section_id, teacher_id, course_id, duration_minutes? (30-240, default 60), preferred_room_id?, days?, term?}`. Returns `[{day_of_week, start_time, end_time, recommended_room, fallback_rooms, soft_warnings}]`; room object `{room_id, room_name, capacity, room_type, building, is_preferred}`. `403` not allowed to act for this teacher (see below), `422` bad day or unknown section/teacher/course |
+| POST | `/api/makeup` | teacher, hod, admin | body `{course_id, section_id, teacher_id, room_id, day_of_week, start_time, end_time, class_date?, reason?, term?}`. `201` returns the makeup. `403` not allowed to book for this teacher, `404` something not found, `409` room too small or capacity unknown, wrong room type (a lab course needs a lab room, a lecture course cannot use a lab), a clash, or the room was booked by someone else a moment ago, `422` end before start or bad day |
 | GET | `/api/makeup` | any user | query: `section_id`, `teacher_id`. Only `scheduled` ones |
+
+Who may act for which teacher: a teacher only for their own `Teacher` record, an HOD for any teacher in their own department, an admin for anyone.
 
 Makeup object: `{id, course_id, section_id, teacher_id, room_id, class_date, day_of_week, start_time, end_time, reason, status (scheduled/cancelled)}`.
 
@@ -109,7 +114,7 @@ Import response (`dry_run=true` saves nothing):
 
 | Method | URL | Who | Notes |
 | --- | --- | --- | --- |
-| POST | `/api/exam-papers` | teacher, hod, admin | multipart: `course_id`, `title`, `term`, `exam_type` (`quiz/midterm/final/sessional/other`), `year?`, `instructor_name?` (the given name, else the uploader's), `file` (pdf/png/jpg/doc/docx, max 20 MB) |
+| POST | `/api/exam-papers` | teacher, hod, admin | multipart: `course_id`, `title`, `term`, `exam_type` (`quiz/midterm/final/sessional/other`), `year?`, `instructor_name?` (see the rule below), `file` (pdf/png/jpg/doc/docx, max 20 MB) |
 | GET | `/api/exam-papers` | any user | query: `course_id`, `term`, `exam_type`, `year`, `q`, `skip`, `limit` |
 | GET | `/api/exam-papers/{id}` | any user | |
 | GET | `/api/exam-papers/{id}/download` | any user | returns the file as an attachment |
@@ -117,11 +122,13 @@ Import response (`dry_run=true` saves nothing):
 
 Paper object: `{id, course_id, title, term, exam_type, year, instructor_name, original_filename, file_size, uploaded_by, created_at}`.
 
+**`instructor_name` rule** (exam papers and lecture materials): a teacher's upload is always filed under the teacher's own name, so a teacher cannot put files under a colleague's name. An HOD or admin may name another instructor; a blank or missing name falls back to the uploader's name.
+
 ## 9. Lecture material archive (`materials.py`)
 
 | Method | URL | Who | Notes |
 | --- | --- | --- | --- |
-| POST | `/api/lecture-materials` | teacher, hod, admin | multipart: `course_id`, `title`, `material_type` (`notes/slides/assignment/other`), `instructor_name?` (the given name if not blank, else the uploader's), `term?`, `description?`, `file` (pdf/ppt/pptx/doc/docx/txt/zip/png/jpg) |
+| POST | `/api/lecture-materials` | teacher, hod, admin | multipart: `course_id`, `title`, `material_type` (`notes/slides/assignment/other`), `instructor_name?` (see the rule below), `term?`, `description?`, `file` (pdf/ppt/pptx/doc/docx/txt/zip/png/jpg) |
 | GET | `/api/lecture-materials` | any user | query: `course_id`, `instructor_name`, `material_type`, `term`, `q`, `skip`, `limit` |
 | GET | `/api/lecture-materials/by-course/{course_id}` | any user | `{course_id, course_code, course_title, instructors: [{instructor_name, materials: [...]}]}` |
 | GET | `/api/lecture-materials/{id}` | any user | |
@@ -185,10 +192,6 @@ An event that starts before the month but runs into it is included in that month
 
 ## Open decisions (this file will change when they are settled)
 
-These come from the backend review. Until each is decided and merged, the code may differ from what is written above.
+Until each is decided and merged, the code may differ from what is written above.
 
-- **Login key (C5):** the contract says `identifier` (roll number). The `users` model still has `email`.
-- **Self-registration (M8):** `POST /api/auth/register` may be removed in favour of `activate` only.
 - **HOD accounts (D2):** `POST /api/auth/users` will need `department_id` when `role` is `hod`.
-- **Makeup booking (M4):** teachers will only be able to book for their own teacher record.
-- **Makeup room type (M3):** whether lecture courses may use labs is still to be decided.
