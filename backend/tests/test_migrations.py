@@ -3,25 +3,24 @@
 Skipped until the first revision exists in alembic/versions/ (see alembic/README.md).
 After that, a model change without a matching migration fails here.
 """
+import importlib
+import pkgutil
 from pathlib import Path
 
 import pytest
+import sqlalchemy as sa
+# Imported normally, not with pytest.importorskip: alembic is a runtime
+# dependency (requirements.txt), so a missing package must fail, not skip.
+from alembic import command
+from alembic.config import Config
 
 BACKEND = Path(__file__).resolve().parents[1]
 VERSIONS = BACKEND / "alembic" / "versions"
 
 
 def test_alembic_upgrade_head_matches_the_models(tmp_path):
-    pytest.importorskip("alembic")
     if not list(VERSIONS.glob("*.py")):
         pytest.skip("first migration not generated yet: run `alembic revision --autogenerate -m 'initial schema'`")
-
-    import importlib
-    import pkgutil
-
-    import sqlalchemy as sa
-    from alembic import command
-    from alembic.config import Config
 
     import app.models
     from app.database import Base
