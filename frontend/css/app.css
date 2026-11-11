@@ -1064,10 +1064,12 @@ body.gpa-page {
 
 /* ----- Page setup: campus photo under a navy overlay ----- */
 body.dash-page {
-  --dash-card-shadow: 0 10px 30px rgba(4, 14, 42, 0.35);
   --dash-line: #e3e9f5;
 
-  min-height: 100vh;
+  /* Exactly one screen tall and never scrolls */
+  height: 100vh;
+  height: 100dvh;               /* mobile: ignore the browser's URL bar */
+  overflow: hidden;
   display: flex;
   flex-direction: column;
   font-family: "Plus Jakarta Sans", "Segoe UI", Arial, sans-serif;
@@ -1180,12 +1182,69 @@ body.dash-page {
 .dash-page .profile-menu .dash-logout:hover { background: #fff1ee; }
 
 
-/* ----- Hero: greeting over the photo (landing .hero style, shorter) ----- */
+/* ----- Below the fixed top bar: side menu (left) + greeting ----- */
+.dash-page .dash-main {
+  display: flex;
+  flex: 1;
+  min-height: 0;                /* lets it shrink to fit the screen */
+  padding-top: 72px;            /* height of the fixed .navbar */
+}
+
+
+/* ----- Side menu: icon + name, no boxes (like the NUML site's links) ----- */
+.dash-page .dash-side {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+  width: 230px;
+  padding: 24px 16px;
+  background: rgba(4, 14, 42, 0.45);
+  border-right: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.dash-page .dash-side a {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 14px;
+  font-size: 16px;
+  font-weight: 700;
+  color: white;
+  border-radius: 10px;
+  transition: background 0.2s, color 0.2s;
+}
+
+.dash-page .dash-side a:hover,
+.dash-page .dash-side a:focus-visible {
+  color: #7cc4ff;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.dash-page .dash-side a:focus-visible { outline: 2px solid #7cc4ff; outline-offset: 2px; }
+
+.dash-page .dash-side svg {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+
+/* ----- Hero: greeting over the photo, centred in the space that is left ----- */
 .dash-page .dash-hero {
   display: flex;
+  flex: 1;
   flex-direction: column;
   align-items: center;
-  padding: 120px 24px 56px;
+  justify-content: center;
+  min-width: 0;
+  padding: 24px;
   color: white;
   text-align: center;
 }
@@ -1220,287 +1279,43 @@ body.dash-page {
 }
 
 
-/* ----- Content column ----- */
-.dash-page .dash-body {
-  flex: 1;
-  width: 100%;
-  max-width: 1180px;
-  margin: 0 auto;
-  padding: 0 24px 72px;
-}
-
-.dash-page .dash-section-title {
-  margin: 0 0 16px;
-  font-size: 20px;
-  color: white;
-  letter-spacing: -0.3px;
-}
-
-
-/* ----- Quick access cards (landing .feature look) ----- */
-.dash-page .dash-cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 18px;
-  margin-bottom: 28px;
-}
-
-.dash-page .dash-card {
-  display: flex;
-  flex-direction: column;
-  padding: 24px 22px;
-  color: var(--ink);
-  background: white;
-  border-radius: 20px;
-  box-shadow: var(--dash-card-shadow);
-  transition: transform 0.25s, box-shadow 0.25s;
-}
-
-.dash-page .dash-card:hover,
-.dash-page .dash-card:focus-visible {
-  transform: translateY(-6px);
-  box-shadow: 0 18px 38px rgba(0, 0, 0, 0.35);
-}
-
-.dash-page .dash-card:focus-visible { outline: 3px solid #7cc4ff; outline-offset: 3px; }
-
-/* Emoji tile (same as the landing .ic) */
-.dash-page .ic {
-  display: grid;
-  place-items: center;
-  width: 52px;
-  height: 52px;
-  margin-bottom: 16px;
-  font-size: 26px;
-  background: var(--bg);
-  border-radius: 14px;
-}
-
-.dash-page .ic.sm {
-  display: inline-grid;
-  width: 34px;
-  height: 34px;
-  margin: 0;
-  font-size: 17px;
-  border-radius: 10px;
-  vertical-align: middle;
-}
-
-.dash-page .dash-card h3 { margin: 0 0 6px; font-size: 18px; color: var(--navy); }
-
-.dash-page .dash-card p {
-  flex: 1;
-  margin: 0 0 16px;
-  font-size: 14px;
-  line-height: 1.5;
-  color: var(--muted);
-}
-
-.dash-page .dash-card-go {
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--blue);
-}
-
-.dash-page .dash-card:hover .dash-card-go { text-decoration: underline; }
-
-
-/* ----- Lower row: Upcoming (wide) + Your account (narrow) ----- */
-.dash-page .dash-split {
-  display: grid;
-  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
-  gap: 18px;
-  align-items: start;
-}
-
-.dash-page .dash-panel {
-  padding: 24px;
-  background: white;
-  border-radius: 20px;
-  box-shadow: var(--dash-card-shadow);
-}
-
-.dash-page .dash-panel-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 16px;
-}
-
-.dash-page .dash-panel-head h2 {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin: 0;
-  font-size: 18px;
-  color: var(--navy);
-}
-
-.dash-page .dash-hint {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--blue);
-}
-
-
-/* ----- Upcoming events list ----- */
-.dash-page .dash-events {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.dash-page .dash-event {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  padding: 12px 14px 12px 12px;
-  border: 1px solid var(--dash-line);
-  border-radius: 16px;
-  transition: border-color 0.2s, background 0.2s;
-}
-
-.dash-page .dash-event:hover { background: #f8faff; border-color: #cfdcf3; }
-
-/* Date badge ("20 / NOV"); type-* picks its color */
-.dash-page .dash-event-date {
-  display: flex;
-  flex: none;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  width: 54px;
-  height: 54px;
-  line-height: 1.1;
-  border-radius: 14px;
-}
-
-.dash-page .dash-event-date strong { font-size: 19px; }
-.dash-page .dash-event-date small  { font-size: 11px; font-weight: 700; letter-spacing: 1px; }
-
-.dash-page .type-event      { color: white; background: var(--blue); }
-.dash-page .type-deadline   { color: white; background: var(--navy); }
-.dash-page .type-department { color: var(--blue); background: #e4edfb; }
-.dash-page .type-holiday    { color: #15803d; background: #dcfce7; }
-
-.dash-page .dash-event-body {
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  gap: 3px;
-  min-width: 0;                 /* long titles wrap instead of widening the row */
-}
-
-.dash-page .dash-event-title { font-size: 15px; color: var(--navy); overflow-wrap: break-word; }
-.dash-page .dash-event-meta  { font-size: 13px; color: var(--muted); }
-
-/* "Tomorrow", "In 5 days" chip */
-.dash-page .dash-event-when {
-  flex: none;
-  padding: 5px 12px;
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--blue);
-  background: #e4edfb;
-  border-radius: 30px;
-  white-space: nowrap;
-}
-
-/* "Loading...", "Nothing coming up", errors */
-.dash-page .dash-events-msg {
-  padding: 22px;
-  font-size: 14px;
-  text-align: center;
-  color: var(--muted);
-  background: var(--bg);
-  border-radius: 16px;
-}
-
-
-/* ----- Your account panel ----- */
-.dash-page .dash-me-card {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  padding: 14px;
-  background: var(--bg);
-  border-radius: 16px;
-}
-
-.dash-page .dash-me-card div { display: flex; flex-direction: column; min-width: 0; }
-.dash-page .dash-me-card strong { font-size: 16px; color: var(--navy); overflow-wrap: break-word; }
-.dash-page .dash-me-card small  { font-size: 13px; color: var(--muted); }
-
-.dash-page .dash-me-facts {
-  margin: 14px 0 18px;
-  padding: 0;
-  list-style: none;
-}
-
-.dash-page .dash-me-facts li {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 10px 2px;
-  font-size: 14px;
-  border-bottom: 1px solid var(--dash-line);
-}
-
-.dash-page .dash-me-facts li:last-child { border-bottom: 0; }
-.dash-page .dash-me-facts span   { color: var(--muted); }
-.dash-page .dash-me-facts strong { color: var(--navy); text-align: right; }
-
-/* Full-width buttons; master .btn.solid is the blue one */
-.dash-page .dash-btn {
-  display: block;
-  width: 100%;
-  text-align: center;
-}
-
-.dash-page .dash-btn + .dash-btn { margin-top: 10px; }
-
-.dash-page .dash-btn.ghost {
-  color: var(--navy);
-  border: 2px solid var(--dash-line);
-}
-
-.dash-page .dash-btn.ghost:hover { border-color: var(--blue); color: var(--blue); }
-
-
 /* ----- Footer sits at the bottom (master .footer) ----- */
 .dash-page .footer { background: rgba(4, 14, 42, 0.85); }
 
 
 /* ----- Tablet ----- */
 @media (max-width: 980px) {
-  body.dash-page { background-attachment: scroll; }   /* fixed backgrounds jank on mobile */
-  .dash-page .dash-links { display: none; }           /* the cards below are the menu */
+  .dash-page .dash-links { display: none; }           /* the side menu is the menu */
   .dash-page .dash-bar { justify-content: space-between; }
-  .dash-page .dash-hero h1 { font-size: 36px; }
-  .dash-page .dash-split { grid-template-columns: minmax(0, 1fr); }
+  .dash-page .dash-side { width: 200px; }
+  .dash-page .dash-hero h1 { font-size: 34px; }
 }
 
-/* ----- Phone ----- */
+/* ----- Phone: the side menu turns into a row of icons with names under them ----- */
 @media (max-width: 640px) {
+  body.dash-page { background-attachment: scroll; }   /* fixed backgrounds jank on mobile */
   .dash-page .profile-name { display: none; }         /* avatar + arrow only */
-  .dash-page .dash-hero { padding: 96px 16px 36px; }
-  .dash-page .dash-hero h1 { font-size: 28px; }
+  .dash-page .dash-main { flex-direction: column; padding-top: 68px; }
+  .dash-page .dash-side {
+    flex-direction: row;
+    justify-content: space-between;
+    width: auto;
+    padding: 8px 6px;
+    border-right: 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  }
+  .dash-page .dash-side a {
+    flex: 1;
+    flex-direction: column;
+    gap: 5px;
+    padding: 8px 2px;
+    font-size: 11px;
+    text-align: center;
+  }
+  .dash-page .dash-hero { padding: 16px; }
+  .dash-page .dash-hero h1 { font-size: 26px; }
   .dash-page .dash-hero p { font-size: 15px; }
-  .dash-page .dash-body { padding: 0 16px 48px; }
-  .dash-page .dash-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
-  .dash-page .dash-card { padding: 18px 16px; }
-  /* 5 cards in 2 columns: the last one spans the row instead of sitting alone */
-  .dash-page .dash-card:last-child:nth-child(odd) { grid-column: 1 / -1; }
-  .dash-page .dash-card p { font-size: 13px; }
-  .dash-page .dash-panel { padding: 18px 16px; }
-  /* Events: the chip drops to its own line under the title */
-  .dash-page .dash-event { flex-wrap: wrap; }
-  .dash-page .dash-event-body { flex-basis: calc(100% - 68px); }   /* 54px badge + 14px gap */
-  .dash-page .dash-event-when { margin-left: 68px; }
+  .dash-page .footer { padding: 14px 16px; font-size: 12px; }
 }
 
 /* =========================================================

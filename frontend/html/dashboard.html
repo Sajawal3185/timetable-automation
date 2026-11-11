@@ -44,56 +44,41 @@
     </div>
   </header>
 
-  <!-- Hero: greeting over the campus photo -->
-  <section class="dash-hero">
-    <span class="pill" id="today"></span>
-    <h1><span id="greeting">Welcome back</span>,<br>what do you want to explore today?</h1>
-    <p>Your past papers, lectures, software links and timetable, all in one place.</p>
-  </section>
+  <div class="dash-main">
 
-  <main class="dash-body">
+    <!-- Side menu: just an icon and a name for each part of the archive -->
+    <nav class="dash-side" aria-label="Quick access">
+      <a href="lecture.html">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+        Lectures
+      </a>
+      <a href="pastpapers.html">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8"/></svg>
+        Past Papers
+      </a>
+      <a href="tools-resources.html">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5M12 15V3"/></svg>
+        Resources
+      </a>
+      <a href="gpacal.html">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M8 6h8M8 11h.01M12 11h.01M16 11h.01M8 15h.01M12 15h.01M16 15h.01M8 19h.01M12 19h.01M16 19h.01"/></svg>
+        GPA &amp; CGPA
+      </a>
+      <!-- Separate system with its own login (roll number), see html/timetable/ -->
+      <a href="timetable/timetable-login.html">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+        Timetable
+      </a>
+    </nav>
 
-    <!-- Quick access: one card per part of the archive (filled by dashboard.js) -->
-    <section aria-labelledby="quickTitle">
-      <h2 class="dash-section-title" id="quickTitle">Quick access</h2>
-      <div class="dash-cards" id="quickCards"></div>
+    <!-- Hero: greeting over the campus photo -->
+    <section class="dash-hero">
+      <span class="pill" id="today"></span>
+      <h1><span id="greeting">Welcome back</span>,<br>what do you want to explore today?</h1>
+      <p>Your past papers, lectures, software links and timetable, all in one place.</p>
     </section>
 
-    <div class="dash-split">
-
-      <!-- Upcoming: deadlines, events and holidays from the university calendar -->
-      <section class="dash-panel" aria-labelledby="eventsTitle">
-        <div class="dash-panel-head">
-          <h2 id="eventsTitle"><span class="ic sm" aria-hidden="true">📌</span> Upcoming</h2>
-          <span class="dash-hint" id="eventsHint"></span>
-        </div>
-        <ul class="dash-events" id="eventsList" aria-live="polite">
-          <li class="dash-events-msg">Loading the calendar…</li>
-        </ul>
-      </section>
-
-      <!-- You: who is logged in, and the two things you can do from here -->
-      <aside class="dash-panel dash-me" aria-labelledby="meTitle">
-        <div class="dash-panel-head">
-          <h2 id="meTitle"><span class="ic sm" aria-hidden="true">👤</span> Your account</h2>
-        </div>
-        <div class="dash-me-card">
-          <span class="avatar lg" id="meAvatar"></span>
-          <div>
-            <strong id="meName"></strong>
-            <small id="meId"></small>
-          </div>
-        </div>
-        <ul class="dash-me-facts">
-          <li><span>Role</span><strong id="meRole">-</strong></li>
-          <li><span>Signed in to</span><strong>NUML Archive</strong></li>
-        </ul>
-        <a href="timetable/timetable-login.html" class="btn solid dash-btn">Open my timetable</a>
-        <a href="login.html" class="btn dash-btn ghost dash-logout">Log out</a>
-      </aside>
-
-    </div>
-  </main>
+  </div>
 
   <!-- Footer: same as the landing page -->
   <footer class="footer">
