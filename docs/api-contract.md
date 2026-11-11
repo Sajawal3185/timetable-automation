@@ -5,6 +5,8 @@ FastAPI's live docs at `/docs` can be used to check it.
 
 ## Rules for everyone
 
+- **URLs:** every endpoint is `{API_BASE}/api/...`. Bodies are JSON, except file uploads (multipart). In the frontend, `API_BASE = null` switches to the mock files.
+- **Tokens** expire after 60 minutes (`ACCESS_TOKEN_EXPIRE_MINUTES`). There is no refresh token: on any `401` the frontend sends the user back to the login page.
 - **Auth:** every endpoint except `POST /api/auth/login`, `POST /api/auth/activate` and `GET /api/health` needs `Authorization: Bearer <JWT>`. Roles (lowercase): `student`, `teacher`, `hod`, `admin`. The role always comes from the database, never from the request.
 - **Errors** look like `{"detail": "message"}`. Validation errors (422) carry a list in `detail`. A role that is not allowed gets `403` with a message in `detail`. Swap conflicts (409) carry an object: `{"detail": {"message": "...", "conflicts": [...]}}`.
 - **Formats:** dates `YYYY-MM-DD`; times `HH:MM` (24 hour); days `Monday` ... `Sunday` (short forms like `Mon` are accepted only in query strings); timestamps ISO 8601.
@@ -190,8 +192,8 @@ Paper object: `{id, course_id, title, term, exam_type, year, instructor_name, or
 
 An event that starts before the month but runs into it is included in that month.
 
-## Open decisions (this file will change when they are settled)
+## Decided, not merged yet
 
-Until each is decided and merged, the code may differ from what is written above.
+These are decided in the plan; the code changes when the task merges, and this file is updated in that PR.
 
-- **HOD accounts (D2):** `POST /api/auth/users` will need `department_id` when `role` is `hod`.
+- **HOD accounts (D2, lands with B-7):** `POST /api/auth/users` takes `department_id`, required when `role` is `hod`, so the HOD can decide their department's swaps.
