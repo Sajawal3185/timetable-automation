@@ -25,6 +25,6 @@ def test_no_second_role_check_implementation():
     """Routers must import require_roles from app.core.permissions, not define their own."""
     assert not (APP / "routers" / "portal_deps.py").exists()
     for path in (APP / "routers").glob("*.py"):
-        source = path.read_text()
+        source = path.read_text(encoding="utf-8")
         assert not re.search(r"def\s+(require_roles?|_require_staff)\b", source), path.name
         assert "portal_deps" not in source, path.name
