@@ -22,6 +22,7 @@
     login: "login.html",
     forgot: "forgot-password.html",
     dashboard: "dashboard.html",
+    adminDashboard: "admin-dashboard.html",
     papers: "pastpapers.html",
     lectures: "lecture.html",
     resources: "tools-resources.html",
@@ -92,6 +93,12 @@
     const all = readJSON(PROFILES_KEY, {});
     all[profile.email.toLowerCase()] = profile;
     localStorage.setItem(PROFILES_KEY, JSON.stringify(all));
+  }
+
+  /* Start page after login: admins and HODs review uploads, everyone else
+     gets the normal dashboard. Same roles as ADMINS in the backend. */
+  function homeFor(user) {
+    return user && (user.role === "admin" || user.role === "hod") ? PAGES.adminDashboard : PAGES.dashboard;
   }
 
   function logout() {
@@ -203,7 +210,8 @@
     const here = currentPage();
     if (PUBLIC_PAGES.includes(here)) return;       // login/forgot: nothing to do
     if (!requireLogin()) return;                   // bounce to login, stop here
-    if (here !== PAGES.dashboard) renderNav();     // dashboard has its own header + quick links
+    // Both dashboards have their own header + side menu
+    if (here !== PAGES.dashboard && here !== PAGES.adminDashboard) renderNav();
   }
 
   if (document.readyState === "loading") {
@@ -215,6 +223,6 @@
   window.NUML = {
     PAGES, MIN_PASSWORD, EMAIL_PATTERN,
     parseEmail, getUser, setUser, findProfile, saveProfile,
-    logout, requireLogin, renderQuickLinks
+    logout, requireLogin, renderQuickLinks, homeFor
   };
 })();

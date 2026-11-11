@@ -6,7 +6,7 @@
 
 // Already logged in? Skip the login form.
 if (document.getElementById("loginForm") && NUML.getUser() && NUML.getToken()) {
-  window.location.replace(NUML.PAGES.dashboard);
+  window.location.replace(NUML.homeFor(NUML.getUser()));
 }
 
 const loginForm = document.getElementById("loginForm");
@@ -36,8 +36,8 @@ NUML.setToken(data.token);
       const me = await NUML.api("/api/auth/me");
       NUML.setUser(me);
 
-      // Every role goes to the dashboard for now. Role start pages come later.
-      window.location.href = NUML.PAGES.dashboard;
+      // Admins and HODs start on the review page, everyone else on the dashboard.
+      window.location.href = NUML.homeFor(me);
     } catch (err) {
       NUML.clearToken();
       msg.textContent =

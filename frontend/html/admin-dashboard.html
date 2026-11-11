@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Admin Dashboard | NUML Archive</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/master.css">
+  <link rel="stylesheet" href="../css/app.css">
+</head>
+<!-- Same look as dashboard.html (dash-page), plus admin-page for the review list -->
+<body class="dash-page admin-page">
+
+  <!-- Top bar: same as the student dashboard, with an "Admin" tag on the logo -->
+  <header class="navbar dash-bar">
+    <a href="admin-dashboard.html" class="logo">NUML <span>Archive</span> <small class="admin-tag">Admin</small></a>
+
+    <nav class="dash-links" aria-label="Main menu">
+      <a href="admin-dashboard.html" class="nl active" aria-current="page">Review uploads</a>
+      <a href="lecture.html" class="nl">Lectures</a>
+      <a href="pastpapers.html" class="nl">Past Papers</a>
+      <a href="tools-resources.html" class="nl">Resources</a>
+      <a href="timetable/timetable-login.html" class="nl">Timetable</a>
+    </nav>
+
+    <!-- Profile (click to see Log out) -->
+    <div class="profile-wrap">
+      <button class="profile" id="profileBtn" aria-expanded="false" aria-controls="profileMenu">
+        <span class="avatar" id="userAvatar"></span>
+        <span class="profile-name" id="userName"></span>
+        <span class="chev" aria-hidden="true">&#9662;</span>
+      </button>
+
+      <div class="profile-menu" id="profileMenu" hidden>
+        <p class="profile-menu-who">
+          <strong id="menuName"></strong>
+          <small id="userId"></small>
+        </p>
+        <a href="login.html" class="dash-logout">Log out</a>
+      </div>
+    </div>
+  </header>
+
+  <div class="dash-main">
+
+    <!-- Side menu: icon + name, same as the student dashboard -->
+    <nav class="dash-side" aria-label="Admin menu">
+      <a href="admin-dashboard.html" class="active" aria-current="page">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        Review uploads
+      </a>
+      <a href="lecture.html">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+        Lectures
+      </a>
+      <a href="pastpapers.html">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8"/></svg>
+        Past Papers
+      </a>
+      <a href="tools-resources.html">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5M12 15V3"/></svg>
+        Resources
+      </a>
+      <a href="timetable/timetable-login.html">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+        Timetable
+      </a>
+    </nav>
+
+    <!-- Review area: the page itself never scrolls, only the list inside it -->
+    <main class="admin-main">
+
+      <div class="admin-head">
+        <div>
+          <span class="pill" id="today"></span>
+          <h1><span id="greeting">Welcome back</span>, here is what students uploaded</h1>
+        </div>
+      </div>
+
+      <section class="admin-panel" aria-labelledby="reviewTitle">
+        <div class="admin-toolbar">
+          <h2 id="reviewTitle" class="sr-only">Uploads</h2>
+
+          <!-- Status tabs (counts filled by admin-dashboard.js) -->
+          <div class="admin-tabs" role="tablist" aria-label="Filter by status">
+            <button role="tab" class="admin-tab" data-status="pending" aria-selected="true">Pending <b id="countPending">0</b></button>
+            <button role="tab" class="admin-tab" data-status="approved" aria-selected="false">Accepted <b id="countApproved">0</b></button>
+            <button role="tab" class="admin-tab" data-status="rejected" aria-selected="false">Rejected <b id="countRejected">0</b></button>
+            <button role="tab" class="admin-tab" data-status="all" aria-selected="false">All <b id="countAll">0</b></button>
+          </div>
+
+          <label class="admin-filter">
+            <span class="sr-only">Type</span>
+            <select id="kindFilter">
+              <option value="all">All types</option>
+              <option value="lecture">Lecture slides</option>
+              <option value="paper">Past papers</option>
+            </select>
+          </label>
+        </div>
+
+        <ul class="admin-list" id="uploadList" aria-live="polite">
+          <li class="admin-msg">Loading uploads…</li>
+        </ul>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- Footer: same as the landing page -->
+  <footer class="footer">
+    <b>NUML Archive</b>
+    <span>A project by students of the National University of Modern Languages.</span>
+  </footer>
+
+  <script src="../js/common.js"></script>
+  <script src="../js/api.js"></script>
+  <script src="../js/admin-dashboard.js"></script>
+</body>
+</html>
