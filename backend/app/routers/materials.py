@@ -37,7 +37,7 @@ def upload_material(
     course_id: int = Form(...),
     title: str = Form(..., min_length=1, max_length=200),
     material_type: MaterialType = Form(...),
-    instructor_name: str | None = Form(None, max_length=100, description="defaults to the uploader's name"),
+    instructor_name: str | None = Form(None, max_length=100, description="HOD/admin only; defaults to the uploader's name. A teacher's upload always uses their own name."),
     term: str | None = Form(None, max_length=40),
     description: str | None = Form(None, max_length=2000),
     file: UploadFile = File(...),

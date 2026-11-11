@@ -35,7 +35,7 @@ def upload_exam_paper(
     term: str = Form(..., min_length=1, max_length=40, description='e.g. "Fall 2025"'),
     exam_type: ExamType = Form(...),
     year: int | None = Form(None, ge=1990, le=2100),
-    instructor_name: str | None = Form(None, max_length=100, description="defaults to the uploader's name"),
+    instructor_name: str | None = Form(None, max_length=100, description="HOD/admin only; defaults to the uploader's name. A teacher's upload always uses their own name."),
     file: UploadFile = File(...),
     db: Session = Depends(get_db),
     user=Depends(require_roles(*STAFF)),

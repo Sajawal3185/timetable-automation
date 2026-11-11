@@ -14,8 +14,8 @@ def test_event_crud_and_permissions(client, seed):
     assert r.status_code == 201
     eid = r.json()["id"]
     assert client("student").get(f"/api/events/{eid}").json()["location"] == "Main hall"
-    assert client("admin").patch(f"/api/events/{eid}", json={"title": "Mid-terms"}).json()["title"] == "Mid-terms"
-    assert client("admin").patch(f"/api/events/{eid}", json={"end_date": "2026-10-01"}).status_code == 422
+    assert client("admin").put(f"/api/events/{eid}", json={"title": "Mid-terms"}).json()["title"] == "Mid-terms"
+    assert client("admin").put(f"/api/events/{eid}", json={"end_date": "2026-10-01"}).status_code == 422
     assert client("student").get(f"/api/events/{eid}").json()["end_date"] == "2026-10-25"  # failed update changed nothing
     assert client("student").delete(f"/api/events/{eid}").status_code == 403
     assert client("admin").delete(f"/api/events/{eid}").status_code == 204
