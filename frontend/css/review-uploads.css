@@ -1,0 +1,79 @@
+/* review-uploads.css - Review Uploads page only.
+   Reuses .page-head, .back-link, .page-body, .tt-nav from app.css. */
+
+.ru-page { background: #eef3fb; min-height: 100vh; }
+
+/* Navbar: dark pill for the active link (as in the design) */
+.ru-page .tt-nav { padding: 10px 24px; font-weight: 600; color: #0b1f4d; }
+.ru-page .tt-nav a,
+.ru-page .tt-nav button { color: #0b1f4d; }
+.ru-page .tt-nav a.active { background: #1c1c1c; color: #fff; border-radius: 10px; padding: 9px 16px; }
+.ru-page .tt-nav .who { color: #0b1f4d; font-weight: 600; }
+
+/* Card */
+.ru-card {
+  background: #fff;
+  border-radius: 18px;
+  border-top: 3px solid var(--blue);
+  box-shadow: 0 10px 30px rgba(11, 31, 77, .12);
+  padding: 18px;
+}
+
+/* Tabs + search */
+.ru-top { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px; }
+.ru-tabs { display: flex; gap: 6px; }
+.ru-tab {
+  padding: 10px 16px; border: 0; border-radius: 12px; background: none;
+  color: var(--navy); font-weight: 600; font-size: 15px; font-family: inherit; cursor: pointer;
+}
+.ru-tab:hover { background: #eef3fb; }
+.ru-tab.active { background: var(--blue); color: #fff; }
+.ru-search {
+  width: 224px; padding: 10px 14px; border: 1px solid #d6e0f2; border-radius: 12px;
+  background: #f3f7fe; font-size: 14px; font-family: inherit; color: var(--ink);
+}
+.ru-search:focus { outline: 2px solid var(--blue); outline-offset: 1px; }
+
+/* Bulk action bar */
+.ru-bulk {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 10px;
+  margin: 14px 0 8px; padding: 10px 14px; background: #f3f7fe; border-radius: 12px; color: var(--navy);
+}
+.ru-bulk[hidden] { display: none; }
+.ru-btn { padding: 7px 16px; border-radius: 999px; font-weight: 600; font-size: 14px; font-family: inherit; cursor: pointer; }
+.ru-btn.approve { background: #15803d; border: 1px solid #15803d; color: #fff; }
+.ru-btn.approve:hover { background: #166534; }
+.ru-btn.reject { background: #fff; border: 1px solid #dc2626; color: #dc2626; }
+.ru-btn.reject:hover { background: #fef2f2; }
+
+/* Table */
+.ru-scroll { overflow-x: auto; margin-top: 8px; }
+.ru-table { width: 100%; border-collapse: collapse; min-width: 640px; }
+.ru-table th {
+  text-align: left; padding: 8px 10px; color: #64748b; font-size: 14px; font-weight: 700;
+  border-bottom: 1px solid #e5ebf5;
+}
+.ru-table td { padding: 11px 10px; border-bottom: 1px solid #e5ebf5; font-size: 14px; }
+.ru-table tr:last-child td { border-bottom: 0; }
+.ru-table .c-check { width: 44px; }
+.ru-table .title { font-weight: 700; color: var(--navy); }
+.ru-table .muted { color: #64748b; }
+.ru-table tr.selected td { background: #f7faff; }
+
+/* Type badges */
+.ru-badge { display: inline-block; padding: 3px 14px; border-radius: 999px; color: #fff; font-size: 12px; font-weight: 700; }
+.ru-badge.midterm { background: #2563eb; }
+.ru-badge.lecture { background: #0b1f4d; }
+.ru-badge.final   { background: #7c3aed; }
+
+/* Review button */
+.ru-review {
+  padding: 6px 16px; border: 1px solid #d6e0f2; border-radius: 999px; background: #fff;
+  color: var(--navy); font-weight: 500; font-size: 14px; font-family: inherit; cursor: pointer;
+}
+.ru-review:hover { background: #eef3fb; }
+
+@media (max-width: 640px) {
+  .ru-search { width: 100%; }
+  .ru-card { padding: 12px; }
+}

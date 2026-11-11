@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Review Uploads | NUML Timetable Automation</title>
+  <link rel="stylesheet" href="../../css/master.css">
+  <link rel="stylesheet" href="../../css/app.css">
+  <link rel="stylesheet" href="../../css/review-uploads.css">
+</head>
+<body class="tt-page ru-page">
+
+  <!-- Navbar: only 3 things -->
+  <nav class="tt-nav" aria-label="Admin navigation">
+    <a href="review-uploads.html" class="active" aria-current="page">Review Uploads</a>
+    <span class="spacer"></span>
+    <span class="who" id="ruWho">Admin · Admin</span>
+    <button type="button" id="ruLogout">Log out</button>
+  </nav>
+
+  <header class="page-head">
+    <a href="../index.html" class="back-link">← Back to NUML Archive</a>
+    <h1>Review Uploads</h1>
+    <p>Compact list for working through many uploads quickly.</p>
+  </header>
+
+  <main class="page-body">
+    <section class="ru-card">
+
+      <div class="ru-top">
+        <div class="ru-tabs" role="tablist">
+          <button type="button" class="ru-tab active" data-status="pending" role="tab" aria-selected="true">Pending</button>
+          <button type="button" class="ru-tab" data-status="approved" role="tab" aria-selected="false">Approved</button>
+          <button type="button" class="ru-tab" data-status="rejected" role="tab" aria-selected="false">Rejected</button>
+        </div>
+        <input type="search" id="ruSearch" class="ru-search" placeholder="Search title" aria-label="Search title">
+      </div>
+
+      <div class="ru-bulk" id="ruBulk" hidden>
+        <b id="ruCount">0 selected</b>
+        <button type="button" class="ru-btn approve" id="ruApprove">Approve selected</button>
+        <button type="button" class="ru-btn reject" id="ruReject">Reject selected</button>
+      </div>
+
+      <div class="ru-scroll">
+        <table class="ru-table">
+          <thead>
+            <tr>
+              <th class="c-check"><input type="checkbox" id="ruAll" aria-label="Select all"></th>
+              <th>Title</th>
+              <th>Type</th>
+              <th>Uploaded by</th>
+              <th>Date</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="ruRows"></tbody>
+        </table>
+      </div>
+      <p class="empty" id="ruEmpty" hidden>No uploads here.</p>
+
+    </section>
+  </main>
+
+  <script src="../../js/timetable/review-uploads.js"></script>
+</body>
+</html>
