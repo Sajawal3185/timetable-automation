@@ -70,7 +70,9 @@ def empty_rooms(
         TimetableEntry.start_time < end_t,   # overlap rule: A starts before B ends
         TimetableEntry.end_time > start_t,   # and A ends after B starts
     )
-    stmt = select(Room).where(~busy).order_by(Room.capacity, Room.name)
+    # Smallest room first, rooms with unknown capacity (NULL) last. Plain ORDER BY capacity would put
+    # NULLs FIRST on SQLite and MySQL, so unknown rooms would top the list.
+    stmt = select(Room).where(~busy).order_by(Room.capacity.is_(None), Room.capacity, Room.name)
     if min_capacity:
         stmt = stmt.where(Room.capacity >= min_capacity)
     return db.execute(stmt).scalars().all()

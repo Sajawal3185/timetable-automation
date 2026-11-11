@@ -1,6 +1,7 @@
 """API tests: rooms, empty-room search, departments, courses."""
 from datetime import time
 
+from app.models.room import Room
 from app.models.timetable_entry import TimetableEntry
 
 
@@ -64,3 +65,14 @@ def test_departments_and_courses(client, seed):
     assert [x["code"] for x in c.get("/api/courses", params={"search": "design"}).json()] == ["SE201"]
     assert len(c.get("/api/courses", params={"department_id": seed.dept.id}).json()) == 2
     assert c.get("/api/courses", params={"department_id": 999}).json() == []
+
+
+def test_empty_rooms_lists_unknown_capacity_last(client, seed, db):
+    """Rooms made by a timetable import have capacity NULL; they must not top the list (BE-18)."""
+    db.add(Room(name="NEW-9", capacity=None))
+    db.commit()
+    r = client("student").get("/api/rooms/empty", params={"day": "Monday", "start": "10:00", "end": "11:00"})
+    assert r.status_code == 200
+    names = [x["name"] for x in r.json()]
+    assert names == ["R-1", "R-2", "LT-1", "NEW-9"]            # small -> big, unknown last
+    assert r.json()[-1]["capacity"] is None
