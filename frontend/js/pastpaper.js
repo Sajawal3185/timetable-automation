@@ -211,7 +211,7 @@ addSubjects("IT", [
   "Foreign Language"
 ]);
 
-// ---------- Demo Papers ----------
+// ---------- Demo Papers (always approved) ----------
 const papers = [
   {
     id: 1,
@@ -260,6 +260,44 @@ const papers = [
     ]
   }
 ];
+
+// ---------- Approved student uploads ----------
+// Students' uploads wait in UploadStore until an admin approves them on
+// review-uploads.html. Only approved ones are loaded here.
+let approvedUploads = [];
+let uploadUrls = [];
+
+async function loadApprovedUploads() {
+  uploadUrls.forEach(url => URL.revokeObjectURL(url));
+  uploadUrls = [];
+
+  const loaded = [];
+
+  for (const item of UploadStore.list({ kind: "paper", status: "approved" })) {
+    try {
+      const files = await UploadStore.getFiles(item);
+
+      loaded.push({
+        id: item.id,
+        dept: item.dept,
+        subject: item.subject,
+        year: item.year,
+        type: item.type,
+        status: "approved",
+        files: files.map(file => {
+          const url = URL.createObjectURL(file.blob);
+          uploadUrls.push(url);
+          return { name: file.name, url };
+        })
+      });
+    } catch (error) {
+      // File missing from this browser's storage: skip this paper.
+    }
+  }
+
+  approvedUploads = loaded;
+  show();
+}
 
 // ---------- Dropdown Helpers ----------
 function fill(select, items, placeholder) {
@@ -366,6 +404,7 @@ function show() {
   $("hint").hidden = true;
 
   const results = papers
+    .concat(approvedUploads)
     .filter(paper => paper.status === "approved")
     .filter(paper => paper.dept === dept)
     .filter(paper => paper.subject === subject)
@@ -507,7 +546,7 @@ $("cancelUpload").addEventListener("click", () => {
 });
 
 // ---------- Submit Paper ----------
-$("uploadForm").addEventListener("submit", event => {
+$("uploadForm").addEventListener("submit", async event => {
   event.preventDefault();
 
   const message = $("uMsg");
@@ -554,26 +593,36 @@ $("uploadForm").addEventListener("submit", event => {
     }
   }
 
-  papers.push({
-    id: Date.now(),
-    dept,
-    subject,
-    year,
-    type,
-    status: "pending",
-    files: files.map(file => ({
-      name: file.name,
-      url: URL.createObjectURL(file)
-    }))
-  });
+  const submitButton = $("uploadForm").querySelector('button[type="submit"]');
+  submitButton.disabled = true;
+  message.className = "form-msg";
+  message.textContent = "Uploading...";
 
-  resetUploadForm();
+  try {
+    await UploadStore.add({
+      kind: "paper",
+      dept,
+      subject,
+      year,
+      type,
+      title: `${subject} ${year}`,
+      uploadedBy: NUML.getUser() ? NUML.getUser().name : "Student"
+    }, files);
 
-  message.className = "form-msg ok";
-  message.textContent =
-    "Demo only: nothing was uploaded. Uploads will work once the backend is connected.";
+    resetUploadForm();
+
+    message.className = "form-msg ok";
+    message.textContent =
+      "Thank you! Your paper was sent for review. It will appear here once an admin approves it.";
+  } catch (error) {
+    message.className = "form-msg error";
+    message.textContent = error.message || "Upload failed. Please try again.";
+  } finally {
+    submitButton.disabled = false;
+  }
 });
 
 // ---------- Start ----------
 initDropdowns();
 show();
+loadApprovedUploads();

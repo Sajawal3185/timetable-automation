@@ -33,6 +33,7 @@ The landing page (`index.html`) and the Archive dashboard each have one link to
 | `swap-approvals.html` (approve/reject) | no | no | start | yes |
 | `makeup.html` (find slots, book) | no | yes | yes | no |
 | `admin.html` (link to backend `/docs`) | no | no | no | start |
+| `review-uploads.html` (approve/reject student uploads) | no | no | no | yes |
 
 Every page calls `TT.init({ allowed: [...] })` (`js/timetable/tt-layout.js`):
 no token goes to the login, `GET /api/auth/me` decides the role, and a role that
@@ -73,6 +74,7 @@ built and demoed before the backend runs. It still behaves like the API:
 | teacher | `tr-200401` | `teacher123` | CS department, teacher #4 |
 | hod | `hod-100301` | `hodpass123` | SE department, also teacher #2 |
 | admin | `adm-100001` | `adminpass1` | |
+| admin | `adm-100002` | `adminpass2` | second admin, for testing Review Uploads (2 admins must agree) |
 
 Try: as `tr-100201`, swap *Mon 08:30 SE-311* with *Mon 10:00 SE-312* (409:
 teacher clash), then *Wed 10:00 SE-311* with *Wed 08:30 SE-315* (pending). Log

@@ -58,5 +58,6 @@
     "section_id": 3,
     "password_sha256": "80655987eb9235fac865acd7b31a7bb9b4ba800f8a2cec8d92175fa7ec2bb51b",
     "is_active": true
-  }
+  },
+  { "id": 7, "name": "Admin Two", "identifier": "adm-100002", "role": "admin", "department_id": null, "section_id": null, "password_sha256": "71f439b976c9ad6c84510e8bdd292cd59de1e3024bbe4b5230715bfffd9a2d20", "is_active": true }
 ]

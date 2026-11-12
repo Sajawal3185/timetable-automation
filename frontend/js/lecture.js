@@ -211,7 +211,7 @@ addSubjects("IT", [
   "Foreign Language"
 ]);
 
-// ---------- Demo Records ----------
+// ---------- Demo Records (always approved) ----------
 const lectures = [
   {
     id: 1,
@@ -284,9 +284,70 @@ function getSubjectOptions(dept) {
     }));
 }
 
+// ---------- Approved student uploads ----------
+// Students' uploads wait in UploadStore until an admin approves them on
+// review-uploads.html. Only approved ones are loaded here.
+let approvedUploads = [];
+let uploadUrls = [];
+
+async function loadApprovedUploads() {
+  uploadUrls.forEach(url => URL.revokeObjectURL(url));
+  uploadUrls = [];
+
+  const loaded = [];
+
+  for (const item of UploadStore.list({ kind: "lecture", status: "approved" })) {
+    try {
+      const files = await UploadStore.getFiles(item);
+
+      if (files.length === 0) {
+        continue;
+      }
+
+      const url = URL.createObjectURL(files[0].blob);
+      uploadUrls.push(url);
+
+      loaded.push({
+        id: item.id,
+        dept: item.dept,
+        subjectName: item.subject,
+        title: item.title,
+        year: item.year,
+        fileName: files[0].name,
+        fileUrl: url,
+        status: "approved"
+      });
+    } catch (error) {
+      // File missing from this browser's storage: skip this lecture.
+    }
+  }
+
+  approvedUploads = loaded;
+  refreshYears();
+  showLectures();
+}
+
+// Re-fill the year list after new approved lectures arrive.
+function refreshYears() {
+  const dept = $("fDept").value;
+  const subjectName = $("fSubject").value;
+
+  if (!dept || !subjectName) {
+    return;
+  }
+
+  const currentYear = $("fYear").value;
+
+  fill($("fYear"), getYearOptions(dept, subjectName), "Choose Year");
+
+  if ([...$("fYear").options].some(option => option.value === currentYear)) {
+    $("fYear").value = currentYear;
+  }
+}
+
 // ---------- Approved Lectures ----------
 function approvedFor(dept, subjectName) {
-  return lectures.filter(lecture =>
+  return lectures.concat(approvedUploads).filter(lecture =>
     lecture.status === "approved" &&
     lecture.dept === dept &&
     lecture.subjectName === subjectName
@@ -549,7 +610,7 @@ function setupUpload() {
     message.className = "form-msg";
   });
 
-  form.addEventListener("submit", event => {
+  form.addEventListener("submit", async event => {
     event.preventDefault();
 
     const dept = $("uDept").value;
@@ -622,25 +683,34 @@ function setupUpload() {
       return;
     }
 
-    // Demo upload only.
-    lectures.push({
-      id: Date.now(),
-      dept,
-      subjectName,
-      title,
-      year,
-      fileName: file.name,
-      fileUrl: URL.createObjectURL(file),
-      status: "pending"
-    });
+    // Send to the admin review queue (shown on the site only once approved).
+    const submitButton = form.querySelector('button[type="submit"]');
+    submitButton.disabled = true;
+    message.textContent = "Uploading...";
 
-    message.textContent =
-      "Demo only: nothing was uploaded. Uploads will work once the backend is connected.";
+    try {
+      await UploadStore.add({
+        kind: "lecture",
+        dept,
+        subject: subjectName,
+        year,
+        type: "Lecture",
+        title,
+        uploadedBy: NUML.getUser() ? NUML.getUser().name : "Student"
+      }, [file]);
 
-    message.classList.add("ok");
+      form.reset();
+      initUploadSelects();
 
-    form.reset();
-    initUploadSelects();
+      message.className = "form-msg ok";
+      message.textContent =
+        "Thank you! Your lecture was sent for review. It will appear here once an admin approves it.";
+    } catch (error) {
+      message.className = "form-msg error";
+      message.textContent = error.message || "Upload failed. Please try again.";
+    } finally {
+      submitButton.disabled = false;
+    }
   });
 }
 
@@ -650,6 +720,7 @@ function initLectures() {
   setupFilters();
   setupUpload();
   showLectures();
+  loadApprovedUploads();
 }
 
 document.addEventListener("DOMContentLoaded", initLectures);

@@ -27,6 +27,7 @@
     { href: P.timetable, label: "My Timetable", roles: ["student", "teacher", "hod"] },
     { href: P.swaps, label: "Swap Requests", roles: ["teacher"] },
     { href: P.approvals, label: "Swap Approvals", roles: ["hod", "admin"] },
+    { href: P.reviewUploads, label: "Review Uploads", roles: ["admin"] },
     { href: P.makeup, label: "Makeup Classes", roles: ["teacher", "hod"] },
     { href: P.admin, label: "Admin", roles: ["admin"] }
   ];
