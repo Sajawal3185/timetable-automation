@@ -34,8 +34,8 @@ competing versions from the same starting point.
 `users` table fix (review item C5) is merged**, so it describes the final tables:
 
 ```bash
-alembic revision --autogenerate -m "initial schema"
-alembic upgrade head
+grep -n "^## \|^# " backend/alembic/README.md
+git diff backend/alembic/README.md
 ```
 
 Until that file exists, `alembic upgrade head` succeeds but creates **no tables**.
