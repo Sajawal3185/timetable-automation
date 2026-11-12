@@ -18,7 +18,6 @@ from app.models.exam_paper import ExamPaper
 from app.routers.portal_deps import ADMINS, STAFF, get_current_user, require_roles
 from app.schemas.portal import ExamPaperOut, ExamType
 from app.utils.file_storage import PAPER_EXTENSIONS, delete_file, resolve_path, save_upload
-from app.utils.instructor import resolve_instructor_name
 
 router = APIRouter(prefix="/api/exam-papers", tags=["Exam Repository"])
 
@@ -35,7 +34,7 @@ def upload_exam_paper(
     term: str = Form(..., min_length=1, max_length=40, description='e.g. "Fall 2025"'),
     exam_type: ExamType = Form(...),
     year: int | None = Form(None, ge=1990, le=2100),
-    instructor_name: str | None = Form(None, max_length=100, description="HOD/admin only; defaults to the uploader's name. A teacher's upload always uses their own name."),
+    instructor_name: str | None = Form(None, max_length=100),
     file: UploadFile = File(...),
     db: Session = Depends(get_db),
     user=Depends(require_roles(*STAFF)),
@@ -44,7 +43,11 @@ def upload_exam_paper(
     if course is None:
         raise HTTPException(404, "Course not found")
         
-    final_instructor_name = resolve_instructor_name(instructor_name, user)
+    user_role = (getattr(user, "role", "") or "").lower()
+    if user_role == "teacher" or not instructor_name:
+        final_instructor_name = (getattr(user, "name", "") or "Unknown").strip()
+    else:
+        final_instructor_name = instructor_name.strip()
 
     saved = save_upload(file, "exam_papers", PAPER_EXTENSIONS)
     paper = ExamPaper(
@@ -125,7 +128,6 @@ def download_exam_paper(paper_id: int, db: Session = Depends(get_db)):
     return FileResponse(
         file_path, filename=paper.original_filename,
         media_type=media_type or "application/octet-stream",
-        content_disposition_type="attachment",  # uploads are downloaded, never rendered in the page
     )
 
 

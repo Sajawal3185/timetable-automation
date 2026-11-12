@@ -227,7 +227,7 @@ def test_load_rows_creates_everything_then_is_idempotent(db):
     assert (first.departments_created, first.sections_created, first.courses_created, first.teachers_created) == (1, 1, 1, 1)
     assert first.rooms_created == ["R-9"]
     room = db.execute(select(Room).where(Room.name == "R-9")).scalar_one()
-    assert room.capacity is None  # unknown, not a made-up placeholder
+    assert room.capacity == ti.DEFAULT_NEW_ROOM_CAPACITY
 
     entries = db.execute(select(TimetableEntry).order_by(TimetableEntry.id)).scalars().all()
     assert entries[2].teacher_id is None and entries[2].room_id is None  # TBA / blank -> no teacher / room

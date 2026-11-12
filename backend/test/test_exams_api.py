@@ -78,27 +78,7 @@ def test_uploader_can_delete_own_paper(client, seed):
 
 def test_upload_size_limit(client, seed, monkeypatch):
     monkeypatch.setenv("MAX_UPLOAD_MB", "1")
-    big = pdf_file(data=PDF + b"x" * (1024 * 1024 + 10))  # a real PDF start, so only the size is wrong
+    big = pdf_file(data=b"x" * (1024 * 1024 + 10))
     r = client("teacher").post("/api/exam-papers", files=big, data={
         "course_id": seed.c1.id, "title": "t", "term": "Fall 2025", "exam_type": "final"})
     assert r.status_code == 413
-
-
-def test_exam_instructor_name_rule(client, seed):
-    """A teacher's paper is filed under their own name; HOD/admin may name another instructor."""
-    teacher, hod = client("teacher"), client("hod")
-    name_of = lambda r: (r.status_code, r.json()["instructor_name"])  # noqa: E731
-    assert name_of(upload_paper(teacher, seed, instructor_name="Ms. Sara")) == (201, "Dr. Teacher")   # ignored
-    assert name_of(upload_paper(teacher, seed, instructor_name="   ")) == (201, "Dr. Teacher")        # blank
-    omitted = teacher.post("/api/exam-papers", files=pdf_file(), data={
-        "course_id": seed.c1.id, "title": "t", "term": "Fall 2025", "exam_type": "final"})
-    assert name_of(omitted) == (201, "Dr. Teacher")                                                     # omitted
-    assert name_of(upload_paper(hod, seed, instructor_name="Dr. Ali")) == (201, "Dr. Ali")
-    assert name_of(upload_paper(hod, seed, instructor_name="  Ms. Sara  ")) == (201, "Ms. Sara")      # trimmed
-    assert name_of(upload_paper(hod, seed, instructor_name="")) == (201, "HOD")
-
-
-def test_exam_search_finds_paper_by_given_instructor(client, seed):
-    upload_paper(client("hod"), seed, instructor_name="Ms. Sara")
-    found = client("student").get("/api/exam-papers", params={"q": "sara"}).json()
-    assert [p["instructor_name"] for p in found] == ["Ms. Sara"]

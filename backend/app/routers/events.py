@@ -4,7 +4,7 @@
                              department_id).  An event overlapping the range is included.
   GET    /api/events/{id}
   POST   /api/events         admin / HOD
-  PUT    /api/events/{id}    admin / HOD   (send only the fields you want to change)
+  PATCH  /api/events/{id}    admin / HOD
   DELETE /api/events/{id}    admin / HOD
 """
 import calendar
@@ -95,7 +95,7 @@ def create_event(body: EventIn, db: Session = Depends(get_db), user=Depends(requ
     return event
 
 
-@router.put("/{event_id}", response_model=EventOut, dependencies=[Depends(require_roles(*ADMINS))])
+@router.patch("/{event_id}", response_model=EventOut, dependencies=[Depends(require_roles(*ADMINS))])
 def update_event(event_id: int, body: EventUpdate, db: Session = Depends(get_db)):
     event = _get_or_404(db, event_id)
     data = body.model_dump(exclude_unset=True)

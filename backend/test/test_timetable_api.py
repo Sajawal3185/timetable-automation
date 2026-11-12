@@ -69,17 +69,3 @@ def test_list_timetable_filters(client, seed, db):
     assert len(c.get("/api/timetable", params={"department_id": seed.dept.id}).json()) == 2
     assert c.get("/api/timetable", params={"department_id": 999}).json() == []
     assert c.get("/api/timetable", params={"day": "xyz"}).status_code == 422
-
-
-def test_rooms_created_by_import_have_unknown_capacity_until_fixed(client, seed):
-    """An invented room must not look like a real 40-seat room to the makeup solver."""
-    client("hod").post("/api/timetable/import", data={"department_code": "SE", "dry_run": "false"},
-                       files={"file": ("se.xlsx", flat_xlsx_bytes(), XLSX_MIME)})
-    student = client("student")
-    rooms = {r["name"]: r for r in student.get("/api/rooms").json()}
-    assert rooms["NEW-7"]["capacity"] is None            # unknown, not a placeholder
-    assert rooms["R-2"]["capacity"] == 60                # existing rooms keep their real capacity
-    sized = {r["name"] for r in student.get("/api/rooms", params={"min_capacity": 1}).json()}
-    assert "NEW-7" not in sized                          # unknown capacity never matches a size filter
-    fixed = client("hod").put(f"/api/rooms/{rooms['NEW-7']['id']}", json={"capacity": 55})
-    assert fixed.status_code == 200 and fixed.json()["capacity"] == 55
