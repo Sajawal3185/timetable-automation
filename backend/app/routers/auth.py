@@ -1,5 +1,5 @@
 """
-routers/auth.py  (owner: Sajawal)
+routers/auth.py
 
 Endpoints:
     POST /api/auth/login      any user logs in, gets a JWT + their role

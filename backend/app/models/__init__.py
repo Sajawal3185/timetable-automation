@@ -1,4 +1,4 @@
-"""Core SQLAlchemy models package (Sajawal)."""
+"""Core SQLAlchemy models package."""
 from app.models.course import Course
 from app.models.department import Department
 from app.models.room import Room
