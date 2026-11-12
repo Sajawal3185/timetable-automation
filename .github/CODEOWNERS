@@ -34,7 +34,6 @@
 /backend/app/services/notification_service.py    @Eishashahzad
 
 # ---- Portal: rooms, timetable import, exams, materials, GPA, software, events ----
-/backend/app/routers/portal_deps.py              @WajihaMehboob7
 /backend/app/routers/rooms.py                    @WajihaMehboob7
 /backend/app/routers/timetable.py                @WajihaMehboob7
 /backend/app/routers/exams.py                    @WajihaMehboob7
