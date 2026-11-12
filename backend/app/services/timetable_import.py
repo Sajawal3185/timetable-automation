@@ -40,8 +40,6 @@ from app.models.section import Section
 from app.models.teacher import Teacher
 from app.models.timetable_entry import TimetableEntry
 
-DEFAULT_NEW_ROOM_CAPACITY = 40  # used when the sheet names a room we have never seen
-
 DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 _DAY_BY_PREFIX = {d[:3].lower(): d for d in DAYS}
 
@@ -109,7 +107,7 @@ class LoadSummary:
     sections_created: int = 0
     courses_created: int = 0
     teachers_created: int = 0
-    rooms_created: list[str] = field(default_factory=list)  # their capacity is a placeholder
+    rooms_created: list[str] = field(default_factory=list)  # capacity unknown (None) until an admin sets it
 
 
 # --------------------------------------------------------------------------- cell helpers
@@ -470,7 +468,10 @@ def load_rows(db: Session, rows: list[TimetableRow], department_code: str) -> Lo
             if rkey not in rooms:
                 rm = _ci_first(db, Room, Room.name, row.room)
                 if rm is None:
-                    rm = Room(name=row.room, capacity=DEFAULT_NEW_ROOM_CAPACITY)
+                    # The sheet has no capacity, so store None (unknown), never a made-up number.
+                    # The makeup solver rejects rooms with unknown capacity; an admin fixes them
+                    # with PUT /api/rooms/{id} (the names are returned in rooms_created).
+                    rm = Room(name=row.room)
                     db.add(rm)
                     db.flush()
                     summary.rooms_created.append(row.room)

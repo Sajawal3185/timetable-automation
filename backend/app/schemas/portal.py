@@ -31,7 +31,7 @@ class CourseOut(ORM):
 class RoomOut(ORM):
     id: int
     name: str
-    capacity: int
+    capacity: int | None = None  # None = unknown (rooms created by a timetable import)
     building: str | None = None
 
 
