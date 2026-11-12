@@ -32,7 +32,8 @@ def require_roles(*roles: str):
 
 def can_request_swap(user, entry) -> bool:
     """Only a teacher who owns that timetable entry may request a swap for it."""
-    return role_of(user) == TEACHER and entry.teacher.user_id == user.id
+    # An imported entry can have no teacher at all (teacher_id is NULL); nobody owns it.
+    return role_of(user) == TEACHER and entry.teacher is not None and entry.teacher.user_id == user.id
 
 
 def can_decide_swap(user, swap) -> bool:
