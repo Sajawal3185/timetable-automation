@@ -4,7 +4,7 @@ import io
 from openpyxl import Workbook
 
 from app.models.timetable_entry import TimetableEntry
-from test.helpers import XLSX_MIME
+from tests.helpers import XLSX_MIME
 
 
 def flat_xlsx_bytes():

@@ -1,6 +1,6 @@
 """Uploads are accepted by what the file contains, not only by its extension (review item D7)."""
 from app.utils.file_storage import MATERIAL_EXTENSIONS, PAPER_EXTENSIONS, content_matches_extension
-from test.helpers import PDF, PNG, PPTX, any_file
+from tests.helpers import PDF, PNG, PPTX, any_file
 
 JPEG = b"\xff\xd8\xff\xe0" + b"\x00" * 8
 OLE = b"\xd0\xcf\x11\xe0\xa1\xb1\x1a\xe1" + b"\x00" * 8

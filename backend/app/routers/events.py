@@ -1,4 +1,4 @@
-"""Institutional event calendar (Wajiha) - proposal 4.6.
+"""Institutional event calendar - proposal 4.6.
 
   GET    /api/events         list (filter: month=YYYY-MM, from_date, to_date, event_type,
                              department_id).  An event overlapping the range is included.

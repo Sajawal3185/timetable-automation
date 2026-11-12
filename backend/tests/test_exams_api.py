@@ -1,5 +1,5 @@
 """API tests: exam repository (upload, search, download, delete, file safety)."""
-from test.helpers import PDF, pdf_file
+from tests.helpers import PDF, pdf_file
 
 
 def upload_paper(c, seed, **over):

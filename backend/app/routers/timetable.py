@@ -1,11 +1,11 @@
-"""Timetable view + import (Wajiha).
+"""Timetable view + import.
 
   POST /api/timetable/import   upload a department sheet (.xlsx/.csv). Admin/HOD only.
                                dry_run=true (default) only previews; nothing is saved.
   GET  /api/timetable          list entries (filter: section_id, teacher_id, room_id,
                                course_id, department_id, day)
 
-Amna's personal-timetable screen calls GET /api/timetable with teacher_id or section_id.
+The personal-timetable screen calls GET /api/timetable with teacher_id or section_id.
 """
 import os
 import tempfile

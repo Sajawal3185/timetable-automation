@@ -1,10 +1,10 @@
-"""Timetable import (Wajiha) - reads department sheets into ONE common dataset.
+"""Timetable import - reads department sheets into ONE common dataset.
 
 Three stages, each usable on its own:
 
   1. parse_workbook()  file -> list[TimetableRow] (+ issues). No database.
   2. validate_rows()   checks the rows (times, days, duplicates).
-  3. load_rows()       writes rows into Sajawal's tables inside the caller's
+  3. load_rows()       writes rows into the core tables inside the caller's
                        transaction (the router commits or rolls back).
 
 Two sheet layouts are recognised automatically:
@@ -374,7 +374,7 @@ def parse_workbook(path: str | Path, department_code: str) -> ParseResult:
 def validate_rows(rows: list[TimetableRow]) -> tuple[list[TimetableRow], list[Issue]]:
     """Stage 2: drop impossible rows and exact duplicates. Returns (good_rows, issues).
 
-    Teacher/room/section CLASH detection is Taha's conflict_checker.py. Run it
+    Teacher/room/section CLASH detection is done by services/conflict_checker.py. Run it
     after the import; this stage only checks that each row makes sense by itself.
     """
     good: list[TimetableRow] = []
@@ -408,9 +408,8 @@ def load_rows(db: Session, rows: list[TimetableRow], department_code: str) -> Lo
     """Stage 3: write rows into the database. Caller commits (or rolls back on error).
 
     Re-importing the same sheet is safe: an identical entry is skipped, not duplicated.
-    ASSUMPTION: TimetableEntry has section_id, course_id, teacher_id, room_id,
-    day_of_week (full day name), start_time, end_time. Adjust the names below if
-    Sajawal's final model differs.
+    Writes TimetableEntry rows with section_id, course_id, teacher_id, room_id,
+    day_of_week (full day name), start_time, end_time (see models/timetable_entry.py).
     """
     summary = LoadSummary()
     code = department_code.strip().upper()

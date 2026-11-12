@@ -1,4 +1,4 @@
-"""File upload helpers (Wajiha) - used by exam papers and lecture materials.
+"""File upload helpers - used by exam papers and lecture materials.
 
 Files go to UPLOAD_DIR (default: ./uploads, ignored by git). The database stores
 only a RELATIVE path. Stored names are random UUIDs so users cannot overwrite
