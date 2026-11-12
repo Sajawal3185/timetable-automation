@@ -10,6 +10,7 @@ from app.database import get_db
 from app.dependencies import get_current_user
 from app.models.course import Course
 from app.models.makeup_class import MakeupClass
+from app.models.notification import NotificationType
 from app.models.room import Room
 from app.models.section import Section
 from app.models.teacher import Teacher
@@ -20,6 +21,7 @@ from app.schemas.makeup import (
     MakeupSearchIn,
     MakeupSlotSuggestionOut,
 )
+from app.services.notification_service import notify_many, recipients_for_makeup
 from app.services.makeup_solver import WEEKDAYS, _load_active_slots, find_makeup_slots
 from app.services.scheduler_rules import ScheduleSlot, check_hard_clashes, check_room_suitability
 
@@ -144,7 +146,19 @@ def book_makeup_class(
         status="scheduled", created_by=user_id,
     )
     db.add(makeup)
+    # Tell the teacher and the section's students, in the SAME transaction as the
+    # booking: if the booking is refused below, no notification is left behind.
+    when = f"{body.day_of_week} {body.start_time:%H:%M}-{body.end_time:%H:%M}"
+    if body.class_date:
+        when = f"{body.class_date:%d %b %Y}, {when}"
     try:
+        db.flush()  # gives makeup.id for the notification's related_id
+        notify_many(
+            db, recipients_for_makeup(db, body.teacher_id, body.section_id),
+            NotificationType.makeup_added,
+            f"Makeup class added: {course.code} on {when} in {room.name}.",
+            related_id=makeup.id,
+        )
         db.commit()
     except IntegrityError as exc:
         # uq_makeup_room_slot: someone booked this room at this time a moment ago.

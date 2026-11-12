@@ -287,3 +287,35 @@ def test_cancelled_makeup_does_not_block_the_slot_in_the_database(db, seed):
     with pytest.raises(IntegrityError):
         db.commit()
     db.rollback()
+
+
+# ---- notifications on booking ---------------------------------------------
+
+def test_booking_notifies_the_teacher_and_the_sections_students(db, seed):
+    from app.models.notification import Notification
+
+    student = User(name="Student", identifier="s-1", password_hash="x", role="student", section_id=seed.sec.id)
+    outsider = User(name="Other", identifier="s-2", password_hash="x", role="student")  # no section
+    db.add_all([student, outsider])
+    db.commit()
+
+    res = _client_as(db, seed.u_teacher).post("/api/makeup", json=_booking(seed))
+    assert res.status_code == 201
+    rows = db.query(Notification).all()
+    assert {n.user_id for n in rows} == {seed.u_teacher.id, student.id}
+    assert all(n.type.value == "makeup_added" and n.related_id == res.json()["id"] for n in rows)
+    assert "SE301" in rows[0].message and "R-Pref" in rows[0].message
+
+    # a refused booking (same slot again) leaves no extra notification behind
+    assert _client_as(db, seed.u_teacher).post("/api/makeup", json=_booking(seed)).status_code == 409
+    assert db.query(Notification).count() == 2
+
+
+def test_booking_for_a_teacher_without_a_login_still_works(db, seed):
+    """Ms. Sara (t2) is an imported teacher with no user account: nobody to notify, no crash."""
+    from app.models.notification import Notification
+
+    admin = _staff_user(db, "admin-2", "admin")
+    res = _client_as(db, admin).post("/api/makeup", json=_booking(seed, teacher_id=seed.t2.id))
+    assert res.status_code == 201
+    assert db.query(Notification).count() == 0
