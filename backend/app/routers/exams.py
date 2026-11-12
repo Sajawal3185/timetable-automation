@@ -12,10 +12,11 @@ from fastapi.responses import FileResponse
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
+from app.core.permissions import ADMINS, STAFF, require_roles, role_of
 from app.database import get_db
+from app.dependencies import get_current_user
 from app.models.course import Course
 from app.models.exam_paper import ExamPaper
-from app.routers.portal_deps import ADMINS, STAFF, get_current_user, require_roles
 from app.schemas.portal import ExamPaperOut, ExamType
 from app.utils.file_storage import PAPER_EXTENSIONS, delete_file, resolve_path, save_upload
 from app.utils.instructor import resolve_instructor_name
@@ -132,7 +133,7 @@ def download_exam_paper(paper_id: int, db: Session = Depends(get_db)):
 @router.delete("/{paper_id}", status_code=204)
 def delete_exam_paper(paper_id: int, db: Session = Depends(get_db), user=Depends(get_current_user)):
     paper = _get_or_404(db, paper_id)
-    if paper.uploaded_by != user.id and user.role not in ADMINS:
+    if paper.uploaded_by != user.id and role_of(user) not in ADMINS:
         raise HTTPException(403, "Only the uploader or an admin/HOD can delete this paper")
     path = paper.file_path
     db.delete(paper)
