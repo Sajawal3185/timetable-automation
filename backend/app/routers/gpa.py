@@ -1,4 +1,4 @@
-"""GPA / CGPA endpoints (Wajiha) - proposal 4.3.
+"""GPA / CGPA endpoints - proposal 4.3.
 
   GET    /api/gpa/grade-scale    letter grade -> points table the server uses
   POST   /api/gpa/calculate      stateless calculator (nothing is saved)

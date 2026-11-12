@@ -1,4 +1,4 @@
-"""Lecture material archive (Wajiha) - proposal 4.2.
+"""Lecture material archive - proposal 4.2.
 
 Notes and slides from DIFFERENT instructors for the SAME course, side by side.
 
@@ -23,6 +23,7 @@ from app.models.course import Course
 from app.models.lecture_material import LectureMaterial
 from app.schemas.portal import LectureMaterialOut, MaterialsByCourse, MaterialsByInstructor, MaterialType
 from app.utils.file_storage import MATERIAL_EXTENSIONS, delete_file, resolve_path, save_upload
+from app.utils.instructor import resolve_instructor_name
 
 router = APIRouter(prefix="/api/lecture-materials", tags=["Lecture Material Archive"])
 
@@ -37,7 +38,7 @@ def upload_material(
     course_id: int = Form(...),
     title: str = Form(..., min_length=1, max_length=200),
     material_type: MaterialType = Form(...),
-    instructor_name: str | None = Form(None, max_length=100, description="defaults to the uploader's name"),
+    instructor_name: str | None = Form(None, max_length=100, description="HOD/admin only; defaults to the uploader's name. A teacher's upload always uses their own name."),
     term: str | None = Form(None, max_length=40),
     description: str | None = Form(None, max_length=2000),
     file: UploadFile = File(...),
@@ -48,11 +49,7 @@ def upload_material(
     if course is None:
         raise HTTPException(404, "Course not found")
         
-    user_role = (getattr(user, "role", "") or "").lower()
-    if user_role == "teacher" or not instructor_name:
-        final_instructor_name = (getattr(user, "name", "") or "Unknown").strip()
-    else:
-        final_instructor_name = instructor_name.strip()
+    final_instructor_name = resolve_instructor_name(instructor_name, user)
 
     saved = save_upload(file, "lecture_materials", MATERIAL_EXTENSIONS)
     material = LectureMaterial(
@@ -165,6 +162,7 @@ def download_material(material_id: int, db: Session = Depends(get_db)):
     return FileResponse(
         file_path, filename=m.original_filename,
         media_type=media_type or "application/octet-stream",
+        content_disposition_type="attachment",  # uploads are downloaded, never rendered in the page
     )
 
 

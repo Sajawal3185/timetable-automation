@@ -1,4 +1,4 @@
-"""grade_records table (Wajiha) - a student saved grades, proposal 4.3."""
+"""grade_records table - a student saved grades, proposal 4.3."""
 from datetime import datetime
 from sqlalchemy import DateTime, Float, ForeignKey, String, UniqueConstraint, func
 from sqlalchemy.orm import Mapped, mapped_column

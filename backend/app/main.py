@@ -4,8 +4,8 @@ Run locally from backend/:   uvicorn app.main:app --reload
 Interactive API docs:        http://127.0.0.1:8000/docs
 
 This file only wires things together (app, middleware, routers). Business
-logic lives in routers/ and services/. Owner: Sajawal (one owner, so two PRs
-never add routers in conflicting places; ask in your PR to have yours added).
+logic lives in routers/ and services/. It has one owner (see .github/CODEOWNERS),
+so two PRs never add routers in conflicting places: ask in your PR to have yours added.
 
 Table creation is NOT done here on purpose: schema changes go through Alembic
 migrations (task BE-10), so every machine and the server get the same tables.
