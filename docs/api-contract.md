@@ -3,12 +3,14 @@
 The single source of truth for every endpoint. If code and this file disagree, that is a bug: fix one of them in the same PR.
 FastAPI's live docs at `/docs` can be used to check it.
 
+**Pending tags.** Something marked *(pending BE-xx)* or *(lands with BE-xx)* is decided but not in `main` yet, so the code differs from this file until that PR merges. The PR that delivers it removes the tag.
+
 ## Rules for everyone
 
 - **URLs:** every endpoint is `{API_BASE}/api/...`. Bodies are JSON, except file uploads (multipart). In the frontend, `API_BASE = null` switches to the mock files.
 - **Tokens** expire after 60 minutes (`ACCESS_TOKEN_EXPIRE_MINUTES`). There is no refresh token: on any `401` the frontend sends the user back to the login page.
 - **Auth:** every endpoint except `POST /api/auth/login`, `POST /api/auth/activate` and `GET /api/health` needs `Authorization: Bearer <JWT>`. Roles (lowercase): `student`, `teacher`, `hod`, `admin`. The role always comes from the database, never from the request.
-- **Errors** look like `{"detail": "message"}`. Validation errors (422) carry a list in `detail`. A role that is not allowed gets `403` with a message in `detail`. Swap conflicts (409) carry an object: `{"detail": {"message": "...", "conflicts": [...]}}`.
+- **Errors** look like `{"detail": "message"}`. Validation errors (422) carry a list in `detail`. A role that is not allowed gets `403 {"detail": "You do not have permission for this action"}`. Swap conflicts (409) carry an object: `{"detail": {"message": "...", "conflicts": [...]}}`.
 - **Formats:** dates `YYYY-MM-DD`; times `HH:MM` (24 hour); days `Monday` ... `Sunday` (short forms like `Mon` are accepted only in query strings); timestamps ISO 8601.
 - **Pagination:** list endpoints take `skip` and `limit`. Exam papers and materials also return `X-Total-Count`.
 - **Updates** use `PUT` with any subset of fields. The only `PATCH` is marking one notification read.
@@ -27,7 +29,7 @@ FastAPI's live docs at `/docs` can be used to check it.
 | POST | `/api/auth/login` | anyone | `{identifier, password}` | `200 {token, user}` (user object below) | `401 Invalid credentials` (same message for unknown user, wrong password, not activated, disabled) |
 | POST | `/api/auth/activate` | anyone | `{identifier, new_password}` (8+ chars, max 72 bytes) | `200` same as login | `400 This account cannot be activated` (not on the roster, not a student, already has a password) |
 | GET | `/api/auth/me` | any user | | `200` user object | `401` |
-| POST | `/api/auth/users` | admin | `{name, identifier, password, role}` (password 8+ chars; `role` is `teacher`, `hod` or `admin`) | `201` user object | `403`, `400` bad role, `409` identifier exists |
+| POST | `/api/auth/users` | admin | `{name, identifier, password, role, department_id}` (password 8+ chars; `role` is `teacher`, `hod` or `admin`; `department_id` is **required when `role` is `hod`** *(lands with BE-07)*) | `201` user object | `403`, `400` bad role, `400` `hod` without `department_id` or unknown department *(lands with BE-07)*, `409` identifier exists |
 
 `identifier` is the login key: the roll number for students (for example `se-9244330`), and the staff identifier for staff. It is trimmed and lowercased before use. Send `Authorization: Bearer <token>` afterwards.
 
@@ -77,12 +79,13 @@ Notification object: `{id, type (schedule_changed/swap_requested/swap_approved/s
 | Method | URL | Who | Notes |
 | --- | --- | --- | --- |
 | GET | `/api/rooms` | any user | query: `min_capacity`, `building`, `search`, `skip`, `limit` |
-| GET | `/api/rooms/empty` | any user | query: `day`, `start`, `end` (all required), `min_capacity`. Rooms with no class overlapping `[start, end)` |
+| GET | `/api/rooms/empty` | any user | query: `day`, `start`, `end` (all required), `min_capacity`. Rooms with no class overlapping `[start, end)`, smallest first, rooms with unknown capacity last |
 | GET | `/api/rooms/{id}` | any user | 404 if missing |
 | POST | `/api/rooms` | hod, admin | body `{name, capacity, building?}`; 409 if name exists |
 | PUT | `/api/rooms/{id}` | hod, admin | any subset of the body above |
 | GET | `/api/departments` | any user | `[{id, name, code}]` |
 | GET | `/api/courses` | any user | query: `department_id`, `search`, `skip`, `limit` |
+| GET | `/api/sections` | any user | query: `department_id`. Returns `[{id, name, department_id, student_count}]`. Lets the frontend offer "pick a section" *(pending BE-04)* |
 
 Room object: `{id, name, capacity, building}`. `capacity` is `null` when unknown (rooms created by a timetable import); the makeup solver never uses such a room. Course object: `{id, code, title, credit_hours, department_id}`.
 
@@ -125,6 +128,8 @@ Import response (`dry_run=true` saves nothing):
 Paper object: `{id, course_id, title, term, exam_type, year, instructor_name, original_filename, file_size, uploaded_by, created_at}`.
 
 **`instructor_name` rule** (exam papers and lecture materials): a teacher's upload is always filed under the teacher's own name, so a teacher cannot put files under a colleague's name. An HOD or admin may name another instructor; a blank or missing name falls back to the uploader's name.
+
+**Upload checks** (exam papers and lecture materials): the extension must be allowed (`400 File type .xyz not allowed`), the file must not be empty (`400 Uploaded file is empty`) or over the size limit (`413`), and the file's real content must match its extension, so a text file renamed `.pdf` is refused with `400 File content does not look like a real .pdf file`. A `.txt` file is accepted if it has no NUL bytes, or if it starts with a UTF-16 BOM. Downloads are always sent as attachments, never shown in the page.
 
 ## 9. Lecture material archive (`materials.py`)
 
@@ -191,9 +196,3 @@ Paper object: `{id, course_id, title, term, exam_type, year, instructor_name, or
 | DELETE | `/api/events/{id}` | hod, admin | 204 |
 
 An event that starts before the month but runs into it is included in that month.
-
-## Decided, not merged yet
-
-These are decided in the plan; the code changes when the task merges, and this file is updated in that PR.
-
-- **HOD accounts (D2, lands with B-7):** `POST /api/auth/users` takes `department_id`, required when `role` is `hod`, so the HOD can decide their department's swaps.
