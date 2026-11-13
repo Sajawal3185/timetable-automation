@@ -1322,16 +1322,18 @@ body.tt-page {
 .tt-page .page-body.tt-wide { max-width: 1240px; }
 
 
-/* ----- Top nav: navy rounded bar, links as pills, Log out top right ----- */
+/* ----- Top nav: navy rounded bar, links as pills, Log out top right -----
+   tt-layout.js moves the nav inside the photo header (.page-head), so the
+   photo shows around the bar; the header's own padding is the gap. */
 .tt-page .tt-nav {
-  position: sticky;               /* stays at the top while the week scrolls */
-  top: 10px;
-  z-index: 40;
+  position: relative;             /* the bell panel is placed against the bar */
+  z-index: 40;                    /* panel above the card that overlaps the header */
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  margin: 10px 12px 0;
+  margin: 0 0 22px;
+  text-align: left;               /* .page-head centres its text */
   padding: 8px;
   background: var(--navy);
   border-radius: 999px;
@@ -1451,12 +1453,12 @@ body.tt-page {
 }
 
 .tt-page .tt-bell-panel {
-  position: absolute;             /* against .tt-nav (sticky = positioned) */
+  position: absolute;             /* against .tt-nav */
   right: 8px;
   top: calc(100% + 8px);
   z-index: 20;
   width: 340px;
-  max-width: calc(100vw - 40px);  /* 12px nav margin + 8px on each side */
+  max-width: calc(100vw - 56px);  /* 20px header padding + 8px, on each side */
   max-height: 420px;
   overflow-y: auto;
   padding: 10px;
@@ -1540,8 +1542,6 @@ body.tt-page {
    page links, which share each row evenly. */
 @media (max-width: 760px) {
   .tt-page .tt-nav {
-    position: relative;           /* not sticky: two rows would cover too much */
-    top: 0;
     flex-direction: column-reverse;
     align-items: stretch;
     gap: 10px;

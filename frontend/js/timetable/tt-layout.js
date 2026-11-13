@@ -89,6 +89,12 @@
     clear(nav);
     nav.setAttribute("aria-label", "Timetable navigation");
 
+    // Every timetable page puts the nav right before its photo header. Moving
+    // it inside the header lets the photo show all around the rounded bar,
+    // instead of the white page background.
+    const head = nav.nextElementSibling;
+    if (head && head.classList.contains("page-head")) head.insertBefore(nav, head.firstChild);
+
     // Two groups: the page links (left), and who is logged in + bell + Log out
     // (right on a laptop, the top row on a phone; see .tt-nav in app.css).
     const links = el("div", { className: "tt-nav-links" });
