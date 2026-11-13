@@ -143,3 +143,5 @@ def test_creating_hod_with_unknown_department_gives_400(world):
 def test_teacher_account_does_not_need_a_department(world):
     r = world["as"]("admin").post("/api/auth/users", json=_new_user("teacher"))
     assert r.status_code == 201, r.text
+    
+

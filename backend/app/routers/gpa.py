@@ -1,4 +1,4 @@
-"""GPA / CGPA endpoints (Wajiha) - proposal 4.3.
+"""GPA / CGPA endpoints - proposal 4.3.
 
   GET    /api/gpa/grade-scale    letter grade -> points table the server uses
   POST   /api/gpa/calculate      stateless calculator (nothing is saved)
@@ -13,8 +13,8 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.database import get_db
+from app.dependencies import get_current_user
 from app.models.grade_record import GradeRecord
-from app.routers.portal_deps import get_current_user
 from app.schemas.portal import GpaRequest, GpaResponse, GradeRecordIn, GradeRecordOut, TermResultOut
 from app.services import gpa_calculator as calc
 

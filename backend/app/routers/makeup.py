@@ -1,14 +1,16 @@
-"""Makeup slot search and booking endpoints (Sajawal) - proposal 2.3."""
+"""Makeup slot search and booking endpoints - proposal 2.3."""
 from dataclasses import asdict
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
+from app.core.permissions import STAFF, require_roles, role_of
 from app.database import get_db
 from app.dependencies import get_current_user
 from app.models.course import Course
 from app.models.makeup_class import MakeupClass
+from app.models.notification import NotificationType
 from app.models.room import Room
 from app.models.section import Section
 from app.models.teacher import Teacher
@@ -19,19 +21,13 @@ from app.schemas.makeup import (
     MakeupSearchIn,
     MakeupSlotSuggestionOut,
 )
+from app.services.notification_service import notify_many, recipients_for_makeup
 from app.services.makeup_solver import WEEKDAYS, _load_active_slots, find_makeup_slots
 from app.services.scheduler_rules import ScheduleSlot, check_hard_clashes, check_room_suitability
 
 router = APIRouter(prefix="/api/makeup", tags=["Makeup Classes"])
 
-STAFF_ROLES = {"teacher", "hod", "admin"}
 VALID_DAYS = (*WEEKDAYS, "Saturday", "Sunday")
-
-
-def _require_staff(user: User = Depends(get_current_user)) -> User:
-    if (user.role or "").lower() not in STAFF_ROLES:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Staff role required")
-    return user
 
 
 def _check_books_for(user: User, teacher: Teacher) -> None:
@@ -41,7 +37,7 @@ def _check_books_for(user: User, teacher: Teacher) -> None:
     - an HOD for themselves or any teacher in their own department
     - an admin for anyone
     """
-    role = (user.role or "").lower()
+    role = role_of(user)
     if role == "admin" or teacher.user_id == user.id:
         return
     dept = getattr(user, "department_id", None)
@@ -70,7 +66,7 @@ def _lock_booking_rows(db: Session, body: MakeupBookIn) -> None:
 def search_makeup_slots(
     body: MakeupSearchIn,
     db: Session = Depends(get_db),
-    user: User = Depends(_require_staff),
+    user: User = Depends(require_roles(*STAFF)),
 ):
     days = body.days or list(WEEKDAYS)
     for d in days:
@@ -99,7 +95,7 @@ def search_makeup_slots(
 def book_makeup_class(
     body: MakeupBookIn,
     db: Session = Depends(get_db),
-    user: User = Depends(_require_staff),
+    user: User = Depends(require_roles(*STAFF)),
 ):
     if body.end_time <= body.start_time:
         raise HTTPException(status_code=422, detail="end_time must be after start_time")
@@ -150,7 +146,19 @@ def book_makeup_class(
         status="scheduled", created_by=user_id,
     )
     db.add(makeup)
+    # Tell the teacher and the section's students, in the SAME transaction as the
+    # booking: if the booking is refused below, no notification is left behind.
+    when = f"{body.day_of_week} {body.start_time:%H:%M}-{body.end_time:%H:%M}"
+    if body.class_date:
+        when = f"{body.class_date:%d %b %Y}, {when}"
     try:
+        db.flush()  # gives makeup.id for the notification's related_id
+        notify_many(
+            db, recipients_for_makeup(db, body.teacher_id, body.section_id),
+            NotificationType.makeup_added,
+            f"Makeup class added: {course.code} on {when} in {room.name}.",
+            related_id=makeup.id,
+        )
         db.commit()
     except IntegrityError as exc:
         # uq_makeup_room_slot: someone booked this room at this time a moment ago.

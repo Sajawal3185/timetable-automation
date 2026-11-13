@@ -1,0 +1,1052 @@
+{
+  "info": {
+    "name": "Timetable demo (Part 8 demo, top to bottom)",
+    "description": "Task X-1. Runs the 5-minute demo from docs/release-plan.md Part 8 against the API, in order.\n\nBefore every run: `SEED_PASSWORD=... python -m scripts.seed --reset` on the target database.\nSet the collection variables `baseUrl` (local or the Render URL) and `password` (= SEED_PASSWORD, as Current value only, so it is never exported). Then Run collection.\n\nEvery request has tests; all of them pass on a freshly reset seed.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "0. Wake the server",
+      "item": [
+        {
+          "name": "Health check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/health",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"server is up\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "1. Logins (one per role)",
+      "item": [
+        {
+          "name": "Login as student (se-9244330)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/auth/login",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"identifier\": \"se-9244330\",\n  \"password\": \"{{password}}\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"logged in\", () => pm.response.to.have.status(200));",
+                  "const res = pm.response.json();",
+                  "pm.collectionVariables.set(\"studentToken\", res.token);",
+                  "pm.collectionVariables.set(\"studentTeacherId\", res.user.teacher_id);",
+                  "pm.collectionVariables.set(\"studentSectionId\", res.user.section_id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login as teacher (tr-100201, Dr. Ahmed Raza)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/auth/login",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"identifier\": \"tr-100201\",\n  \"password\": \"{{password}}\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"logged in\", () => pm.response.to.have.status(200));",
+                  "const res = pm.response.json();",
+                  "pm.collectionVariables.set(\"teacherToken\", res.token);",
+                  "pm.collectionVariables.set(\"teacherTeacherId\", res.user.teacher_id);",
+                  "pm.collectionVariables.set(\"teacherSectionId\", res.user.section_id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login as HOD (hod-100301, Ms. Sara Khan)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/auth/login",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"identifier\": \"hod-100301\",\n  \"password\": \"{{password}}\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"logged in\", () => pm.response.to.have.status(200));",
+                  "const res = pm.response.json();",
+                  "pm.collectionVariables.set(\"hodToken\", res.token);",
+                  "pm.collectionVariables.set(\"hodTeacherId\", res.user.teacher_id);",
+                  "pm.collectionVariables.set(\"hodSectionId\", res.user.section_id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login as admin (adm-100001)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/auth/login",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"identifier\": \"adm-100001\",\n  \"password\": \"{{password}}\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"logged in\", () => pm.response.to.have.status(200));",
+                  "const res = pm.response.json();",
+                  "pm.collectionVariables.set(\"adminToken\", res.token);",
+                  "pm.collectionVariables.set(\"adminTeacherId\", res.user.teacher_id);",
+                  "pm.collectionVariables.set(\"adminSectionId\", res.user.section_id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Wrong password is refused",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/auth/login",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"identifier\": \"tr-100201\",\n  \"password\": \"not-the-password\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"401 Invalid credentials\", () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "2. Student sees their section's timetable",
+      "item": [
+        {
+          "name": "Student: my section's timetable",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/timetable?section_id={{studentSectionId}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{studentToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"200 and classes listed\", () => {",
+                  "    pm.response.to.have.status(200);",
+                  "    pm.expect(pm.response.json().length).to.be.above(0);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "3. Teacher asks for a swap (clash refused, free slot pending)",
+      "item": [
+        {
+          "name": "Teacher: my timetable",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/timetable?teacher_id={{teacherTeacherId}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{teacherToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "function find(day, start) {",
+                  "    const e = pm.response.json().find(x => x.day_of_week === day && x.start_time.startsWith(start));",
+                  "    pm.expect(e, day + \" \" + start).to.exist;",
+                  "    return e;",
+                  "}",
+                  "",
+                  "pm.test(\"200\", () => pm.response.to.have.status(200));",
+                  "// Dr. Ahmed Raza's classes used by the demo (see backend/scripts/seed.py)",
+                  "const mon = find(\"Monday\", \"08:30\");      // SE-311, BSSE-5A",
+                  "const wed = find(\"Wednesday\", \"10:00\");   // SE-311, BSSE-5A",
+                  "pm.collectionVariables.set(\"clashEntryId\", mon.id);",
+                  "pm.collectionVariables.set(\"freeEntryId\", wed.id);",
+                  "pm.collectionVariables.set(\"makeupSectionId\", mon.section_id);",
+                  "pm.collectionVariables.set(\"makeupCourseId\", mon.course_id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "HOD's classes (the swap targets)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/timetable?teacher_id={{hodTeacherId}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{hodToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "function find(day, start) {",
+                  "    const e = pm.response.json().find(x => x.day_of_week === day && x.start_time.startsWith(start));",
+                  "    pm.expect(e, day + \" \" + start).to.exist;",
+                  "    return e;",
+                  "}",
+                  "",
+                  "pm.test(\"200\", () => pm.response.to.have.status(200));",
+                  "// Ms. Sara Khan's classes: Mon 10:00 SE-312 (5A) clashes, Wed 08:30 SE-315 (5B) is free",
+                  "pm.collectionVariables.set(\"clashTargetId\", find(\"Monday\", \"10:00\").id);",
+                  "pm.collectionVariables.set(\"freeTargetId\", find(\"Wednesday\", \"08:30\").id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Teacher: swap into a clashing slot is refused",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/swap-requests",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{teacherToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"entry_id\": {{clashEntryId}},\n  \"target_entry_id\": {{clashTargetId}},\n  \"reason\": \"Demo: this one clashes\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"409 hard clash\", () => pm.response.to.have.status(409));",
+                  "pm.test(\"says why\", () => pm.expect(pm.response.text().length).to.be.above(10));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Teacher: swap into a free slot is pending",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/swap-requests",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{teacherToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"entry_id\": {{freeEntryId}},\n  \"target_entry_id\": {{freeTargetId}},\n  \"reason\": \"Demo: free slot\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"201 created\", () => pm.response.to.have.status(201));",
+                  "const swap = pm.response.json();",
+                  "pm.test(\"status is pending\", () => pm.expect(swap.status).to.eql(\"pending\"));",
+                  "pm.collectionVariables.set(\"swapId\", swap.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Student cannot approve a swap",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/swap-requests/{{swapId}}/approve",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{studentToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"403\", () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "4. HOD approves",
+      "item": [
+        {
+          "name": "HOD: pending swap requests",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/swap-requests",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{hodToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"200\", () => pm.response.to.have.status(200));",
+                  "const id = pm.collectionVariables.get(\"swapId\");",
+                  "pm.test(\"the demo swap is listed\", () => pm.expect(pm.response.json().map(s => s.id)).to.include(Number(id)));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "HOD: approve the swap",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/swap-requests/{{swapId}}/approve",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{hodToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"note\": \"Approved in the demo\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"status is approved\", () => pm.expect(pm.response.json().status).to.eql(\"approved\"));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "5. Teacher: bell shows 'Swap approved', class moved",
+      "item": [
+        {
+          "name": "Teacher: unread count",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/notifications/unread-count",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{teacherToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"at least one unread\", () => pm.expect(pm.response.json().count).to.be.above(0));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Teacher: notifications",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/notifications?unread_only=true",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{teacherToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"200\", () => pm.response.to.have.status(200));",
+                  "const n = pm.response.json().find(x => x.type === \"swap_approved\");",
+                  "pm.test(\"a 'swap approved' notification\", () => pm.expect(n).to.exist);",
+                  "pm.collectionVariables.set(\"notificationId\", n.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Teacher: mark it read",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": "{{baseUrl}}/api/notifications/{{notificationId}}/read",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{teacherToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Teacher: the class is in its new slot",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/timetable?teacher_id={{teacherTeacherId}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{teacherToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"200\", () => pm.response.to.have.status(200));",
+                  "const id = Number(pm.collectionVariables.get(\"freeEntryId\"));",
+                  "const moved = pm.response.json().find(x => x.id === id);",
+                  "pm.test(\"Wed 10:00 class now on Wednesday 08:30\", () => {",
+                  "    pm.expect(moved.day_of_week).to.eql(\"Wednesday\");",
+                  "    pm.expect(moved.start_time.startsWith(\"08:30\")).to.be.true;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "6. Teacher books a makeup class",
+      "item": [
+        {
+          "name": "Teacher: find free slots (90 min)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/makeup/find-slots",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{teacherToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"section_id\": {{makeupSectionId}},\n  \"teacher_id\": {{teacherTeacherId}},\n  \"course_id\": {{makeupCourseId}},\n  \"duration_minutes\": 90\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"200\", () => pm.response.to.have.status(200));",
+                  "const slots = pm.response.json();",
+                  "pm.test(\"at least one free slot\", () => pm.expect(slots.length).to.be.above(0));",
+                  "pm.test(\"lecture rooms only\", () => slots.forEach(s => pm.expect(s.recommended_room.room_type).to.eql(\"lecture\")));",
+                  "const s = slots[0];",
+                  "pm.collectionVariables.set(\"makeupRoomId\", s.recommended_room.room_id);",
+                  "pm.collectionVariables.set(\"makeupDay\", s.day_of_week);",
+                  "pm.collectionVariables.set(\"makeupStart\", s.start_time);",
+                  "pm.collectionVariables.set(\"makeupEnd\", s.end_time);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Teacher: book the first slot",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/makeup",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{teacherToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"course_id\": {{makeupCourseId}},\n  \"section_id\": {{makeupSectionId}},\n  \"teacher_id\": {{teacherTeacherId}},\n  \"room_id\": {{makeupRoomId}},\n  \"day_of_week\": \"{{makeupDay}}\",\n  \"start_time\": \"{{makeupStart}}\",\n  \"end_time\": \"{{makeupEnd}}\",\n  \"reason\": \"Demo makeup class\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"201 booked\", () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set(\"makeupId\", pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Booking the same slot again is refused",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/makeup",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{teacherToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"course_id\": {{makeupCourseId}},\n  \"section_id\": {{makeupSectionId}},\n  \"teacher_id\": {{teacherTeacherId}},\n  \"room_id\": {{makeupRoomId}},\n  \"day_of_week\": \"{{makeupDay}}\",\n  \"start_time\": \"{{makeupStart}}\",\n  \"end_time\": \"{{makeupEnd}}\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"409 clash\", () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "7. Student: bell shows 'Makeup class added'",
+      "item": [
+        {
+          "name": "Student: notifications",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/notifications?unread_only=true",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{studentToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"a 'makeup added' notification\", () =>",
+                  "    pm.expect(pm.response.json().some(x => x.type === \"makeup_added\")).to.be.true);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Student: makeup classes for my section",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/makeup?section_id={{studentSectionId}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{studentToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"200\", () => pm.response.to.have.status(200));",
+                  "const id = Number(pm.collectionVariables.get(\"makeupId\"));",
+                  "pm.test(\"the booked makeup is listed\", () => pm.expect(pm.response.json().map(m => m.id)).to.include(id));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Student: mark all read",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/api/notifications/read-all",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{studentToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "8. Admin",
+      "item": [
+        {
+          "name": "Admin: who am I",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/auth/me",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"role is admin\", () => pm.expect(pm.response.json().role).to.eql(\"admin\"));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://127.0.0.1:8000",
+      "type": "string"
+    },
+    {
+      "key": "password",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "studentToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "studentTeacherId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "studentSectionId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "teacherToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "teacherTeacherId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "teacherSectionId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "hodToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "hodTeacherId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "hodSectionId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "adminToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "adminTeacherId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "adminSectionId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "clashEntryId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "freeEntryId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "clashTargetId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "freeTargetId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "makeupSectionId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "makeupCourseId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "swapId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "notificationId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "makeupRoomId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "makeupDay",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "makeupStart",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "makeupEnd",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "makeupId",
+      "value": "",
+      "type": "string"
+    }
+  ]
+}

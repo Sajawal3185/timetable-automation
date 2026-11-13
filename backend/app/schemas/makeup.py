@@ -1,4 +1,4 @@
-"""Pydantic schemas for Makeup Slot Solver and booking (Sajawal)."""
+"""Pydantic schemas for Makeup Slot Solver and booking."""
 from datetime import date, time
 from pydantic import BaseModel, ConfigDict, Field
 

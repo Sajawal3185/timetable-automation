@@ -1,12 +1,15 @@
 """Role checks as FastAPI dependencies, plus swap-specific permission rules.
 
-Depends on get_current_user from app/dependencies.py (blocked until login is merged).
+This is the ONE place for role checks: routers use `Depends(require_roles(...))`
+with the STAFF / ADMINS tuples below. Do not write per-router role checks.
 """
 from fastapi import Depends, HTTPException
 
 from app.dependencies import get_current_user
 
 STUDENT, TEACHER, HOD, ADMIN = "student", "teacher", "hod", "admin"
+STAFF = (TEACHER, HOD, ADMIN)  # may upload files, manage software, request makeups
+ADMINS = (HOD, ADMIN)          # may manage rooms, events and timetable imports
 
 
 def role_of(user) -> str:
@@ -29,7 +32,8 @@ def require_roles(*roles: str):
 
 def can_request_swap(user, entry) -> bool:
     """Only a teacher who owns that timetable entry may request a swap for it."""
-    return role_of(user) == TEACHER and entry.teacher.user_id == user.id
+    # An imported entry can have no teacher at all (teacher_id is NULL); nobody owns it.
+    return role_of(user) == TEACHER and entry.teacher is not None and entry.teacher.user_id == user.id
 
 
 def can_decide_swap(user, swap) -> bool:
