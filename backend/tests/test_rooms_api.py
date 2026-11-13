@@ -6,7 +6,7 @@ from app.models.timetable_entry import TimetableEntry
 
 
 def test_list_and_filter_rooms(client, seed):
-    c = client("student")
+    c = client("teacher")
     assert [r["name"] for r in c.get("/api/rooms").json()] == ["LT-1", "R-1", "R-2"]
     big = c.get("/api/rooms", params={"min_capacity": 50}).json()
     assert {r["name"] for r in big} == {"R-2", "LT-1"}
@@ -14,7 +14,18 @@ def test_list_and_filter_rooms(client, seed):
 
 
 def test_get_room_404(client, seed):
-    assert client("student").get("/api/rooms/999").status_code == 404
+    assert client("teacher").get("/api/rooms/999").status_code == 404
+
+
+def test_students_cannot_read_rooms(client, seed):
+    """Rooms are Timetable data; the Timetable is for staff only."""
+    c = client("student")
+    assert c.get("/api/rooms").status_code == 403
+    assert c.get("/api/rooms/1").status_code == 403
+    assert c.get("/api/rooms/empty", params={"day": "Monday", "start": "08:30", "end": "10:00"}).status_code == 403
+    # departments and courses are shared with the Archive, so students keep them
+    assert c.get("/api/departments").status_code == 200
+    assert c.get("/api/courses").status_code == 200
 
 
 def test_create_and_update_room_permissions(client, seed):
@@ -36,7 +47,7 @@ def test_empty_rooms_respects_overlap_boundaries(client, seed, db):
     db.add(TimetableEntry(section_id=1, course_id=seed.c1.id, room_id=seed.small.id,
                           day_of_week="Monday", start_time=time(10, 0), end_time=time(11, 0)))
     db.commit()
-    c = client("student")
+    c = client("teacher")
 
     def free(day, start, end, **extra):
         r = c.get("/api/rooms/empty", params={"day": day, "start": start, "end": end, **extra})
@@ -52,7 +63,7 @@ def test_empty_rooms_respects_overlap_boundaries(client, seed, db):
 
 
 def test_empty_rooms_validation(client, seed):
-    c = client("student")
+    c = client("teacher")
     assert c.get("/api/rooms/empty", params={"day": "Funday", "start": "9:00", "end": "10:00"}).status_code == 422
     assert c.get("/api/rooms/empty", params={"day": "Monday", "start": "xx", "end": "10:00"}).status_code == 422
     assert c.get("/api/rooms/empty", params={"day": "Monday", "start": "11:00", "end": "10:00"}).status_code == 422
@@ -72,6 +83,6 @@ def test_empty_rooms_lists_unknown_capacity_last(client, seed, db):
     when sorting by capacity, so without care they would top the list."""
     db.add(Room(name="A-Unknown", capacity=None))
     db.commit()
-    rooms = client("student").get("/api/rooms/empty", params={"day": "Monday", "start": "09:00", "end": "10:00"}).json()
+    rooms = client("teacher").get("/api/rooms/empty", params={"day": "Monday", "start": "09:00", "end": "10:00"}).json()
     assert [r["name"] for r in rooms] == ["R-1", "R-2", "LT-1", "A-Unknown"]
     assert rooms[-1]["capacity"] is None

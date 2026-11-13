@@ -1,13 +1,13 @@
 /* ==========================================================================
-   tt-timetable.js  -  timetable.html (student, teacher, hod).
+   tt-timetable.js  -  timetable.html (teacher, hod).
 
-   One view for every role; only the filter differs:
-     student      -> GET /api/timetable?section_id=<their section>
-     teacher/hod  -> GET /api/timetable?teacher_id=<their teacher row>
+   The Timetable is for staff only (team decision, 13 Nov), so this is the
+   teacher's own week:
+     GET /api/timetable?teacher_id=<their teacher row>
    plus GET /api/makeup with the same filter, so makeup classes appear in the
    same week.
 
-   Where the section/teacher id comes from: /api/auth/me. The real UserOut
+   Where the teacher id comes from: /api/auth/me. The real UserOut
    does not return it yet (it only has id, name, role). Rather than guess,
    the page says so and shows nothing - showing a wrong section's week would
    be worse than showing none. See README "Backend gaps".
@@ -15,30 +15,26 @@
 (async function () {
   "use strict";
 
-  const me = await TT.init({ allowed: ["student", "teacher", "hod"] });
+  const me = await TT.init({ allowed: ["teacher", "hod"] });
   if (!me) return;
 
   const summary = document.getElementById("ttSummary");
   const msg = document.getElementById("ttMsg");
   const week = document.getElementById("ttWeek");
 
-  const isStudent = me.role === "student";
-  const filterKey = isStudent ? "section_id" : "teacher_id";
-  const filterValue = me[filterKey];
+  const teacherId = me.teacher_id;
 
-  if (filterValue == null) {
+  if (teacherId == null) {
     summary.textContent = "No timetable to show.";
-    TT.showMsg(msg, isStudent
-      ? "Your account is not linked to a section yet. Ask your department admin to set it."
-      : "Your account is not linked to a teacher record yet. Ask your department admin to link it.", "error");
+    TT.showMsg(msg, "Your account is not linked to a teacher record yet. Ask your department admin to link it.", "error");
     return;
   }
 
   let entries, makeups, names;
   try {
     [entries, makeups, names] = await Promise.all([
-      window.TTApi.request("GET", "/api/timetable", { query: { [filterKey]: filterValue, limit: 2000 } }),
-      window.TTApi.request("GET", "/api/makeup", { query: { [filterKey]: filterValue } }),
+      window.TTApi.request("GET", "/api/timetable", { query: { teacher_id: teacherId, limit: 2000 } }),
+      window.TTApi.request("GET", "/api/makeup", { query: { teacher_id: teacherId } }),
       TT.loadNames()
     ]);
   } catch (err) {
@@ -47,14 +43,13 @@
     return;
   }
 
-  /* Build one card per class. Students see the room (and which teacher is
-     not known by name yet); teachers see the section they teach. */
+  /* Build one card per class: time, course, room and the section taught. */
   function classCard(item, isMakeup) {
     const lines = [
       TT.el("span", { className: "tt-time", text: TT.hhmm(item.start_time) + " – " + TT.hhmm(item.end_time) }),
       TT.el("strong", { text: names.courseLabel(item.course_id) }),
       TT.el("span", { text: "Room: " + names.roomLabel(item.room_id) }),
-      TT.el("span", { text: isStudent ? names.teacherLabel(item.teacher_id) : names.sectionLabel(item.section_id) })
+      TT.el("span", { text: names.sectionLabel(item.section_id) })
     ];
     if (isMakeup) {
       lines.unshift(TT.el("span", { className: "tt-tag", text: "Makeup" }));
@@ -79,7 +74,6 @@
     week.appendChild(col);
   });
 
-  const who = isStudent ? names.sectionLabel(filterValue) : me.name;
-  summary.textContent = who + ": " + entries.length + " weekly class" + (entries.length === 1 ? "" : "es") +
+  summary.textContent = me.name + ": " + entries.length + " weekly class" + (entries.length === 1 ? "" : "es") +
     (makeups.length ? " and " + makeups.length + " makeup class" + (makeups.length === 1 ? "" : "es") : "") + ".";
 })();

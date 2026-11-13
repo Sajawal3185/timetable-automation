@@ -108,7 +108,7 @@ def preview_swap_conflicts(db: Session, a: TimetableEntry, b: TimetableEntry) ->
 
 
 def _notify_swap(db, a, b, type_, swap_id, message) -> None:
-    # Both teachers plus the students of both sections (task spec, file 2).
+    # Both teachers. Students are not told: the Timetable is for staff only.
     notify_many(db, recipients_for_swap(db, a, b), type_, message, related_id=swap_id)
 
 

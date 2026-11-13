@@ -25,14 +25,19 @@ The landing page (`index.html`) and the Archive dashboard each have one link to
 
 ## Timetable pages and who may open them
 
-| Page | student | teacher | hod | admin |
-|---|:-:|:-:|:-:|:-:|
-| `timetable-login.html` | public | public | public | public |
-| `timetable.html` (week, Mon to Sun) | start | start | yes | no |
-| `swaps.html` (request a swap) | no | yes | no (API is teacher-only) | no |
-| `swap-approvals.html` (approve/reject) | no | no | start | yes |
-| `makeup.html` (find slots, book) | no | yes | yes | no |
-| `admin.html` (link to backend `/docs`) | no | no | no | start |
+The Timetable is for staff only (team decision, 13 Nov 2026). Students use the
+NUML Archive: a student who logs in on the Timetable login page is told so and
+not let in, and the backend answers 403 to students on every Timetable
+endpoint.
+
+| Page | teacher | hod | admin |
+|---|:-:|:-:|:-:|
+| `timetable-login.html` | public | public | public |
+| `timetable.html` (week, Mon to Sun) | start | yes | no |
+| `swaps.html` (request a swap) | yes | no (API is teacher-only) | no |
+| `swap-approvals.html` (approve/reject) | no | start | yes |
+| `makeup.html` (find slots, book) | yes | yes | no |
+| `admin.html` (link to backend `/docs`) | no | no | start |
 
 Every page calls `TT.init({ allowed: [...] })` (`js/timetable/tt-layout.js`):
 no token goes to the login, `GET /api/auth/me` decides the role, and a role that
@@ -70,10 +75,10 @@ Login & Signup Plan. The backend endpoints are still pending (see
 `docs/api-contract.md`, section 2), so in mock mode:
 
 - No email is sent. The code is always **123456**, and both pages say so.
-- A `numl-f24-26789@numls.edu.pk` email gets the student form; any other
-  `@numls.edu.pk` email gets the staff form. A student is logged in after the
-  code; a staff account waits for approval (logging in shows "Your account is
-  waiting for approval").
+- Signup is for staff only. A student email (`numl-f24-26789@numls.edu.pk`)
+  is refused and pointed to the Archive. Any other `@numls.edu.pk` email can
+  sign up; after the code the account waits for approval (logging in shows
+  "Your account is waiting for approval").
 - Accounts you create last until you close the tab. Only they have an email,
   so forgot password works for them, not for the sample accounts below.
 
@@ -81,8 +86,7 @@ Login & Signup Plan. The backend endpoints are still pending (see
 
 | Role | Roll number / Staff ID | Password | Notes |
 |---|---|---|---|
-| student | `Se-9244330` | `student123` | section #1 (BSSE-5A) |
-| student | `cs-9255101` | `student123` | section #3, CS department |
+| student | `Se-9244330` | `student123` | Archive account: the Timetable login turns it away |
 | teacher | `tr-100201` | `teacher123` | SE department, teacher #1 |
 | teacher | `tr-200401` | `teacher123` | CS department, teacher #4 |
 | hod | `hod-100301` | `hodpass123` | SE department, also teacher #2 |
@@ -115,7 +119,7 @@ not the docs, and these need backend changes before real mode works:
 6. `POST /api/swap-requests` is teacher-only, so an HOD cannot request a swap.
 7. A swap exchanges the times of two existing classes; there is no "move to a
    new day/time/room" request.
-8. Swap notifications go to both teachers and both sections' students, not to
+8. Swap notifications go to both teachers (no longer to students), not to
    the HOD who must approve. Booking a makeup sends no notification
    (`recipients_for_makeup` is never called).
 9. The makeup solver sorts rooms by capacity then name, so a lab can be the

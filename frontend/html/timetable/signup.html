@@ -12,34 +12,25 @@
 
   <div class="card">
     <h2>Create account</h2>
-    <p>Use your official NUML email. We send it a code to prove it's yours.</p>
+    <p>For teachers and staff. Use your official NUML email; we send it a code to prove it's yours.</p>
 
-    <!-- Step 1: the email decides the form -->
+    <!-- Step 1: the NUML email -->
     <form id="suEmailStep" novalidate>
       <label for="suEmail">NUML email</label>
-      <input type="email" id="suEmail" autocomplete="email" placeholder="numl-f24-26789@numls.edu.pk" required>
-      <span class="hint">Students: numl-f24-26789@numls.edu.pk. Staff: your NUML staff email.</span>
+      <input type="email" id="suEmail" autocomplete="email" placeholder="name@numls.edu.pk" required>
+      <span class="hint">Students don't need an account here: the Timetable is for staff. Use the NUML Archive instead.</span>
       <button type="submit">Continue</button>
       <p class="msg" id="suEmailMsg" role="alert"></p>
     </form>
 
-    <!-- Step 2: student or staff details -->
+    <!-- Step 2: details -->
     <form id="suDetailsStep" novalidate hidden>
       <p class="sent-to">Signing up as <strong id="suEmailShown"></strong></p>
-      <span class="kind" id="suKind"></span>
 
       <label for="suName">Full name</label>
       <input type="text" id="suName" autocomplete="name" maxlength="100" required>
 
-      <!-- Students only -->
-      <div id="suStudentFields" hidden>
-        <label for="suRoll">Roll number</label>
-        <input type="text" id="suRoll" placeholder="se-9244330" autocomplete="off" required>
-        <span class="hint">For your profile only. You'll log in with your email.</span>
-      </div>
-
-      <!-- Staff only -->
-      <p class="hint" id="suStaffNote" hidden>Staff accounts are checked by an admin or your HOD before you can log in.</p>
+      <p class="hint">An admin or your HOD checks new accounts before you can log in. You'll log in with your email.</p>
 
       <label for="suPassword">Password</label>
       <input type="password" id="suPassword" autocomplete="new-password" placeholder="8 to 72 characters" required>
@@ -71,7 +62,7 @@
       </div>
     </form>
 
-    <!-- Done: staff wait for approval -->
+    <!-- Done: the account waits for approval -->
     <div class="done" id="suPending" hidden>
       <h3>Your account is waiting for approval</h3>
       <p>An admin or your HOD will check it. You can log in once it's approved.</p>

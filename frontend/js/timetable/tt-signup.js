@@ -1,20 +1,21 @@
 /* ==========================================================================
    tt-signup.js  -  signup.html (Login & Signup Plan, 12 Nov).
 
-   There is no list of students or teachers from the university, so the
-   official NUML email is the proof of identity:
-     1. The person types their email. Its format picks the form:
-          numl-<letter><yy>-<digits>@numls.edu.pk -> student form
-          any other @numls.edu.pk address        -> staff form
-          any other domain                        -> refused here
-     2. They fill in the form. POST /api/auth/signup sends a 6-digit code to
-        that email. Nothing is a real account yet.
-     3. They type the code. POST /api/auth/verify-email:
-          student -> active, gets a token, goes to their start page
-          staff   -> a teacher account waiting for an admin or HOD's approval
+   The Timetable is for staff only (team decision, 13 Nov). There is no list
+   of teachers from the university, so the official NUML email is the proof
+   of identity:
+     1. The person types their email.
+          a student email (numl-<letter><yy>-<digits>@...) -> refused here,
+                                                              students use the Archive
+          any other @numls.edu.pk address                  -> next step
+          any other domain                                 -> refused here
+     2. They fill in name and password. POST /api/auth/signup sends a 6-digit
+        code to that email. Nothing is a real account yet.
+     3. They type the code. POST /api/auth/verify-email creates a teacher
+        account waiting for an admin or HOD's approval.
 
-   The role is never sent: the backend decides it from the email. Every check
-   here is only a hint; the backend rechecks all of them.
+   The role is never sent. Every check here is only a hint; the backend
+   rechecks all of them.
    The password is only sent to the server, never stored in the browser.
    ========================================================================== */
 (function () {
@@ -26,7 +27,6 @@
 
   const steps = { email: $("suEmailStep"), details: $("suDetailsStep"), code: $("suCodeStep"), pending: $("suPending") };
   let email = "";
-  let isStudent = false;
   let resendTimer = null;
 
   function show(node, text, isError) {
@@ -62,12 +62,13 @@
       return;
     }
 
+    if (A.STUDENT_EMAIL.test(typed)) {
+      show(msg, "The Timetable is for teachers and staff only. Students can use the NUML Archive.", true);
+      return;
+    }
+
     email = typed;
-    isStudent = A.STUDENT_EMAIL.test(email);
     $("suEmailShown").textContent = email;
-    $("suKind").textContent = isStudent ? "Student account" : "Staff account";
-    $("suStudentFields").hidden = !isStudent;
-    $("suStaffNote").hidden = isStudent;
     show(msg, "");
     goTo("details");
   });
@@ -81,15 +82,9 @@
     const name = $("suName").value.trim();
     const pw = $("suPassword").value;
     const pw2 = $("suPassword2").value;
-    const roll = $("suRoll").value.trim().toLowerCase();
 
     // Quick checks, in the order of the form, so the first problem is shown
     if (!name) { show(msg, "Enter your full name.", true); $("suName").focus(); return; }
-    if (isStudent && !A.ROLL_NUMBER.test(roll)) {
-      show(msg, "Roll number should look like se-9244330.", true);
-      $("suRoll").focus();
-      return;
-    }
     if (pw.length < C.MIN_PASSWORD || new TextEncoder().encode(pw).length > C.MAX_PASSWORD) {
       show(msg, "Password must be " + C.MIN_PASSWORD + " to " + C.MAX_PASSWORD + " characters.", true);
       $("suPassword").focus();
@@ -98,7 +93,6 @@
     if (pw !== pw2) { show(msg, "The two passwords don't match.", true); $("suPassword2").focus(); return; }
 
     const body = { email, name, password: pw };
-    if (isStudent) body.roll_number = roll;
 
     const btn = $("suDetailsBtn");
     btn.disabled = true;
@@ -165,15 +159,9 @@
     btn.disabled = true;
     show(msg, "Checking…");
     try {
-      const res = await window.TTApi.request("POST", "/api/auth/verify-email", { body: { email, code }, redirectOn401: false });
+      await window.TTApi.request("POST", "/api/auth/verify-email", { body: { email, code }, redirectOn401: false });
       clearInterval(resendTimer);
-      if (res.status === "active" && res.token) {
-        // Students are active straight away: save the token only and go in.
-        window.TTApi.setToken(res.token);
-        window.location.replace(C.START_PAGE[res.user.role] || C.PAGES.login);
-        return;
-      }
-      goTo("pending");   // staff: no token until an admin or HOD approves
+      goTo("pending");   // no token until an admin or HOD approves
     } catch (err) {
       if (err.status === 429) show(msg, "Too many attempts. Try again later.", true);
       else show(msg, err.message, true);
