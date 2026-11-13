@@ -1095,7 +1095,12 @@ body.dash-page {
   gap: 6px;
 }
 
+/* The logo and the link names never shrink or wrap; when they don't fit,
+   the links are hidden instead (see the media queries at the end) */
+.dash-page .dash-bar .logo { flex: none; white-space: nowrap; }
+
 .dash-page .dash-links .nl {
+  white-space: nowrap;
   padding: 8px 14px;
   border-radius: 10px;
   transition: background 0.2s;
@@ -1187,6 +1192,7 @@ body.dash-page {
 .dash-page .dash-main {
   display: flex;
   flex: 1;
+  min-width: 0;                 /* a long word can never widen the page */
   min-height: 0;                /* lets it shrink to fit the screen */
   padding-top: 72px;            /* height of the fixed .navbar */
 }
@@ -1267,6 +1273,7 @@ body.dash-page {
   font-weight: 800;
   line-height: 1.12;
   letter-spacing: -1px;
+  overflow-wrap: break-word;
 }
 
 .dash-page .dash-hero h1 span { color: #7cc4ff; }   /* same light blue as the logo */
@@ -1309,34 +1316,52 @@ body.dash-page {
 .dash-page .dash-links .nl.soon:hover { color: white; background: none; }
 
 
+/* ----- Top links only where the whole bar fits on one line (measured with
+   the inner-page names); below that the side menu is the menu. The admin bar
+   has one more link and the "Admin" tag, so it needs more room. ----- */
+@media (max-width: 1400px) {
+  .dash-page.admin-page .dash-links { display: none; }
+  .dash-page.admin-page .dash-bar { justify-content: space-between; }
+}
+@media (max-width: 1200px) {
+  .dash-page .dash-links { display: none; }
+  .dash-page .dash-bar { justify-content: space-between; }
+}
+
 /* ----- Tablet ----- */
 @media (max-width: 980px) {
-  .dash-page .dash-links { display: none; }           /* the side menu is the menu */
-  .dash-page .dash-bar { justify-content: space-between; }
-  .dash-page .dash-side { width: 200px; }
   .dash-page .dash-hero h1 { font-size: 34px; }
 }
 
-/* ----- Phone: the side menu turns into a row of icons with names under them ----- */
+/* ----- Phone: the side menu turns into a grid of icons, 3 per row, names under them -----
+   Each item gets exactly a third of the width, whatever its label says, so a
+   long name (or a bigger font setting) wraps inside its own cell instead of
+   pushing the page wider than the screen. A short last row is centred. */
 @media (max-width: 640px) {
   body.dash-page { background-attachment: scroll; }   /* fixed backgrounds jank on mobile */
   .dash-page .profile-name { display: none; }         /* avatar + arrow only */
   .dash-page .dash-main { flex-direction: column; padding-top: 68px; }
   .dash-page .dash-side {
     flex-direction: row;
-    justify-content: space-between;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 4px;
     width: auto;
-    padding: 8px 6px;
+    padding: 8px;
     border-right: 0;
     border-bottom: 1px solid rgba(255, 255, 255, 0.12);
   }
   .dash-page .dash-side a {
-    flex: 1;
+    flex: 0 0 calc((100% - 8px) / 3);                 /* 3 per row, minus the 2 gaps */
+    min-width: 0;
     flex-direction: column;
-    gap: 5px;
-    padding: 8px 2px;
-    font-size: 11px;
+    justify-content: flex-start;
+    gap: 6px;
+    padding: 10px 4px;
+    font-size: 12px;
+    line-height: 1.25;
     text-align: center;
+    overflow-wrap: anywhere;
   }
   .dash-page .dash-hero { padding: 16px; }
   .dash-page .dash-hero h1 { font-size: 26px; }
