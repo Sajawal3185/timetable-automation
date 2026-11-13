@@ -1,0 +1,115 @@
+/* =========================================================
+   TT-AUTH.CSS: the Timetable's login, signup and forgot password pages
+   Body class : <body class="auth-page tt-auth">
+   Link order : master.css, auth.css, then this file
+
+   auth.css is shared with the Archive's login pages, so it is not
+   changed. Everything here is scoped by the tt-auth body class, so no
+   Archive page can change.
+   ========================================================= */
+
+/* Tall forms (signup) scroll instead of being cut off on short screens */
+body.auth-page.tt-auth { padding: 24px 16px; }
+
+.tt-auth .card {
+  width: 380px;
+  max-width: 100%;
+}
+
+.tt-auth .card h2 + p { margin-bottom: 18px; }
+
+/* One step of a multi-step form; only the current one is shown */
+.tt-auth [hidden] { display: none !important; }
+
+/* "Forgot password?" and "Create account" under the login form */
+.tt-auth .auth-links {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 14px 0 0;
+  font-size: 13px;
+}
+.tt-auth .auth-links a { color: var(--blue); font-weight: 600; }
+.tt-auth .auth-links a:hover { text-decoration: underline; }
+
+/* Which form the email picked */
+.tt-auth .kind {
+  display: block;
+  width: fit-content;
+  margin: 0 auto 14px;
+  padding: 4px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--blue);
+  background: #e6efff;
+  border-radius: 20px;
+}
+
+/* The email the code was sent to, with a way to change it */
+.tt-auth .sent-to {
+  margin: 0 0 14px;
+  font-size: 13px;
+  color: #444;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+.tt-auth .sent-to strong { color: #111; }
+
+/* 6-digit code: big and spaced so it is easy to read back */
+.tt-auth input.code {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 8px;
+  text-align: center;
+}
+
+/* Secondary actions: Resend code, use a different email */
+.tt-auth .row-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.tt-auth .text-btn {
+  width: auto;
+  padding: 4px 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--blue);
+  background: none;
+}
+.tt-auth .text-btn:hover { background: none; text-decoration: underline; }
+.tt-auth .text-btn:disabled { color: #8a8fa8; text-decoration: none; cursor: default; }
+
+/* Mock mode: tells the tester no email is sent and which code works */
+.tt-auth .demo-note {
+  margin: 14px 0 0;
+  padding: 10px 12px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: #6b4e00;
+  text-align: left;
+  background: #fff7db;
+  border-radius: 8px;
+}
+
+/* Final message (account waiting for approval, password changed) */
+.tt-auth .done {
+  text-align: center;
+}
+.tt-auth .done h3 { margin: 8px 0; color: var(--blue); }
+.tt-auth .done p { margin: 0 0 16px; }
+.tt-auth .done .button-link {
+  display: block;
+  padding: 11px;
+  font-size: 15px;
+  color: white;
+  text-align: center;
+  background: var(--blue);
+  border-radius: 6px;
+}
+.tt-auth .done .button-link:hover { background: var(--blue-dark); }
+
+.tt-auth button:disabled { opacity: 0.7; cursor: default; }

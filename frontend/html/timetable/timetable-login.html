@@ -6,17 +6,18 @@
   <title>Log in | NUML Timetable Automation</title>
   <link rel="stylesheet" href="../../css/master.css">
   <link rel="stylesheet" href="../../css/auth.css">
+  <link rel="stylesheet" href="../../css/tt-auth.css">
 </head>
-<body class="auth-page">
+<body class="auth-page tt-auth">
 
   <div class="card">
     <h2>Timetable Automation</h2>
     <p>National University of Modern Languages</p>
 
     <form id="ttLoginForm" novalidate>
-      <label for="identifier">Roll number / Staff ID</label>
+      <label for="identifier">NUML email or ID</label>
       <input type="text" id="identifier" name="identifier" autocomplete="username"
-        placeholder="Se-9244330" required>
+        placeholder="numl-f24-26789 or name@numls.edu.pk" required>
 
       <label for="password">Password</label>
       <input type="password" id="password" name="password" autocomplete="current-password"
@@ -26,7 +27,10 @@
       <p class="msg" id="ttLoginMsg" role="alert"></p>
     </form>
 
-    <p>Forgot your password? Contact your department admin to reset your password.</p>
+    <div class="auth-links">
+      <a href="forgot-password.html">Forgot password?</a>
+      <a href="signup.html">Create account</a>
+    </div>
     <p class="msg" id="ttModeNote"></p>
 
     <a href="../index.html" class="back-btn">← Back to NUML Archive</a>

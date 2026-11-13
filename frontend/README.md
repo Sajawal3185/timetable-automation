@@ -63,6 +63,20 @@ built and demoed before the backend runs. It still behaves like the API:
 - Changes (swaps, approvals, bookings, read notifications) are kept in
   `sessionStorage` for the current tab. Close the tab to reset the demo.
 
+### Signup and forgot password (mock mode)
+
+`html/timetable/signup.html` and `html/timetable/forgot-password.html` follow the
+Login & Signup Plan. The backend endpoints are still pending (see
+`docs/api-contract.md`, section 2), so in mock mode:
+
+- No email is sent. The code is always **123456**, and both pages say so.
+- A `numl-f24-26789@numls.edu.pk` email gets the student form; any other
+  `@numls.edu.pk` email gets the staff form. A student is logged in after the
+  code; a staff account waits for approval (logging in shows "Your account is
+  waiting for approval").
+- Accounts you create last until you close the tab. Only they have an email,
+  so forgot password works for them, not for the sample accounts below.
+
 ### Demo accounts (mock mode only)
 
 | Role | Roll number / Staff ID | Password | Notes |

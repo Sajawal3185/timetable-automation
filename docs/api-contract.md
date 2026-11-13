@@ -33,7 +33,24 @@ FastAPI's live docs at `/docs` can be used to check it.
 
 `identifier` is the login key: the roll number for students (for example `se-9244330`), and the staff identifier for staff. It is trimmed and lowercased before use. Send `Authorization: Bearer <token>` afterwards.
 
-There is no self-registration: students activate a roster account with `/activate`, and an admin creates staff accounts with `/users`.
+There is no self-registration in the backend yet: students activate a roster account with `/activate`, and an admin creates staff accounts with `/users`.
+
+### Signup and forgot password *(pending: Login & Signup Plan, 12 Nov)*
+
+Decided in the Login & Signup Plan (no university roster, so the official NUML email is the proof of identity). The Timetable frontend's signup, login and forgot-password pages already call these, and `frontend/js/timetable/tt-mock.js` answers them in mock mode (code always `123456`). The backend doesn't have them yet.
+
+| Method | URL | Who | Body | Success | Errors |
+| --- | --- | --- | --- | --- | --- |
+| GET | `/api/auth/signup-options` | anyone, no token | | `200 {departments: [{id, name, code}], sections: [{id, name, department_id}]}` for the signup dropdowns | |
+| POST | `/api/auth/signup` | anyone | student: `{email, name, department_id, section_id, roll_number, password}`; staff: `{email, name, department_id, password}`. The **email decides** student or staff; a role is never sent. | `202 {email, kind: "student" or "staff", expires_in}`: a 6-digit code is emailed. Nothing is an account yet; a new signup replaces an unfinished one for the same email | `400` not an `@numls.edu.pk` email, `409 This email already has an account. Log in instead.`, `422` missing field, bad roll number shape, section not in the department, password not 8 to 72 characters |
+| POST | `/api/auth/verify-email` | anyone | `{email, code}` | student: `200 {status: "active", token, user}` (logged in); staff: `200 {status: "pending"}` (a `teacher` that can't log in until approved) | `400` wrong or expired code, or the signup expired; `429 Too many attempts. Try again later.` after 5 wrong codes |
+| POST | `/api/auth/resend-code` | anyone | `{email}` (an unfinished signup) | `202` a new code replaces the old one | `400` no unfinished signup, `429` asked again within 60 seconds |
+| POST | `/api/auth/forgot-password` | anyone | `{identifier}` (NUML email or ID) | `202 {"detail": "If that account exists, we sent a code to its email."}`: **always the same**, so it can't reveal who is registered. Sends at most one code a minute, to the email the account signed up with | `422` empty |
+| POST | `/api/auth/reset-password` | anyone | `{identifier, code, new_password}` | `200`: password changed, the code can't be used again, existing sessions end | `400` wrong or expired code (also for an unknown account), `422` password not 8 to 72 characters, `429` after 5 wrong codes |
+
+Rules: emails are trimmed, lowercased and must end in `@numls.edu.pk`. A student email is `numl-<term letter><yy>-<sys-id>@numls.edu.pk` (any single letter, so spring students aren't locked out); the student's `identifier` becomes the part before `@` (e.g. `numl-f24-26789`), and a staff member's `identifier` is their full email. Codes are 6 digits, stored hashed, valid for 10 minutes, single use, 5 attempts.
+
+**Login changes with this plan:** `identifier` accepts the ID or the full email. A staff account still waiting for approval gets `403 Your account is waiting for approval`, but only after the right password; every other failure stays `401 Invalid credentials`.
 
 User object: `{id, name, role, identifier, department_id, section_id, teacher_id}`. `department_id`, `section_id` and `teacher_id` are `null` when they do not apply; `teacher_id` is the `Teacher` row linked to this account, used to load a teacher's own timetable.
 

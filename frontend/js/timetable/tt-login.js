@@ -1,8 +1,10 @@
 /* ==========================================================================
    tt-login.js  -  timetable-login.html only.
 
-   Login is by roll number / staff ID (backend field `identifier`), not by
-   email like the Archive login. The browser never decides whether a password
+   Login is by "NUML email or ID" (backend field `identifier`): a student's
+   numl-f24-26789 or full NUML email, a staff member's NUML email, or an
+   older roll number / staff ID (Login & Signup Plan, 12 Nov). The browser
+   never decides whether a password
    is right: it sends both to POST /api/auth/login and believes the answer.
    The 8-character check below is only a hint so nobody waits for a server
    round trip on an obviously short password.
@@ -54,7 +56,7 @@
     const password = pwInput.value;
 
     if (!identifier) {
-      show("Enter your roll number or staff ID.", true);
+      show("Enter your NUML email or ID.", true);
       idInput.focus();
       return;
     }
@@ -75,7 +77,13 @@
       window.TTApi.setToken(data.token);   // the token only, never the user object
       goToStart(data.user.role);
     } catch (err) {
-      show(err.status === 401 ? "Wrong roll number or password." : err.message, true);
+      // Same message for every wrong login, so nobody can find out which
+      // accounts exist. The one exception is a staff account that is still
+      // waiting for approval (only after the right password).
+      if (err.status === 401) show("Invalid email/ID or password", true);
+      else if (err.status === 403) show("Your account is waiting for approval", true);
+      else if (err.status === 429) show("Too many attempts. Try again later.", true);
+      else show(err.message, true);
       pwInput.value = "";
       pwInput.focus();
     } finally {
