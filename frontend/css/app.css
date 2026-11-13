@@ -1055,21 +1055,22 @@ body.gpa-page {
 
    Body class : <body class="dash-page">
    Same look as the landing page and the timetable login:
-   the NUML campus photo under a navy overlay, white cards,
-   blue accents. From master: --navy, --blue, --bg, --ink,
-   --muted, .navbar, .logo, .nl, .btn, .footer.
-   Every rule starts with .dash-page, so nothing here can
-   change another page.
+   the NUML campus photo under a navy overlay, a side menu,
+   blue accents. From master: --navy, --blue, --ink, --muted,
+   .navbar, .logo, .nl, .footer.
+   Every rule is scoped by the dash-page body class, so nothing
+   here can change another page.
    ========================================================= */
 
 /* ----- Page setup: campus photo under a navy overlay ----- */
 body.dash-page {
   --dash-line: #e3e9f5;
 
-  /* Exactly one screen tall and never scrolls */
-  height: 100vh;
-  height: 100dvh;               /* mobile: ignore the browser's URL bar */
-  overflow: hidden;
+  /* At least one screen tall; scrolls down (never sideways) if the
+     content does not fit, e.g. a phone held sideways or 200% zoom */
+  min-height: 100vh;
+  min-height: 100dvh;           /* mobile: ignore the browser's URL bar */
+  overflow-x: hidden;
   display: flex;
   flex-direction: column;
   font-family: "Plus Jakarta Sans", "Segoe UI", Arial, sans-serif;
@@ -1289,7 +1290,7 @@ body.dash-page {
    dashboard above plus an "Admin" tag and a Review uploads item.
    ========================================================= */
 
-.admin-page .admin-tag {
+.dash-page .admin-tag {
   margin-left: 6px;
   padding: 3px 9px;
   font-size: 11px;

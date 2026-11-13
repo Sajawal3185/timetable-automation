@@ -36,7 +36,7 @@ NUML.setToken(data.token);
       const me = await NUML.api("/api/auth/me");
       NUML.setUser(me);
 
-      // Admins and HODs start on the review page, everyone else on the dashboard.
+      // Admins and HODs start on the admin dashboard, everyone else on the dashboard.
       window.location.href = NUML.homeFor(me);
     } catch (err) {
       NUML.clearToken();

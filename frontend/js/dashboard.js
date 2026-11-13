@@ -21,9 +21,12 @@ function setText(id, text) {
 const user = NUML.getUser();
 
 if (user) {
-  const name = user.name.trim();
+  /* An old or hand-edited saved user may have no name: fall back to the
+     roll number, and keep the "Welcome back" greeting if there is neither. */
+  const name = String(user.name || user.identifier || "").trim();
   const initials = name
     .split(/\s+/)
+    .filter(Boolean)
     .slice(0, 2)
     .map((w) => w[0])
     .join("")
@@ -31,7 +34,7 @@ if (user) {
   const firstName = name.split(/\s+/)[0];
   const handle = user.identifier ? "@" + user.identifier : "";
 
-  setText("greeting", "Hey " + firstName);
+  if (firstName) setText("greeting", "Hey " + firstName);
   setText("userName", firstName);
   setText("userAvatar", initials);
   setText("menuName", name);
@@ -60,6 +63,15 @@ if (profileBtn && profileMenu) {
     if (!e.target.closest(".profile-wrap")) {
       profileMenu.hidden = true;
       profileBtn.setAttribute("aria-expanded", false);
+    }
+  });
+
+  /* Escape closes the menu and puts focus back on the button */
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && !profileMenu.hidden) {
+      profileMenu.hidden = true;
+      profileBtn.setAttribute("aria-expanded", false);
+      profileBtn.focus();
     }
   });
 }

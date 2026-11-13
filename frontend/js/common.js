@@ -95,10 +95,19 @@
     localStorage.setItem(PROFILES_KEY, JSON.stringify(all));
   }
 
-  /* Start page after login: admins and HODs review uploads, everyone else
-     gets the normal dashboard. Same roles as ADMINS in the backend. */
+  /* Admins and HODs (same roles as ADMINS in the backend). This only picks
+     which page to show; the backend must still check the role on every
+     admin endpoint, because anyone can edit localStorage. */
+  const ADMIN_ROLES = ["admin", "hod"];
+
+  function isAdmin(user) {
+    return !!user && ADMIN_ROLES.includes(user.role);
+  }
+
+  /* Start page after login: admin dashboard for admins and HODs,
+     the normal dashboard for everyone else. */
   function homeFor(user) {
-    return user && (user.role === "admin" || user.role === "hod") ? PAGES.adminDashboard : PAGES.dashboard;
+    return isAdmin(user) ? PAGES.adminDashboard : PAGES.dashboard;
   }
 
   function logout() {
@@ -223,6 +232,6 @@
   window.NUML = {
     PAGES, MIN_PASSWORD, EMAIL_PATTERN,
     parseEmail, getUser, setUser, findProfile, saveProfile,
-    logout, requireLogin, renderQuickLinks, homeFor
+    logout, requireLogin, renderQuickLinks, isAdmin, homeFor
   };
 })();
