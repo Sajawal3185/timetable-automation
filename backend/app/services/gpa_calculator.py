@@ -1,4 +1,4 @@
-"""GPA / CGPA calculation (Wajiha) - proposal 4.3.
+"""GPA / CGPA calculation - proposal 4.3.
 
 Pure functions: no database, no HTTP. That makes them easy to test.
 

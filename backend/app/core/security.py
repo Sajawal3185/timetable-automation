@@ -1,4 +1,4 @@
-"""Pure password hashing and JWT token functions — no model imports (Sajawal)."""
+"""Pure password hashing and JWT token functions — no model imports."""
 from datetime import datetime, timedelta, timezone
 from typing import Any
 

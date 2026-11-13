@@ -1,4 +1,4 @@
-"""lecture_materials table (Wajiha) - notes/slides from many instructors, proposal 4.2."""
+"""lecture_materials table - notes/slides from many instructors, proposal 4.2."""
 from datetime import datetime
 from sqlalchemy import DateTime, ForeignKey, Integer, String, Text, func
 from sqlalchemy.orm import Mapped, mapped_column

@@ -166,3 +166,4 @@ def test_cannot_mark_another_users_notification_read(world):
 def test_unknown_notification_id_gives_404(world):
     r = world["as"]("teacher").patch("/api/notifications/99999/read")
     assert r.status_code == 404
+    

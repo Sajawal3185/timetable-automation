@@ -1,5 +1,5 @@
 """
-routers/auth.py  (owner: Sajawal)
+routers/auth.py
 
 Endpoints:
     POST /api/auth/login      any user logs in, gets a JWT + their role
@@ -25,6 +25,7 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
+from app.core.permissions import require_roles
 from app.database import get_db
 from app.dependencies import get_current_user
 from app.core.security import (
@@ -194,14 +195,8 @@ def me(current_user: User = Depends(get_current_user), db: Session = Depends(get
 def create_staff_user(
     data: CreateUserRequest,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    _admin: User = Depends(require_roles("admin")),
 ):
-    # Inline role check so this file has no dependency on Taha's permissions.py.
-    # Once require_roles() exists there, replace these lines with:
-    #     current_user = Depends(require_roles("admin"))
-    if current_user.role != "admin":
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not allowed")
-
     if data.role not in STAFF_ROLES:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
