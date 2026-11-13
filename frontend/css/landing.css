@@ -8,6 +8,7 @@
   background:
     linear-gradient(rgba(8, 24, 70, .5), rgba(8, 24, 70, .78)),
     url("../images/numl.webp");
+  background-color: #081846;
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
@@ -28,6 +29,7 @@
   background:
     linear-gradient(rgba(8, 24, 70, .88), rgba(8, 24, 70, .92)),
     url("../images/numl.webp");
+  background-color: #081846;
   background-size: cover;
   background-position: center;
   background-attachment: fixed;

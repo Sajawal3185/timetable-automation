@@ -518,7 +518,7 @@ const resources = [
     courses: ["Computer Organization and Assembly Language", "Operating Systems"],
     os: ["Windows", "macOS", "Linux"],
     description: "Runs and debugs MIPS assembly programs.",
-    link: "http://courses.missouristate.edu/kenvollmar/mars/",
+    link: "https://dpetersanderson.github.io/",
     steps: ["Install Java first.", "Download the Mars .jar file.", "Open it, write assembly code and click Assemble."]
   },
   {
