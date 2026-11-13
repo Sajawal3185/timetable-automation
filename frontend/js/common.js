@@ -42,6 +42,7 @@
 
   const USER_KEY = "numlUser";          // same key dashboard.js already reads
   const TOKEN_KEY = "numlToken";        // same key api.js uses
+  const TT_TOKEN_KEY = "ttAuthToken";   // token used by the timetable pages
   const PROFILES_KEY = "numlProfiles";  // name/department saved at signup (NO passwords)
   const MIN_PASSWORD = 8;               // login and signup used 6 and 8; one rule now
 
@@ -94,9 +95,11 @@
     localStorage.setItem(PROFILES_KEY, JSON.stringify(all));
   }
 
+  /* Log out: clear the user AND both tokens, then go to login. */
   function logout() {
     localStorage.removeItem(USER_KEY);
     localStorage.removeItem(TOKEN_KEY);
+    localStorage.removeItem(TT_TOKEN_KEY);
     window.location.href = PAGES.login;
   }
 

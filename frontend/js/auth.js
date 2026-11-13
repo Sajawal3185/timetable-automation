@@ -32,13 +32,14 @@ if (loginForm) {
         method: "POST",
         body: { identifier, password }
       });
-NUML.setToken(data.token);
+      NUML.setToken(data.token);
       const me = await NUML.api("/api/auth/me");
       NUML.setUser(me);
 
       // Every role goes to the dashboard for now. Role start pages come later.
       window.location.href = NUML.PAGES.dashboard;
     } catch (err) {
+      console.error("Login failed:", err);
       NUML.clearToken();
       msg.textContent =
         err.status === 401

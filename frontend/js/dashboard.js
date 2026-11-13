@@ -46,10 +46,9 @@ if (profileBtn && profileMenu) {
 }
 
 /* Log out: clear the session AND navigate. */
-const logoutEl = document.querySelector(".dash-logout");
-if (logoutEl) {
-  logoutEl.addEventListener("click", (e) => {
+document.querySelectorAll(".dash-logout").forEach((el) => {
+  el.addEventListener("click", (e) => {
     e.preventDefault();
     NUML.logout();
   });
-}
+});
