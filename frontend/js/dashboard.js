@@ -1,6 +1,10 @@
 /* ==========================================================================
-   dashboard.js  -  needs common.js, then api.js, loaded first.
+   dashboard.js  -  needs common.js loaded first.
    common.js already sends logged-out users to the login page.
+
+   Used by dashboard.html and admin-dashboard.html. The admin page is the
+   same page with <body class="... admin-page">; only admins and HODs
+   (NUML.isAdmin) may stay on it, everyone else goes to the student dashboard.
 
    What it fills in:
      1. Greeting and profile button
@@ -10,6 +14,12 @@
    Names go in with textContent, never innerHTML, so a name like "<b>"
    stays plain text.
    ========================================================================== */
+
+/* Admin page only. This just hides the page from other roles; the backend
+   checks the role on every admin endpoint. */
+if (document.body.classList.contains("admin-page") && !NUML.isAdmin(NUML.getUser())) {
+  window.location.replace(NUML.PAGES.dashboard);
+}
 
 function setText(id, text) {
   const node = document.getElementById(id);
