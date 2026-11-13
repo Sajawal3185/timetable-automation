@@ -23,7 +23,7 @@ const user = NUML.getUser();
 if (user) {
   /* An old or hand-edited saved user may have no name: fall back to the
      roll number, and keep the "Welcome back" greeting if there is neither. */
-  const name = String(user.name || user.identifier || "").trim();
+  const name = String(user.name || "").trim() || String(user.identifier || "").trim();
   const initials = name
     .split(/\s+/)
     .filter(Boolean)
