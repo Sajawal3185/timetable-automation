@@ -304,7 +304,7 @@ function getYearOptions(dept, subjectName) {
 function getUploadYearOptions() {
   const years = [];
 
-  for (let year = thisYear; year >= 2020; year--) {
+  for (let year = thisYear; year >= 2018; year--) {
     years.push({
       value: year,
       label: String(year)
