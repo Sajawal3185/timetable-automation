@@ -1322,18 +1322,23 @@ body.tt-page {
 .tt-page .page-body.tt-wide { max-width: 1240px; }
 
 
-/* ----- Top nav: navy rounded bar, links as pills, Log out top right -----
-   tt-layout.js moves the nav inside the photo header (.page-head), so the
-   photo shows around the bar; the header's own padding is the gap. */
+/* ----- Top nav: navy rounded bar fixed at the top of the screen -----
+   Text logo (the way back to the Archive), links as pills, and the bell
+   and Log out at the far right.
+   The photo header starts at the very top of the page and gets extra top
+   padding as tall as the bar (--tt-nav-h, measured by tt-layout.js), so the
+   photo shows around the bar instead of the white page background. */
+.tt-page .page-head { padding-top: calc(var(--tt-nav-h, 56px) + 32px); }
+
 .tt-page .tt-nav {
-  position: relative;             /* the bell panel is placed against the bar */
-  z-index: 40;                    /* panel above the card that overlaps the header */
+  position: fixed;
+  top: 10px;
+  left: 12px;
+  right: 12px;
+  z-index: 50;
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: 12px;
-  margin: 0 0 22px;
-  text-align: left;               /* .page-head centres its text */
   padding: 8px;
   background: var(--navy);
   border-radius: 999px;
@@ -1341,8 +1346,22 @@ body.tt-page {
   font: 500 14px "Plus Jakarta Sans", "Segoe UI", Arial, sans-serif;
 }
 
+/* "← NUML Archive" in the same text-logo style as the Archive's .logo */
+.tt-page .tt-logo {
+  flex: none;
+  padding: 0 10px 0 8px;
+  font-size: 18px;
+  font-weight: 800;
+  color: white;
+  white-space: nowrap;
+}
+.tt-page .tt-logo-arrow { margin-right: 2px; font-weight: 600; opacity: 0.75; }
+.tt-page .tt-logo-accent { color: #7cc4ff; }
+.tt-page .tt-logo:hover .tt-logo-arrow { opacity: 1; }
+
 .tt-page .tt-nav-links {
   display: flex;
+  flex: 1;
   flex-wrap: wrap;
   gap: 6px;
   min-width: 0;
@@ -1458,8 +1477,8 @@ body.tt-page {
   top: calc(100% + 8px);
   z-index: 20;
   width: 340px;
-  max-width: calc(100vw - 56px);  /* 20px header padding + 8px, on each side */
-  max-height: 420px;
+  max-width: calc(100vw - 40px);  /* 12px bar margin + 8px, on each side */
+  max-height: min(420px, calc(100vh - var(--tt-nav-h, 56px) - 40px));
   overflow-y: auto;
   padding: 10px;
   background: white;
@@ -1537,24 +1556,43 @@ body.tt-page {
 .tt-page .tt-status.cancelled { color: white; background: var(--muted); }
 
 
-/* Phone and small tablet: two rows inside a rounded card. Top row: who is
-   logged in on the left, the bell and Log out on the right. Below it the
-   page links, which share each row evenly. */
-@media (max-width: 760px) {
+/* Smaller laptops: the name goes first, so logo, links, bell and Log out
+   still fit on one line. */
+@media (max-width: 1100px) {
+  .tt-page .tt-nav .who { display: none; }
+}
+
+/* Tablet and phone: two rows inside a rounded card. Top row: the logo on the
+   left, the bell and Log out on the right. Below: the page links share one
+   row equally (a long name wraps inside its pill), so the fixed bar stays
+   short and no link is ever cut off. */
+@media (max-width: 900px) {
   .tt-page .tt-nav {
-    flex-direction: column-reverse;
-    align-items: stretch;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas: "logo end" "links links";
     gap: 10px;
     padding: 10px;
     border-radius: 22px;
   }
-  .tt-page .tt-nav-links a { flex: 1 1 auto; text-align: center; padding: 9px 12px; }
-  .tt-page .tt-nav-end { min-width: 0; }
-  .tt-page .tt-nav .who {
-    flex: 1;
+  .tt-page .tt-logo { grid-area: logo; align-self: center; }
+  .tt-page .tt-nav-end { grid-area: end; }
+  .tt-page .tt-nav-links {
+    grid-area: links;
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(0, 1fr);
+  }
+  .tt-page .tt-nav-links a {
+    display: grid;
+    place-items: center;
     min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    padding: 8px 6px;
+    font-size: 13px;
+    line-height: 1.2;
+    text-align: center;
+    white-space: normal;
+    border-radius: 14px;
   }
 }
 

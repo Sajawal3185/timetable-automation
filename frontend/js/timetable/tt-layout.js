@@ -89,14 +89,18 @@
     clear(nav);
     nav.setAttribute("aria-label", "Timetable navigation");
 
-    // Every timetable page puts the nav right before its photo header. Moving
-    // it inside the header lets the photo show all around the rounded bar,
-    // instead of the white page background.
-    const head = nav.nextElementSibling;
-    if (head && head.classList.contains("page-head")) head.insertBefore(nav, head.firstChild);
+    // Text logo, the way back to the Archive. It replaces the header's own
+    // "Back to NUML Archive" line, which is hidden on pages that have this nav.
+    const logo = el("a", { className: "tt-logo", attrs: { href: P.archive, "aria-label": "Back to NUML Archive" } }, [
+      el("span", { className: "tt-logo-arrow", text: "←", attrs: { "aria-hidden": "true" } }),
+      document.createTextNode(" NUML "),
+      el("span", { className: "tt-logo-accent", text: "Archive" })
+    ]);
+    const back = document.querySelector(".page-head > .back-link");
+    if (back) back.hidden = true;
 
-    // Two groups: the page links (left), and who is logged in + bell + Log out
-    // (right on a laptop, the top row on a phone; see .tt-nav in app.css).
+    // Then two groups: the page links, and who is logged in + bell + Log out
+    // (far right on a laptop, next to the logo on a phone; see .tt-nav in app.css).
     const links = el("div", { className: "tt-nav-links" });
     const here = currentFile();
     NAV_ITEMS.filter((item) => item.roles.includes(me.role)).forEach((item) => {
@@ -115,12 +119,21 @@
     const out = el("button", { className: "tt-logout", text: "Log out", attrs: { type: "button" } });
     out.addEventListener("click", logout);
 
+    nav.appendChild(logo);
     nav.appendChild(links);
     nav.appendChild(el("div", { className: "tt-nav-end" }, [
       el("span", { className: "who", text: me.name + " · " + (ROLE_LABEL[me.role] || me.role) }),
       bellSlot,
       out
     ]));
+
+    // The bar is fixed at the top of the screen, so the page needs room under
+    // it. Its height changes with the screen width (one or two rows), so it is
+    // measured and handed to the CSS as --tt-nav-h.
+    const setHeight = () => document.documentElement.style.setProperty("--tt-nav-h", nav.offsetHeight + "px");
+    setHeight();
+    if (window.ResizeObserver) new ResizeObserver(setHeight).observe(nav);
+    else window.addEventListener("resize", setHeight);
 
     return bellSlot;
   }
