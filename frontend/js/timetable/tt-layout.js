@@ -89,6 +89,9 @@
     clear(nav);
     nav.setAttribute("aria-label", "Timetable navigation");
 
+    // Two groups: the page links (left), and who is logged in + bell + Log out
+    // (right on a laptop, the top row on a phone; see .tt-nav in app.css).
+    const links = el("div", { className: "tt-nav-links" });
     const here = currentFile();
     NAV_ITEMS.filter((item) => item.roles.includes(me.role)).forEach((item) => {
       const a = el("a", { text: item.label, attrs: { href: item.href } });
@@ -96,21 +99,22 @@
         a.classList.add("active");
         a.setAttribute("aria-current", "page");
       }
-      nav.appendChild(a);
+      links.appendChild(a);
     });
-
-    nav.appendChild(el("span", { className: "spacer" }));
 
     // The bell lives here; tt-bell.js fills it. If that script is not on the
     // page the nav still works.
     const bellSlot = el("div", { className: "tt-bell-wrap", attrs: { id: "ttBellSlot" } });
-    nav.appendChild(bellSlot);
 
-    nav.appendChild(el("span", { className: "who", text: me.name + " · " + (ROLE_LABEL[me.role] || me.role) }));
-
-    const out = el("button", { text: "Log out", attrs: { type: "button" } });
+    const out = el("button", { className: "tt-logout", text: "Log out", attrs: { type: "button" } });
     out.addEventListener("click", logout);
-    nav.appendChild(out);
+
+    nav.appendChild(links);
+    nav.appendChild(el("div", { className: "tt-nav-end" }, [
+      el("span", { className: "who", text: me.name + " · " + (ROLE_LABEL[me.role] || me.role) }),
+      bellSlot,
+      out
+    ]));
 
     return bellSlot;
   }
