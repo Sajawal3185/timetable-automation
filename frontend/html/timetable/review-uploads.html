@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Review Uploads | NUML Archive</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../css/master.css">
+  <link rel="stylesheet" href="../../css/app.css">
+  <link rel="stylesheet" href="../../css/review-uploads.css">
+</head>
+<body class="tt-page review-page">
+
+  <!-- Filled by tt-layout.js: Review Uploads, admin name, Log out -->
+  <nav class="tt-nav" id="ttNav" aria-label="Timetable navigation"></nav>
+
+  <header class="page-head">
+    <a href="../index.html" class="back-link">← Back to NUML Archive</a>
+    <h1>Review Uploads</h1>
+    <p>Compact list for working through many uploads quickly. An upload is final when 2 admins agree.</p>
+  </header>
+
+  <div class="page-body" id="ttGate">
+    <section class="tt-card"><p>Checking your session…</p></section>
+  </div>
+
+  <main class="page-body" id="ttMain" hidden>
+    <section class="ru-card">
+
+      <div class="ru-top">
+        <div class="ru-tabs" role="tablist" aria-label="Upload status">
+          <button type="button" class="ru-tab active" role="tab" aria-selected="true"  data-tab="pending"  id="tabPending">Pending</button>
+          <button type="button" class="ru-tab"        role="tab" aria-selected="false" data-tab="approved" id="tabApproved">Approved</button>
+          <button type="button" class="ru-tab"        role="tab" aria-selected="false" data-tab="rejected" id="tabRejected">Rejected</button>
+        </div>
+        <input type="search" id="ruSearch" class="ru-search" placeholder="Search title" aria-label="Search uploads by title">
+      </div>
+
+      <div class="ru-bulk">
+        <strong id="ruSelected">0 selected</strong>
+        <button type="button" class="ru-btn approve" id="bulkApprove" disabled>Approve selected</button>
+        <button type="button" class="ru-btn reject"  id="bulkReject"  disabled>Reject selected</button>
+      </div>
+
+      <p class="form-msg" id="ruMsg" role="status"></p>
+
+      <div class="ru-table-wrap">
+        <table class="ru-table">
+          <thead>
+            <tr>
+              <th class="ru-check"><input type="checkbox" id="ruAll" aria-label="Select all"></th>
+              <th>Title</th>
+              <th>Type</th>
+              <th>Uploaded by</th>
+              <th>Date</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="ruRows"></tbody>
+        </table>
+      </div>
+
+      <p class="empty" id="ruEmpty" hidden></p>
+    </section>
+  </main>
+
+  <!-- Preview + decision window -->
+  <dialog class="ru-modal" id="ruModal" aria-labelledby="mTitle">
+    <div class="ru-modal-head">
+      <div>
+        <h2 id="mTitle"></h2>
+        <p id="mMeta"></p>
+        <p class="ru-votes" id="mVotes"></p>
+      </div>
+      <button type="button" class="ru-x" id="mClose" aria-label="Close">×</button>
+    </div>
+    <div class="ru-files" id="mFiles"></div>
+    <div class="ru-preview" id="mPreview"></div>
+    <p class="form-msg" id="mMsg" role="status"></p>
+    <div class="ru-modal-foot">
+      <button type="button" class="ru-btn approve" id="mApprove">Approve</button>
+      <button type="button" class="ru-btn reject"  id="mReject">Reject</button>
+      <button type="button" class="ru-btn plain"   id="mCancel">Close</button>
+    </div>
+  </dialog>
+
+  <script src="../../js/timetable/tt-config.js"></script>
+  <script src="../../js/timetable/tt-mock.js"></script>
+  <script src="../../js/timetable/tt-api.js"></script>
+  <script src="../../js/timetable/tt-layout.js"></script>
+  <script src="../../js/timetable/tt-bell.js"></script>
+  <script src="../../js/uploads-store.js"></script>
+  <script src="../../js/timetable/review-uploads.js"></script>
+</body>
+</html>
