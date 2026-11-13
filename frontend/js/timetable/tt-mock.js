@@ -385,16 +385,6 @@
     db.email_codes = db.email_codes.filter((c) => c !== row);   // single use
   }
 
-  // PENDING (signup plan): departments and sections for the signup dropdowns.
-  // Public, because the person has no account yet. Names only.
-  route("GET", /^\/api\/auth\/signup-options$/, (db) => ({
-    status: 200,
-    data: {
-      departments: db.departments.slice().sort((a, b) => a.name.localeCompare(b.name)).map((d) => pick(d, ["id", "name", "code"])),
-      sections: db.sections.slice().sort((a, b) => a.name.localeCompare(b.name)).map((x) => pick(x, ["id", "name", "department_id"]))
-    }
-  }));
-
   // PENDING (signup plan): start a signup. The email decides student or staff;
   // the role is never read from the request. Nothing is a real account until
   // the code is entered, and a new signup replaces an unfinished one, so
@@ -403,8 +393,6 @@
     const b = req.body || {};
     const email = cleanEmail(b.email);
     const name = requireText(b.name, "name", "Full name");
-    const dept = byId(db.departments, b.department_id);
-    if (!dept) throw new HttpError(422, [{ loc: ["body", "department_id"], msg: "Choose your department", type: "missing" }]);
     const password = checkPassword(b.password, "password");
     if (db.users.some((u) => u.email === email)) {
       throw new HttpError(409, "This email already has an account. Log in instead.");
@@ -412,19 +400,15 @@
 
     const isStudent = AUTH.STUDENT_EMAIL.test(email);
     const local = email.slice(0, email.indexOf("@"));
-    const signup = { email, name, department_id: dept.id, kind: isStudent ? "student" : "staff" };
+    const signup = { email, name, kind: isStudent ? "student" : "staff" };
     if (isStudent) {
-      const section = byId(db.sections, b.section_id);
-      if (!section || section.department_id !== dept.id) {
-        throw new HttpError(422, [{ loc: ["body", "section_id"], msg: "Choose a section of your department", type: "value_error" }]);
-      }
       const roll = requireText(b.roll_number, "roll_number", "Roll number").toLowerCase();
       if (!AUTH.ROLL_NUMBER.test(roll)) {
         throw new HttpError(422, [{ loc: ["body", "roll_number"], msg: "Roll number should look like se-9244330", type: "value_error" }]);
       }
       const parts = /^numl-([a-z])(\d{2})-(\d+)$/.exec(local);
       Object.assign(signup, {
-        identifier: local, section_id: section.id, roll_number: roll,
+        identifier: local, roll_number: roll,
         sys_id: parts[3], join_term: parts[1] + parts[2]
       });
     } else {
@@ -458,8 +442,8 @@
       identifier: signup.identifier,
       email,
       role: signup.kind === "student" ? "student" : "teacher",
-      department_id: signup.department_id,
-      section_id: signup.section_id || null,
+      department_id: null,   // not asked at signup; an admin sets it later
+      section_id: null,
       roll_number: signup.roll_number || null,
       sys_id: signup.sys_id || null,
       join_term: signup.join_term || null,

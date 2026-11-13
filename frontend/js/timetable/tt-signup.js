@@ -25,12 +25,8 @@
   const $ = (id) => document.getElementById(id);
 
   const steps = { email: $("suEmailStep"), details: $("suDetailsStep"), code: $("suCodeStep"), pending: $("suPending") };
-  const deptSelect = $("suDept");
-  const sectionSelect = $("suSection");
-
   let email = "";
   let isStudent = false;
-  let options = null;          // {departments, sections} from the server
   let resendTimer = null;
 
   function show(node, text, isError) {
@@ -42,7 +38,7 @@
     Object.keys(steps).forEach((k) => { steps[k].hidden = k !== step; });
     // "Already have an account?" only makes sense before the account exists
     $("suLinks").hidden = step === "pending";
-    const first = steps[step].querySelector("input:not([disabled]), select:not([disabled]), a");
+    const first = steps[step].querySelector("input, a");
     if (first) first.focus();
   }
 
@@ -54,7 +50,7 @@
   }
 
   /* ---- Step 1: email ---------------------------------------------------- */
-  steps.email.addEventListener("submit", async (event) => {
+  steps.email.addEventListener("submit", (event) => {
     event.preventDefault();
     const msg = $("suEmailMsg");
     const typed = $("suEmail").value.trim().toLowerCase();
@@ -73,42 +69,10 @@
     $("suStudentFields").hidden = !isStudent;
     $("suStaffNote").hidden = isStudent;
     show(msg, "");
-
-    if (!options) {
-      try {
-        options = await window.TTApi.request("GET", "/api/auth/signup-options", { redirectOn401: false });
-        fillDepartments();
-      } catch (err) {
-        show(msg, "Could not load the departments. " + err.message, true);
-        return;
-      }
-    }
     goTo("details");
   });
 
   /* ---- Step 2: details -------------------------------------------------- */
-  function option(value, text) {
-    const o = document.createElement("option");
-    o.value = value;
-    o.textContent = text;
-    return o;
-  }
-
-  function fillDepartments() {
-    deptSelect.replaceChildren(option("", "Choose your department"));
-    options.departments.forEach((d) => deptSelect.appendChild(option(d.id, d.name)));
-  }
-
-  deptSelect.addEventListener("change", () => {
-    const deptId = Number(deptSelect.value);
-    const list = deptId ? options.sections.filter((s) => s.department_id === deptId) : [];
-    sectionSelect.replaceChildren(option("", deptId
-      ? (list.length ? "Choose your section" : "No sections yet: ask your admin to add yours")
-      : "Choose your department first"));
-    list.forEach((s) => sectionSelect.appendChild(option(s.id, s.name)));
-    sectionSelect.disabled = list.length === 0;
-  });
-
   $("suChangeEmail").addEventListener("click", () => goTo("email"));
 
   steps.details.addEventListener("submit", async (event) => {
@@ -121,10 +85,10 @@
 
     // Quick checks, in the order of the form, so the first problem is shown
     if (!name) { show(msg, "Enter your full name.", true); $("suName").focus(); return; }
-    if (!deptSelect.value) { show(msg, "Choose your department.", true); deptSelect.focus(); return; }
-    if (isStudent) {
-      if (!sectionSelect.value) { show(msg, "Choose your section.", true); sectionSelect.focus(); return; }
-      if (!A.ROLL_NUMBER.test(roll)) { show(msg, "Roll number should look like se-9244330.", true); $("suRoll").focus(); return; }
+    if (isStudent && !A.ROLL_NUMBER.test(roll)) {
+      show(msg, "Roll number should look like se-9244330.", true);
+      $("suRoll").focus();
+      return;
     }
     if (pw.length < C.MIN_PASSWORD || new TextEncoder().encode(pw).length > C.MAX_PASSWORD) {
       show(msg, "Password must be " + C.MIN_PASSWORD + " to " + C.MAX_PASSWORD + " characters.", true);
@@ -133,8 +97,8 @@
     }
     if (pw !== pw2) { show(msg, "The two passwords don't match.", true); $("suPassword2").focus(); return; }
 
-    const body = { email, name, department_id: Number(deptSelect.value), password: pw };
-    if (isStudent) Object.assign(body, { section_id: Number(sectionSelect.value), roll_number: roll });
+    const body = { email, name, password: pw };
+    if (isStudent) body.roll_number = roll;
 
     const btn = $("suDetailsBtn");
     btn.disabled = true;
