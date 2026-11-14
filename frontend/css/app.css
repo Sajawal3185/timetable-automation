@@ -17,6 +17,7 @@
 .page-head {
   background: linear-gradient(rgba(10, 40, 100, 0.85), rgba(10, 40, 100, 0.75)),
               url("../images/numl.webp");   /* ../ = one folder up, out of css/ */
+  background-color: #0a2864;
   background-size: cover;
   background-position: center;
   color: white;
