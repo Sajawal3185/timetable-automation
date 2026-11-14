@@ -10,8 +10,9 @@
      2. They fill in the form. POST /api/auth/signup sends a 6-digit code to
         that email. Nothing is a real account yet.
      3. They type the code. POST /api/auth/verify-email:
-          student -> active, gets a token, goes to their start page
-          staff   -> a teacher account waiting for an admin or HOD's approval
+          student -> a `student` account, logged in, goes to their start page
+          staff   -> a `teacher` account, logged in the same way (no approval,
+                     decided 14 Nov; an admin links it to a teacher record later)
 
    The role is never sent: the backend decides it from the email. Every check
    here is only a hint; the backend rechecks all of them.
@@ -24,7 +25,7 @@
   const A = C.AUTH;
   const $ = (id) => document.getElementById(id);
 
-  const steps = { email: $("suEmailStep"), details: $("suDetailsStep"), code: $("suCodeStep"), pending: $("suPending") };
+  const steps = { email: $("suEmailStep"), details: $("suDetailsStep"), code: $("suCodeStep") };
   const deptSelect = $("suDept");
   const sectionSelect = $("suSection");
 
@@ -40,8 +41,6 @@
 
   function goTo(step) {
     Object.keys(steps).forEach((k) => { steps[k].hidden = k !== step; });
-    // "Already have an account?" only makes sense before the account exists
-    $("suLinks").hidden = step === "pending";
     const first = steps[step].querySelector("input:not([disabled]), select:not([disabled]), a");
     if (first) first.focus();
   }
@@ -203,13 +202,9 @@
     try {
       const res = await window.TTApi.request("POST", "/api/auth/verify-email", { body: { email, code }, redirectOn401: false });
       clearInterval(resendTimer);
-      if (res.status === "active" && res.token) {
-        // Students are active straight away: save the token only and go in.
-        window.TTApi.setToken(res.token);
-        window.location.replace(C.START_PAGE[res.user.role] || C.PAGES.login);
-        return;
-      }
-      goTo("pending");   // staff: no token until an admin or HOD approves
+      // Students and staff are both active straight away: save the token only and go in.
+      window.TTApi.setToken(res.token);
+      window.location.replace(C.START_PAGE[res.user.role] || C.PAGES.login);
     } catch (err) {
       if (err.status === 429) show(msg, "Too many attempts. Try again later.", true);
       else show(msg, err.message, true);

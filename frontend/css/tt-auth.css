@@ -95,7 +95,7 @@ body.auth-page.tt-auth { padding: 24px 16px; }
   border-radius: 8px;
 }
 
-/* Final message (account waiting for approval, password changed) */
+/* Final message (password changed) */
 .tt-auth .done {
   text-align: center;
 }

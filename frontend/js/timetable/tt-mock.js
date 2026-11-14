@@ -441,8 +441,10 @@
     return { status: 202, data: { email, kind: signup.kind, expires_in: CODE_MINUTES * 60 } };
   });
 
-  // PENDING (signup plan): enter the signup code. Students become active and
-  // are logged in; staff become a pending teacher who cannot log in yet.
+  // PENDING (signup plan): enter the signup code. Everyone is active and
+  // logged in straight away: students as `student`, staff as `teacher` (no
+  // approval, decided 14 Nov). An admin links a teacher account to its
+  // teacher record later; only an admin makes someone HOD or admin.
   route("POST", /^\/api\/auth\/verify-email$/, async (db, req) => {
     const b = req.body || {};
     const email = cleanEmail(b.email);
@@ -463,7 +465,6 @@
       roll_number: signup.roll_number || null,
       sys_id: signup.sys_id || null,
       join_term: signup.join_term || null,
-      status: signup.kind === "student" ? "active" : "pending",
       email_verified_at: nowIso(),
       password_sha256: signup.password_sha256,
       is_active: true
@@ -471,12 +472,11 @@
     db.users.push(user);
     db.pending_signups = db.pending_signups.filter((p) => p !== signup);
 
-    if (user.status === "pending") return { status: 200, data: { status: "pending" } };
     const token = randomToken();
     const sessions = readSessions();
     sessions[token] = user.id;
     writeSessions(sessions);
-    return { status: 200, data: { status: "active", token, user: pick(user, SHAPES.UserOut) } };
+    return { status: 200, data: { token, user: pick(user, SHAPES.UserOut) } };
   });
 
   // PENDING (signup plan): send a new signup code, at most once a minute.
@@ -501,7 +501,7 @@
     const b = req.body || {};
     requireText(b.identifier, "identifier", "NUML email or ID");
     const user = findAccount(db, b.identifier);
-    if (user && user.email && user.status !== "rejected") {
+    if (user && user.email) {
       const old = db.email_codes.find((c) => c.email === user.email && c.purpose === "reset");
       if (!old || secondsSince(old.sent_at) >= AUTH.RESEND_SECONDS) await issueCode(db, user.email, "reset");
     }
@@ -541,10 +541,6 @@
     if (!user || !user.is_active || !user.password_sha256 || hash !== user.password_sha256) {
       throw new HttpError(401, "Invalid credentials");
     }
-    // The one exception to "same message for everything" (signup plan): only
-    // after the right password, so it does not reveal which accounts exist.
-    if (user.status === "pending") throw new HttpError(403, "Your account is waiting for approval");
-    if (user.status === "rejected") throw new HttpError(401, "Invalid credentials");
     const token = randomToken();
     const sessions = readSessions();
     sessions[token] = user.id;

@@ -78,10 +78,8 @@
       goToStart(data.user.role);
     } catch (err) {
       // Same message for every wrong login, so nobody can find out which
-      // accounts exist. The one exception is a staff account that is still
-      // waiting for approval (only after the right password).
+      // accounts exist.
       if (err.status === 401) show("Invalid email/ID or password", true);
-      else if (err.status === 403) show("Your account is waiting for approval", true);
       else if (err.status === 429) show("Too many attempts. Try again later.", true);
       else show(err.message, true);
       pwInput.value = "";

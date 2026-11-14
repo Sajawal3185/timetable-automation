@@ -71,9 +71,8 @@ Login & Signup Plan. The backend endpoints are still pending (see
 
 - No email is sent. The code is always **123456**, and both pages say so.
 - A `numl-f24-26789@numls.edu.pk` email gets the student form; any other
-  `@numls.edu.pk` email gets the staff form. A student is logged in after the
-  code; a staff account waits for approval (logging in shows "Your account is
-  waiting for approval").
+  `@numls.edu.pk` email gets the staff form. Both are logged in after the
+  code: students as `student`, staff as `teacher` (no approval step).
 - Accounts you create last until you close the tab. Only they have an email,
   so forgot password works for them, not for the sample accounts below.
 
