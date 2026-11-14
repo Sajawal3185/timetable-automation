@@ -34,6 +34,7 @@ from app.core.security import (
     hash_password,
     verify_password,
 )
+from app.models.department import Department
 from app.models.teacher import Teacher
 from app.models.user import User
 
@@ -83,6 +84,7 @@ class CreateUserRequest(BaseModel):
     identifier: str = Field(min_length=1)
     password: str = Field(min_length=8)
     role: str
+    department_id: int | None = None
 
     _pw_len = field_validator("password")(_check_password_length)
 
@@ -203,6 +205,18 @@ def create_staff_user(
             detail=f"role must be one of: {', '.join(sorted(STAFF_ROLES))}",
         )
 
+    # BE-07: a HOD must belong to a department, otherwise can_decide_swap refuses them forever.
+    if data.role == "hod" and data.department_id is None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="department_id is required when role is hod",
+        )
+    if data.department_id is not None and db.get(Department, data.department_id) is None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Department not found",
+        )
+
     # Step 1: friendly early check, so the common duplicate case returns 409
     # without hashing a password first.
     identifier = _normalize(data.identifier)
@@ -214,6 +228,7 @@ def create_staff_user(
         identifier=identifier,
         password_hash=hash_password(data.password),
         role=data.role,
+        department_id=data.department_id,
         is_active=True,
     )
     db.add(user)

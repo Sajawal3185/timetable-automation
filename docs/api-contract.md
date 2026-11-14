@@ -29,7 +29,7 @@ FastAPI's live docs at `/docs` can be used to check it.
 | POST | `/api/auth/login` | anyone | `{identifier, password}` | `200 {token, user}` (user object below) | `401 Invalid credentials` (same message for unknown user, wrong password, not activated, disabled) |
 | POST | `/api/auth/activate` | anyone | `{identifier, new_password}` (8+ chars, max 72 bytes) | `200` same as login | `400 This account cannot be activated` (not on the roster, not a student, already has a password) |
 | GET | `/api/auth/me` | any user | | `200` user object | `401` |
-| POST | `/api/auth/users` | admin | `{name, identifier, password, role, department_id}` (password 8+ chars; `role` is `teacher`, `hod` or `admin`; `department_id` is **required when `role` is `hod`** *(lands with BE-07)*) | `201` user object | `403`, `400` bad role, `400` `hod` without `department_id` or unknown department *(lands with BE-07)*, `409` identifier exists |
+| POST | `/api/auth/users` | admin | `{name, identifier, password, role, department_id}` (password 8+ chars; `role` is `teacher`, `hod` or `admin`; `department_id` is **required when `role` is `hod`**  | `201` user object | `403`, `400` bad role, `400` `hod` without `department_id` or unknown department , `409` identifier exists |
 
 `identifier` is the login key: the roll number for students (for example `se-9244330`), and the staff identifier for staff. It is trimmed and lowercased before use. Send `Authorization: Bearer <token>` afterwards.
 
