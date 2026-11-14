@@ -7,7 +7,6 @@ from sqlalchemy.orm import Session
 
 from app.core.permissions import STAFF, require_roles, role_of
 from app.database import get_db
-from app.dependencies import get_current_user
 from app.models.course import Course
 from app.models.makeup_class import MakeupClass
 from app.models.notification import NotificationType
@@ -146,7 +145,7 @@ def book_makeup_class(
         status="scheduled", created_by=user_id,
     )
     db.add(makeup)
-    # Tell the teacher and the section's students, in the SAME transaction as the
+    # Tell the teacher (staff only, no students), in the SAME transaction as the
     # booking: if the booking is refused below, no notification is left behind.
     when = f"{body.day_of_week} {body.start_time:%H:%M}-{body.end_time:%H:%M}"
     if body.class_date:
@@ -154,7 +153,7 @@ def book_makeup_class(
     try:
         db.flush()  # gives makeup.id for the notification's related_id
         notify_many(
-            db, recipients_for_makeup(db, body.teacher_id, body.section_id),
+            db, recipients_for_makeup(db, body.teacher_id),
             NotificationType.makeup_added,
             f"Makeup class added: {course.code} on {when} in {room.name}.",
             related_id=makeup.id,
@@ -171,7 +170,7 @@ def book_makeup_class(
     return makeup
 
 
-@router.get("", response_model=list[MakeupClassOut], dependencies=[Depends(get_current_user)])
+@router.get("", response_model=list[MakeupClassOut], dependencies=[Depends(require_roles(*STAFF))])
 def list_makeup_classes(section_id: int | None = None, teacher_id: int | None = None, db: Session = Depends(get_db)):
     stmt = select(MakeupClass).where(MakeupClass.status == "scheduled").order_by(MakeupClass.day_of_week, MakeupClass.start_time)
     if section_id:

@@ -126,10 +126,10 @@ def test_teacher_creates_swap_for_own_class(world):
     body = r.json()
     assert body["status"] == "pending" and body["warnings"] == []
     assert body["entry_id"] == world["e1"].id and body["target_entry_id"] == world["e3"].id
-    # both teachers and the students of both sections are told
+    # both teachers are told; students are not (the Timetable is for staff only)
     recipients = {n.user_id for n in world["db"]().execute(select(Notification)).scalars()}
     u = world["users"]
-    assert recipients == {u["teacher"].id, u["teacher2"].id, u["student"].id}
+    assert recipients == {u["teacher"].id, u["teacher2"].id}
 
 
 def test_create_permission_refusals(world):
@@ -267,4 +267,4 @@ def test_swap_with_a_teacher_who_has_no_login_still_works(world):
     assert _create(world).status_code == 201
     recipients = {n.user_id for n in world["db"]().execute(select(Notification)).scalars()}
     u = world["users"]
-    assert recipients == {u["teacher"].id, u["student"].id}
+    assert recipients == {u["teacher"].id}

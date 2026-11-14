@@ -209,10 +209,10 @@
       ]
     },
     {
-      "name": "2. Student sees their section's timetable",
+      "name": "2. Students are kept out of the Timetable",
       "item": [
         {
-          "name": "Student: my section's timetable",
+          "name": "Student: timetable is refused",
           "request": {
             "method": "GET",
             "header": [],
@@ -234,10 +234,36 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"200 and classes listed\", () => {",
-                  "    pm.response.to.have.status(200);",
-                  "    pm.expect(pm.response.json().length).to.be.above(0);",
-                  "});"
+                  "pm.test(\"403: the Timetable is for staff only\", () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Student: rooms are refused",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/rooms",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{studentToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"403\", () => pm.response.to.have.status(403));"
                 ]
               }
             }
@@ -782,10 +808,41 @@
       ]
     },
     {
-      "name": "7. Student: bell shows 'Makeup class added'",
+      "name": "7. Teacher sees the makeup; students are not told",
       "item": [
         {
-          "name": "Student: notifications",
+          "name": "Teacher: my makeup classes",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/makeup?teacher_id={{teacherTeacherId}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{teacherToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"200\", () => pm.response.to.have.status(200));",
+                  "const id = Number(pm.collectionVariables.get(\"makeupId\"));",
+                  "pm.test(\"the booked makeup is listed\", () => pm.expect(pm.response.json().map(m => m.id)).to.include(id));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Student: no 'makeup added' notification",
           "request": {
             "method": "GET",
             "header": [],
@@ -808,15 +865,15 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test(\"200\", () => pm.response.to.have.status(200));",
-                  "pm.test(\"a 'makeup added' notification\", () =>",
-                  "    pm.expect(pm.response.json().some(x => x.type === \"makeup_added\")).to.be.true);"
+                  "pm.test(\"students are not notified\", () =>",
+                  "    pm.expect(pm.response.json().some(x => x.type === \"makeup_added\")).to.be.false);"
                 ]
               }
             }
           ]
         },
         {
-          "name": "Student: makeup classes for my section",
+          "name": "Student: makeup list is refused",
           "request": {
             "method": "GET",
             "header": [],
@@ -838,38 +895,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"200\", () => pm.response.to.have.status(200));",
-                  "const id = Number(pm.collectionVariables.get(\"makeupId\"));",
-                  "pm.test(\"the booked makeup is listed\", () => pm.expect(pm.response.json().map(m => m.id)).to.include(id));"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "Student: mark all read",
-          "request": {
-            "method": "POST",
-            "header": [],
-            "url": "{{baseUrl}}/api/notifications/read-all",
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{studentToken}}",
-                  "type": "string"
-                }
-              ]
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test(\"200\", () => pm.response.to.have.status(200));"
+                  "pm.test(\"403\", () => pm.response.to.have.status(403));"
                 ]
               }
             }

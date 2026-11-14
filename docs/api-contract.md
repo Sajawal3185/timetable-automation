@@ -33,7 +33,23 @@ FastAPI's live docs at `/docs` can be used to check it.
 
 `identifier` is the login key: the roll number for students (for example `se-9244330`), and the staff identifier for staff. It is trimmed and lowercased before use. Send `Authorization: Bearer <token>` afterwards.
 
-There is no self-registration: students activate a roster account with `/activate`, and an admin creates staff accounts with `/users`.
+There is no self-registration in the backend yet: students activate a roster account with `/activate`, and an admin creates staff accounts with `/users`.
+
+### Signup and forgot password *(pending: Login & Signup Plan, 12 Nov)*
+
+Decided in the Login & Signup Plan (no university roster, so the official NUML email is the proof of identity). The Timetable frontend's signup, login and forgot-password pages already call these, and `frontend/js/timetable/tt-mock.js` answers them in mock mode (code always `123456`). The backend doesn't have them yet.
+
+| Method | URL | Who | Body | Success | Errors |
+| --- | --- | --- | --- | --- | --- |
+| POST | `/api/auth/signup` | anyone | `{email, name, password}`. **Staff only**: the Timetable has no student accounts. No department is asked; the new user's `department_id` starts as `null` and an admin sets it later. A role is never sent. | `202 {email, kind: "staff", expires_in}`: a 6-digit code is emailed. Nothing is an account yet; a new signup replaces an unfinished one for the same email | `400` not an `@numls.edu.pk` email, `400` a student email (`numl-<letter><yy>-<sys-id>@…`: students use the Archive), `409 This email already has an account. Log in instead.`, `422` missing field, password not 8 to 72 characters |
+| POST | `/api/auth/verify-email` | anyone | `{email, code}` | `200 {status: "pending"}`: a `teacher` that can't log in until an admin or HOD approves | `400` wrong or expired code, or the signup expired; `429 Too many attempts. Try again later.` after 5 wrong codes |
+| POST | `/api/auth/resend-code` | anyone | `{email}` (an unfinished signup) | `202` a new code replaces the old one | `400` no unfinished signup, `429` asked again within 60 seconds |
+| POST | `/api/auth/forgot-password` | anyone | `{identifier}` (NUML email or ID) | `202 {"detail": "If that account exists, we sent a code to its email."}`: **always the same**, so it can't reveal who is registered. Sends at most one code a minute, to the email the account signed up with | `422` empty |
+| POST | `/api/auth/reset-password` | anyone | `{identifier, code, new_password}` | `200`: password changed, the code can't be used again, existing sessions end | `400` wrong or expired code (also for an unknown account), `422` password not 8 to 72 characters, `429` after 5 wrong codes |
+
+Rules: emails are trimmed, lowercased and must end in `@numls.edu.pk`. A student email (`numl-<term letter><yy>-<sys-id>@numls.edu.pk`) is refused. A staff member's `identifier` is their full email. Codes are 6 digits, stored hashed, valid for 10 minutes, single use, 5 attempts.
+
+**Login changes with this plan:** `identifier` accepts the ID or the full email. A staff account still waiting for approval gets `403 Your account is waiting for approval`, but only after the right password; every other failure stays `401 Invalid credentials`.
 
 User object: `{id, name, role, identifier, department_id, section_id, teacher_id}`. `department_id`, `section_id` and `teacher_id` are `null` when they do not apply; `teacher_id` is the `Teacher` row linked to this account, used to load a teacher's own timetable.
 
@@ -55,7 +71,7 @@ Swap object: `{id, requester_teacher_id, entry_id, target_entry_id, status (pend
 | --- | --- | --- | --- |
 | POST | `/api/makeup/find-slots` | teacher, hod, admin | body `{section_id, teacher_id, course_id, duration_minutes? (30-240, default 60), preferred_room_id?, days?, term?}`. Returns `[{day_of_week, start_time, end_time, recommended_room, fallback_rooms, soft_warnings}]`; room object `{room_id, room_name, capacity, room_type, building, is_preferred}`. `403` not allowed to act for this teacher (see below), `422` bad day or unknown section/teacher/course |
 | POST | `/api/makeup` | teacher, hod, admin | body `{course_id, section_id, teacher_id, room_id, day_of_week, start_time, end_time, class_date?, reason?, term?}`. `201` returns the makeup. `403` not allowed to book for this teacher, `404` something not found, `409` room too small or capacity unknown, wrong room type (a lab course needs a lab room, a lecture course cannot use a lab), a clash, or the room was booked by someone else a moment ago, `422` end before start or bad day |
-| GET | `/api/makeup` | any user | query: `section_id`, `teacher_id`. Only `scheduled` ones |
+| GET | `/api/makeup` | teacher, hod, admin (students `403`) | query: `section_id`, `teacher_id`. Only `scheduled` ones |
 
 Who may act for which teacher: a teacher only for their own `Teacher` record, an HOD for any teacher in their own department, an admin for anyone.
 
@@ -78,9 +94,9 @@ Notification object: `{id, type (schedule_changed/swap_requested/swap_approved/s
 
 | Method | URL | Who | Notes |
 | --- | --- | --- | --- |
-| GET | `/api/rooms` | any user | query: `min_capacity`, `building`, `search`, `skip`, `limit` |
-| GET | `/api/rooms/empty` | any user | query: `day`, `start`, `end` (all required), `min_capacity`. Rooms with no class overlapping `[start, end)`, smallest first, rooms with unknown capacity last |
-| GET | `/api/rooms/{id}` | any user | 404 if missing |
+| GET | `/api/rooms` | teacher, hod, admin (students `403`) | query: `min_capacity`, `building`, `search`, `skip`, `limit` |
+| GET | `/api/rooms/empty` | teacher, hod, admin (students `403`) | query: `day`, `start`, `end` (all required), `min_capacity`. Rooms with no class overlapping `[start, end)`, smallest first, rooms with unknown capacity last |
+| GET | `/api/rooms/{id}` | teacher, hod, admin (students `403`) | 404 if missing |
 | POST | `/api/rooms` | hod, admin | body `{name, capacity, building?}`; 409 if name exists |
 | PUT | `/api/rooms/{id}` | hod, admin | any subset of the body above |
 | GET | `/api/departments` | any user | `[{id, name, code}]` |
@@ -93,7 +109,7 @@ Room object: `{id, name, capacity, building}`. `capacity` is `null` when unknown
 
 | Method | URL | Who | Notes |
 | --- | --- | --- | --- |
-| GET | `/api/timetable` | any user | query: `section_id`, `teacher_id`, `room_id`, `course_id`, `department_id`, `day`, `skip`, `limit` |
+| GET | `/api/timetable` | teacher, hod, admin (students `403`) | query: `section_id`, `teacher_id`, `room_id`, `course_id`, `department_id`, `day`, `skip`, `limit` |
 | POST | `/api/timetable/import` | hod, admin | multipart form: `department_code` (SE/AI/CS/IT), `dry_run` (default `true`), `file` (.xlsx/.csv, max 10 MB) |
 
 Entry object: `{id, section_id, course_id, teacher_id, room_id, day_of_week, start_time, end_time}`.

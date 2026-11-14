@@ -34,12 +34,12 @@ npx newman run docs/postman/demo.postman_collection.json \
 |---|---|
 | 0 | `/api/health` answers (wakes the Render server) |
 | 1 | Student, teacher, HOD and admin log in; a wrong password gets 401 |
-| 2 | The student sees their section's timetable |
+| 2 | The Timetable is for staff only: a student gets 403 on the timetable and rooms |
 | 3 | The teacher's swap into the known clashing slot is refused (409); the swap into the known free slot is created as `pending`; a student cannot approve it (403) |
 | 4 | The HOD sees the request and approves it |
 | 5 | The teacher has a `swap_approved` notification, marks it read, and the class is in its new slot |
 | 6 | Find makeup slots for 90 minutes (lecture rooms only), book the first one, and booking the same slot again is refused (409) |
-| 7 | The student has a `makeup_added` notification and sees the makeup class |
+| 7 | The teacher sees the makeup class; the student gets no `makeup_added` notification and 403 on the makeup list |
 | 8 | Admin `/api/auth/me` |
 
 The clashing and free slots come from `backend/scripts/seed.py`: Dr. Ahmed Raza's Monday 08:30 class clashes with Ms. Sara Khan's Monday 10:00 class, and his Wednesday 10:00 class swaps cleanly with her Wednesday 08:30 class.
