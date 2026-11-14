@@ -18,6 +18,7 @@ body.auth-page {
   align-items: center;
   background: linear-gradient(rgba(20, 90, 110, .65), rgba(20, 90, 110, .65)),
               url("../images/numl.webp") center / cover;
+  background-color: #145a6e;
 }
 
 
