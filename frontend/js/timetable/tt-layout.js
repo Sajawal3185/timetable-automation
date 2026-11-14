@@ -89,6 +89,19 @@
     clear(nav);
     nav.setAttribute("aria-label", "Timetable navigation");
 
+    // Text logo, the way back to the Archive. It replaces the header's own
+    // "Back to NUML Archive" line, which is hidden on pages that have this nav.
+    const logo = el("a", { className: "tt-logo", attrs: { href: P.archive, "aria-label": "Back to NUML Archive" } }, [
+      el("span", { className: "tt-logo-arrow", text: "←", attrs: { "aria-hidden": "true" } }),
+      document.createTextNode(" NUML "),
+      el("span", { className: "tt-logo-accent", text: "Archive" })
+    ]);
+    const back = document.querySelector(".page-head > .back-link");
+    if (back) back.hidden = true;
+
+    // Then two groups: the page links, and who is logged in + bell + Log out
+    // (far right on a laptop, next to the logo on a phone; see .tt-nav in app.css).
+    const links = el("div", { className: "tt-nav-links" });
     const here = currentFile();
     NAV_ITEMS.filter((item) => item.roles.includes(me.role)).forEach((item) => {
       const a = el("a", { text: item.label, attrs: { href: item.href } });
@@ -96,21 +109,31 @@
         a.classList.add("active");
         a.setAttribute("aria-current", "page");
       }
-      nav.appendChild(a);
+      links.appendChild(a);
     });
-
-    nav.appendChild(el("span", { className: "spacer" }));
 
     // The bell lives here; tt-bell.js fills it. If that script is not on the
     // page the nav still works.
     const bellSlot = el("div", { className: "tt-bell-wrap", attrs: { id: "ttBellSlot" } });
-    nav.appendChild(bellSlot);
 
-    nav.appendChild(el("span", { className: "who", text: me.name + " · " + (ROLE_LABEL[me.role] || me.role) }));
-
-    const out = el("button", { text: "Log out", attrs: { type: "button" } });
+    const out = el("button", { className: "tt-logout", text: "Log out", attrs: { type: "button" } });
     out.addEventListener("click", logout);
-    nav.appendChild(out);
+
+    nav.appendChild(logo);
+    nav.appendChild(links);
+    nav.appendChild(el("div", { className: "tt-nav-end" }, [
+      el("span", { className: "who", text: me.name + " · " + (ROLE_LABEL[me.role] || me.role) }),
+      bellSlot,
+      out
+    ]));
+
+    // The bar is fixed at the top of the screen, so the page needs room under
+    // it. Its height changes with the screen width (one or two rows), so it is
+    // measured and handed to the CSS as --tt-nav-h.
+    const setHeight = () => document.documentElement.style.setProperty("--tt-nav-h", nav.offsetHeight + "px");
+    setHeight();
+    if (window.ResizeObserver) new ResizeObserver(setHeight).observe(nav);
+    else window.addEventListener("resize", setHeight);
 
     return bellSlot;
   }
