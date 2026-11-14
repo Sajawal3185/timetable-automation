@@ -26,6 +26,11 @@
    "not linked" message if they are missing, so real mode fails visibly
    instead of silently showing someone else's week.
 
+   SIGNUP AND FORGOT PASSWORD (Login & Signup Plan, 12 Nov) are not in the
+   backend yet. Their endpoints are marked pending in docs/api-contract.md and
+   are mocked here so the pages can be built now. No email is sent: the code
+   is always TT_CONFIG.AUTH.MOCK_CODE (123456), and the pages say so.
+
    State lives in sessionStorage ("ttMockDb", "ttMockSessions"): it survives
    page loads in one tab (so a teacher's request can be approved by the HOD
    after switching accounts) and disappears when the tab closes.
@@ -42,6 +47,10 @@
     "users", "departments", "sections", "courses", "rooms", "teachers",
     "timetable_entries", "makeup_classes", "swap_requests", "notifications"
   ];
+  // Tables that start empty and only exist in the mock (signup plan):
+  //   pending_signups  a signup waiting for its code (not a real account yet)
+  //   email_codes      {email, purpose, code_sha256, expires_at, attempts, sent_at}
+  const EMPTY_TABLES = ["pending_signups", "email_codes"];
 
   /* Field lists copied from backend/app/schemas and routers/auth.py. */
   const SHAPES = {
@@ -79,7 +88,11 @@
     dbPromise = (async () => {
       try {
         const saved = sessionStorage.getItem(DB_KEY);
-        if (saved) return JSON.parse(saved);
+        if (saved) {
+          const db = JSON.parse(saved);
+          EMPTY_TABLES.forEach((t) => { if (!db[t]) db[t] = []; });
+          return db;
+        }
       } catch (e) { /* corrupted or blocked: reseed below */ }
       const db = {};
       await Promise.all(TABLES.map(async (t) => {
@@ -87,6 +100,7 @@
         if (!res.ok) throw new Error("Mock data file missing: " + t + ".json");
         db[t] = await res.json();
       }));
+      EMPTY_TABLES.forEach((t) => { db[t] = []; });
       saveDb(db);
       return db;
     })();
@@ -307,6 +321,208 @@
   const routes = [];
   const route = (method, pattern, fn) => routes.push({ method, pattern, fn });
 
+  /* ---- Signup plan helpers (pending backend; see the header) ---------- */
+  const AUTH = window.TT_CONFIG.AUTH;
+  const CODE_MINUTES = 10;
+  const MAX_ATTEMPTS = 5;
+
+  function findAccount(db, typed) {
+    const t = String(typed || "").trim().toLowerCase();
+    if (!t) return null;
+    return db.users.find((u) => u.identifier === t || (u.email && u.email === t)) || null;
+  }
+
+  function cleanEmail(value) {
+    const email = String(value || "").trim().toLowerCase();
+    const at = email.indexOf("@");
+    if (!email.endsWith(AUTH.EMAIL_DOMAIN) || at < 1 || at !== email.lastIndexOf("@")) {
+      throw new HttpError(400, "Use your NUML email address (ending in " + AUTH.EMAIL_DOMAIN + ")");
+    }
+    return email;
+  }
+
+  function checkPassword(pw, field) {
+    const p = String(pw || "");
+    if (p.length < 8 || new TextEncoder().encode(p).length > 72) {
+      throw new HttpError(422, [{ loc: ["body", field], msg: "Password must be 8 to 72 characters", type: "value_error" }]);
+    }
+    return p;
+  }
+
+  function requireText(value, field, label) {
+    const v = String(value || "").trim();
+    if (!v) throw new HttpError(422, [{ loc: ["body", field], msg: label + " is required", type: "missing" }]);
+    return v;
+  }
+
+  const secondsSince = (iso) => (Date.now() - Date.parse(iso + "Z")) / 1000;
+
+  /* Store a new code (hashed) for this email and purpose, replacing any old
+     one. In mock mode "sending" it means nothing: the code is MOCK_CODE. */
+  async function issueCode(db, email, purpose) {
+    db.email_codes = db.email_codes.filter((c) => !(c.email === email && c.purpose === purpose));
+    db.email_codes.push({
+      email, purpose,
+      code_sha256: await sha256Hex(email + ":" + purpose + ":" + AUTH.MOCK_CODE),
+      expires_at: new Date(Date.now() + CODE_MINUTES * 60000).toISOString().slice(0, 19),
+      attempts: 0,
+      sent_at: nowIso()
+    });
+  }
+
+  /* Check a typed code. Wrong codes count; after MAX_ATTEMPTS the code is dead. */
+  async function useCode(db, email, purpose, code) {
+    const row = db.email_codes.find((c) => c.email === email && c.purpose === purpose);
+    if (!row || secondsSince(row.expires_at) > 0) throw new HttpError(400, "The code is wrong or has expired. Ask for a new one.");
+    if (row.attempts >= MAX_ATTEMPTS) throw new HttpError(429, "Too many attempts. Try again later.");
+    const ok = (await sha256Hex(email + ":" + purpose + ":" + String(code || "").trim())) === row.code_sha256;
+    if (!ok) {
+      row.attempts += 1;
+      saveDb(db);   // the attempt counts even though the request fails
+      if (row.attempts >= MAX_ATTEMPTS) throw new HttpError(429, "Too many attempts. Try again later.");
+      throw new HttpError(400, "The code is wrong or has expired. Ask for a new one.");
+    }
+    db.email_codes = db.email_codes.filter((c) => c !== row);   // single use
+  }
+
+  // PENDING (signup plan): departments and sections for the signup dropdowns.
+  // Public, because the person has no account yet. Names only.
+  route("GET", /^\/api\/auth\/signup-options$/, (db) => ({
+    status: 200,
+    data: {
+      departments: db.departments.slice().sort((a, b) => a.name.localeCompare(b.name)).map((d) => pick(d, ["id", "name", "code"])),
+      sections: db.sections.slice().sort((a, b) => a.name.localeCompare(b.name)).map((x) => pick(x, ["id", "name", "department_id"]))
+    }
+  }));
+
+  // PENDING (signup plan): start a signup. The email decides student or staff;
+  // the role is never read from the request. Nothing is a real account until
+  // the code is entered, and a new signup replaces an unfinished one, so
+  // nobody can block someone else's email.
+  route("POST", /^\/api\/auth\/signup$/, async (db, req) => {
+    const b = req.body || {};
+    const email = cleanEmail(b.email);
+    const name = requireText(b.name, "name", "Full name");
+    const dept = byId(db.departments, b.department_id);
+    if (!dept) throw new HttpError(422, [{ loc: ["body", "department_id"], msg: "Choose your department", type: "missing" }]);
+    const password = checkPassword(b.password, "password");
+    if (db.users.some((u) => u.email === email)) {
+      throw new HttpError(409, "This email already has an account. Log in instead.");
+    }
+
+    const isStudent = AUTH.STUDENT_EMAIL.test(email);
+    const local = email.slice(0, email.indexOf("@"));
+    const signup = { email, name, department_id: dept.id, kind: isStudent ? "student" : "staff" };
+    if (isStudent) {
+      const section = byId(db.sections, b.section_id);
+      if (!section || section.department_id !== dept.id) {
+        throw new HttpError(422, [{ loc: ["body", "section_id"], msg: "Choose a section of your department", type: "value_error" }]);
+      }
+      const roll = requireText(b.roll_number, "roll_number", "Roll number").toLowerCase();
+      if (!AUTH.ROLL_NUMBER.test(roll)) {
+        throw new HttpError(422, [{ loc: ["body", "roll_number"], msg: "Roll number should look like se-9244330", type: "value_error" }]);
+      }
+      const parts = /^numl-([a-z])(\d{2})-(\d+)$/.exec(local);
+      Object.assign(signup, {
+        identifier: local, section_id: section.id, roll_number: roll,
+        sys_id: parts[3], join_term: parts[1] + parts[2]
+      });
+    } else {
+      signup.identifier = email;   // staff log in with their full email
+    }
+    if (db.users.some((u) => u.identifier === signup.identifier)) {
+      throw new HttpError(409, "This email already has an account. Log in instead.");
+    }
+    signup.password_sha256 = await sha256Hex(signup.identifier + ":" + password);   // never the password itself
+
+    db.pending_signups = db.pending_signups.filter((p) => p.email !== email);
+    db.pending_signups.push(Object.assign(signup, { created_at: nowIso() }));
+    await issueCode(db, email, "signup");
+    return { status: 202, data: { email, kind: signup.kind, expires_in: CODE_MINUTES * 60 } };
+  });
+
+  // PENDING (signup plan): enter the signup code. Students become active and
+  // are logged in; staff become a pending teacher who cannot log in yet.
+  route("POST", /^\/api\/auth\/verify-email$/, async (db, req) => {
+    const b = req.body || {};
+    const email = cleanEmail(b.email);
+    const signup = db.pending_signups.find((p) => p.email === email);
+    if (!signup || secondsSince(signup.created_at) > CODE_MINUTES * 60) {
+      throw new HttpError(400, "This signup has expired. Start again.");
+    }
+    await useCode(db, email, "signup", b.code);
+
+    const user = {
+      id: nextId(db.users),
+      name: signup.name,
+      identifier: signup.identifier,
+      email,
+      role: signup.kind === "student" ? "student" : "teacher",
+      department_id: signup.department_id,
+      section_id: signup.section_id || null,
+      roll_number: signup.roll_number || null,
+      sys_id: signup.sys_id || null,
+      join_term: signup.join_term || null,
+      status: signup.kind === "student" ? "active" : "pending",
+      email_verified_at: nowIso(),
+      password_sha256: signup.password_sha256,
+      is_active: true
+    };
+    db.users.push(user);
+    db.pending_signups = db.pending_signups.filter((p) => p !== signup);
+
+    if (user.status === "pending") return { status: 200, data: { status: "pending" } };
+    const token = randomToken();
+    const sessions = readSessions();
+    sessions[token] = user.id;
+    writeSessions(sessions);
+    return { status: 200, data: { status: "active", token, user: pick(user, SHAPES.UserOut) } };
+  });
+
+  // PENDING (signup plan): send a new signup code, at most once a minute.
+  // (Forgot password resends by calling forgot-password again.)
+  route("POST", /^\/api\/auth\/resend-code$/, async (db, req) => {
+    const b = req.body || {};
+    const purpose = "signup";
+    const email = cleanEmail(b.email);
+    if (!db.pending_signups.some((p) => p.email === email)) throw new HttpError(400, "This signup has expired. Start again.");
+    const old = db.email_codes.find((c) => c.email === email && c.purpose === purpose);
+    if (old && secondsSince(old.sent_at) < AUTH.RESEND_SECONDS) {
+      throw new HttpError(429, "Please wait a minute before asking for a new code.");
+    }
+    await issueCode(db, email, purpose);
+    return { status: 202, data: {} };
+  });
+
+  // PENDING (signup plan): forgot password. Always the same answer, so the
+  // page cannot be used to check who is registered. The code goes to the
+  // email the account signed up with.
+  route("POST", /^\/api\/auth\/forgot-password$/, async (db, req) => {
+    const b = req.body || {};
+    requireText(b.identifier, "identifier", "NUML email or ID");
+    const user = findAccount(db, b.identifier);
+    if (user && user.email && user.status !== "rejected") {
+      const old = db.email_codes.find((c) => c.email === user.email && c.purpose === "reset");
+      if (!old || secondsSince(old.sent_at) >= AUTH.RESEND_SECONDS) await issueCode(db, user.email, "reset");
+    }
+    return { status: 202, data: { detail: "If that account exists, we sent a code to its email." } };
+  });
+
+  // PENDING (signup plan): set a new password with the reset code.
+  route("POST", /^\/api\/auth\/reset-password$/, async (db, req) => {
+    const b = req.body || {};
+    const password = checkPassword(b.new_password, "new_password");
+    const user = findAccount(db, b.identifier);
+    if (!user || !user.email) throw new HttpError(400, "The code is wrong or has expired. Ask for a new one.");
+    await useCode(db, user.email, "reset", b.code);
+    user.password_sha256 = await sha256Hex(user.identifier + ":" + password);
+    // Log the account out everywhere, like a real password change should.
+    const sessions = readSessions();
+    Object.keys(sessions).forEach((t) => { if (sessions[t] === user.id) delete sessions[t]; });
+    writeSessions(sessions);
+    return { status: 200, data: { detail: "Password changed. You can log in now." } };
+  });
+
   // routers/auth.py login()
   route("POST", /^\/api\/auth\/login$/, async (db, req) => {
     const body = req.body || {};
@@ -315,14 +531,20 @@
     if (!body.password) errors.push({ loc: ["body", "password"], msg: "String should have at least 1 character", type: "string_too_short" });
     if (errors.length) throw new HttpError(422, errors);
 
-    const identifier = String(body.identifier).trim().toLowerCase();
-    const user = db.users.find((u) => u.identifier === identifier);
+    // "NUML email or ID": a roll number / staff ID, a student's
+    // numl-f24-26789, or the full NUML email (signup plan).
+    const typed = String(body.identifier).trim().toLowerCase();
+    const user = findAccount(db, typed);
     // Hash even for unknown users, like the backend's DUMMY_HASH, so the code
     // path is the same either way.
-    const hash = await sha256Hex(identifier + ":" + String(body.password));
-    if (!user || !user.is_active || hash !== user.password_sha256) {
+    const hash = await sha256Hex((user ? user.identifier : typed) + ":" + String(body.password));
+    if (!user || !user.is_active || !user.password_sha256 || hash !== user.password_sha256) {
       throw new HttpError(401, "Invalid credentials");
     }
+    // The one exception to "same message for everything" (signup plan): only
+    // after the right password, so it does not reveal which accounts exist.
+    if (user.status === "pending") throw new HttpError(403, "Your account is waiting for approval");
+    if (user.status === "rejected") throw new HttpError(401, "Invalid credentials");
     const token = randomToken();
     const sessions = readSessions();
     sessions[token] = user.id;

@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Create account | NUML Timetable Automation</title>
+  <link rel="stylesheet" href="../../css/master.css">
+  <link rel="stylesheet" href="../../css/auth.css">
+  <link rel="stylesheet" href="../../css/tt-auth.css">
+</head>
+<body class="auth-page tt-auth">
+
+  <div class="card">
+    <h2>Create account</h2>
+    <p>Use your official NUML email. We send it a code to prove it's yours.</p>
+
+    <!-- Step 1: the email decides the form -->
+    <form id="suEmailStep" novalidate>
+      <label for="suEmail">NUML email</label>
+      <input type="email" id="suEmail" autocomplete="email" placeholder="numl-f24-26789@numls.edu.pk" required>
+      <span class="hint">Students: numl-f24-26789@numls.edu.pk. Staff: your NUML staff email.</span>
+      <button type="submit">Continue</button>
+      <p class="msg" id="suEmailMsg" role="alert"></p>
+    </form>
+
+    <!-- Step 2: student or staff details -->
+    <form id="suDetailsStep" novalidate hidden>
+      <p class="sent-to">Signing up as <strong id="suEmailShown"></strong></p>
+      <span class="kind" id="suKind"></span>
+
+      <label for="suName">Full name</label>
+      <input type="text" id="suName" autocomplete="name" maxlength="100" required>
+
+      <label for="suDept">Department</label>
+      <select id="suDept" required>
+        <option value="">Loading…</option>
+      </select>
+
+      <!-- Students only -->
+      <div id="suStudentFields" hidden>
+        <label for="suSection">Section</label>
+        <select id="suSection" required disabled>
+          <option value="">Choose your department first</option>
+        </select>
+
+        <label for="suRoll">Roll number</label>
+        <input type="text" id="suRoll" placeholder="se-9244330" autocomplete="off" required>
+        <span class="hint">For your profile only. You'll log in with your email.</span>
+      </div>
+
+      <!-- Staff only -->
+      <p class="hint" id="suStaffNote" hidden>Staff accounts are checked by an admin or your HOD before you can log in.</p>
+
+      <label for="suPassword">Password</label>
+      <input type="password" id="suPassword" autocomplete="new-password" placeholder="8 to 72 characters" required>
+
+      <label for="suPassword2">Confirm password</label>
+      <input type="password" id="suPassword2" autocomplete="new-password" required>
+
+      <button type="submit" id="suDetailsBtn">Send code</button>
+      <p class="msg" id="suDetailsMsg" role="alert"></p>
+
+      <div class="row-actions">
+        <button type="button" class="text-btn" id="suChangeEmail">← Use a different email</button>
+      </div>
+    </form>
+
+    <!-- Step 3: the code from the email -->
+    <form id="suCodeStep" novalidate hidden>
+      <p class="sent-to">We sent a 6-digit code to <strong id="suCodeEmail"></strong>. It works for 10 minutes.</p>
+
+      <label for="suCode">Code</label>
+      <input type="text" id="suCode" class="code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" required>
+
+      <button type="submit" id="suCodeBtn">Verify and create account</button>
+      <p class="msg" id="suCodeMsg" role="alert"></p>
+
+      <div class="row-actions">
+        <button type="button" class="text-btn" id="suBack">← Change details</button>
+        <button type="button" class="text-btn" id="suResend">Resend code</button>
+      </div>
+    </form>
+
+    <!-- Done: staff wait for approval -->
+    <div class="done" id="suPending" hidden>
+      <h3>Your account is waiting for approval</h3>
+      <p>An admin or your HOD will check it. You can log in once it's approved.</p>
+      <a href="timetable-login.html" class="button-link">Back to login</a>
+    </div>
+
+    <p class="demo-note" id="suDemo" hidden></p>
+
+    <div class="auth-links" id="suLinks">
+      <a href="timetable-login.html">Already have an account? Log in</a>
+    </div>
+  </div>
+
+  <script src="../../js/timetable/tt-config.js"></script>
+  <script src="../../js/timetable/tt-mock.js"></script>
+  <script src="../../js/timetable/tt-api.js"></script>
+  <script src="../../js/timetable/tt-signup.js"></script>
+</body>
+</html>
