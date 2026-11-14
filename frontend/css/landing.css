@@ -1,74 +1,380 @@
+
 /* ---------- Hero ---------- */
+
 .hero {
   min-height: 100vh;
-  display: flex; flex-direction: column; justify-content: center; align-items: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
   text-align: center;
+
   padding: 110px 24px 70px;
   color: white;
+
   background:
     linear-gradient(rgba(8, 24, 70, .5), rgba(8, 24, 70, .78)),
     url("../images/numl.webp");
+
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
 }
+
+
+/* ---------- Hero Label ---------- */
+
 .pill {
-  padding: 7px 18px; border-radius: 30px;
-  font-size: 13px; font-weight: 600;
+  padding: 7px 18px;
+  border-radius: 30px;
+  font-size: 13px;
+  font-weight: 600;
+
   background: rgba(255, 255, 255, .16);
   border: 1px solid rgba(255, 255, 255, .4);
+
   margin-bottom: 24px;
 }
-.hero h1 { font-size: 62px; line-height: 1.08; margin: 0 0 22px; font-weight: 800; letter-spacing: -1.5px; }
-.hero p { font-size: 18px; line-height: 1.65; max-width: 600px; margin: 0 0 34px; color: rgba(255, 255, 255, .92); }
+
+
+/* ---------- Hero Heading ---------- */
+
+.hero h1 {
+  font-size: 62px;
+  line-height: 1.08;
+  margin: 0 0 22px;
+  font-weight: 800;
+  letter-spacing: -1.5px;
+}
+
+
+/* ---------- Hero Description ---------- */
+
+.hero > p {
+  font-size: 18px;
+  line-height: 1.65;
+  max-width: 600px;
+  margin: 0 0 34px;
+  color: rgba(255, 255, 255, .92);
+}
+
+
+/* ---------- Portal Cards Layout ---------- */
+
+.hero-actions {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 25px;
+
+  width: 100%;
+  max-width: 850px;
+  margin-top: 5px;
+}
+
+
+/* ---------- Common Portal Card ---------- */
+
+.portal-card {
+  min-height: 300px;
+  padding: 30px 25px;
+  border-radius: 20px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+
+  border: 1px solid rgba(180, 210, 245, .25);
+
+  box-shadow: 0 12px 35px rgba(0, 0, 0, .28);
+
+  transition: none;
+}
+
+
+/* Cards Will Not Move */
+
+.portal-card:hover {
+  transform: none;
+}
+
+
+/* ---------- Dark Navy Blue Glass Cards ---------- */
+
+.archive-card {
+  background: linear-gradient(
+    145deg,
+    rgba(5, 25, 65, .88),
+    rgba(10, 45, 90, .82)
+  );
+}
+
+.timetable-card {
+  background: linear-gradient(
+    145deg,
+    rgba(8, 32, 78, .88),
+    rgba(15, 55, 105, .82)
+  );
+}
+
+
+/* ---------- Large Beige Icons ---------- */
+
+.portal-icon {
+  font-size: 56px;
+  line-height: 1;
+
+  margin-bottom: 20px;
+
+  background: none;
+  border: none;
+  box-shadow: none;
+
+  filter: sepia(.45);
+}
+
+
+/* ---------- Card Titles ---------- */
+
+.portal-card h2 {
+  color: #ffffff;
+  font-size: 25px;
+  font-weight: 800;
+  margin: 0 0 15px;
+}
+
+
+/* ---------- Role Labels ---------- */
+
+.portal-roles {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 9px;
+
+  margin-bottom: 13px;
+}
+
+.portal-roles span {
+  padding: 6px 13px;
+  border-radius: 20px;
+
+  color: #ffffff;
+  background: rgba(255, 255, 255, .09);
+  border: 1px solid rgba(255, 255, 255, .22);
+
+  font-size: 12px;
+  font-weight: 600;
+}
+
+
+/* ---------- Short Card Descriptions ---------- */
+
+.portal-description {
+  color: rgba(255, 255, 255, .85);
+  font-size: 14px;
+  line-height: 1.5;
+
+  margin: 0 0 22px;
+}
+
+
+/* ---------- Card Buttons ---------- */
+
+.portal-btn {
+  display: inline-block;
+  padding: 12px 25px;
+  border-radius: 9px;
+
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 700;
+
+  transition: none;
+}
+
+
+/* Both Buttons White */
+
+.archive-btn,
+.timetable-btn {
+  background: #ffffff;
+  color: #082f49;
+}
+
 
 /* ---------- Features ---------- */
+
 .features {
   padding: 100px 48px;
+
   background:
     linear-gradient(rgba(8, 24, 70, .88), rgba(8, 24, 70, .92)),
     url("../images/numl.webp");
+
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
 }
-.head { text-align: center; margin-bottom: 46px; }
-.head h2 { font-size: 42px; margin: 0 0 10px; color: white; letter-spacing: -1px; }
-.head p { margin: 0; color: rgba(255, 255, 255, .8); font-size: 17px; }
 
-.feature-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; max-width: 1180px; margin: 0 auto; }
+
+/* ---------- Features Heading ---------- */
+
+.head {
+  text-align: center;
+  margin-bottom: 46px;
+}
+
+.head h2 {
+  font-size: 42px;
+  margin: 0 0 10px;
+  color: white;
+  letter-spacing: -1px;
+}
+
+.head p {
+  margin: 0;
+  color: rgba(255, 255, 255, .8);
+  font-size: 17px;
+}
+
+
+/* ---------- Feature Grid ---------- */
+
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 22px;
+
+  max-width: 1180px;
+  margin: 0 auto;
+}
+
+
+/* ---------- Feature Cards ---------- */
+
 .feature {
   background: white;
-  border-radius: 20px;
+  border-radius: 16px;
   padding: 30px 26px;
+
+  min-height: 190px;
+
   transition: .25s;
-  cursor: pointer;
-}
-.feature:hover { transform: translateY(-6px); box-shadow: 0 18px 38px rgba(0, 0, 0, .35); }
-.ic { display: grid; place-items: center; width: 54px; height: 54px; border-radius: 14px; background: var(--bg); font-size: 27px; margin-bottom: 16px; }
-.feature h3 { margin: 0 0 8px; font-size: 21px; color: var(--navy); }
-.feature > p { margin: 0 0 16px; line-height: 1.55; color: var(--muted); font-size: 15px; }
-.feature ul { list-style: none; margin: 0; padding: 0; }
-.feature li { position: relative; padding: 6px 0 6px 27px; font-size: 14px; font-weight: 500; }
-.feature li::before {
-  content: "✓";
-  position: absolute; left: 0; top: 7px;
-  width: 18px; height: 18px; border-radius: 50%;
-  background: var(--blue); color: white;
-  font-size: 11px; text-align: center; line-height: 18px;
+  cursor: default;
+
+  box-shadow: 0 8px 20px rgba(0, 0, 0, .15);
 }
 
-/* ---------- Tablet and mobile ---------- */
+.feature:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 18px 38px rgba(0, 0, 0, .35);
+}
+
+
+/* ---------- Feature Icons ---------- */
+
+.ic {
+  display: grid;
+  place-items: center;
+
+  width: 54px;
+  height: 54px;
+
+  border-radius: 14px;
+  background: var(--bg);
+
+  font-size: 27px;
+  margin-bottom: 16px;
+}
+
+
+/* ---------- Feature Titles ---------- */
+
+.feature h3 {
+  margin: 0 0 10px;
+  font-size: 21px;
+  color: var(--navy);
+}
+
+
+/* ---------- Feature Descriptions ---------- */
+
+.feature > p {
+  margin: 0;
+  line-height: 1.6;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+
+/* ---------- Tablet ---------- */
+
 @media (max-width: 980px) {
-  .hero h1 { font-size: 42px; }
-  .feature-grid { grid-template-columns: repeat(2, 1fr); }
-  .features { padding: 70px 24px; }
-  .hero, .features { background-attachment: scroll; }
+
+  .hero h1 {
+    font-size: 42px;
+  }
+
+  .feature-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .features {
+    padding: 70px 24px;
+  }
+
+  .hero,
+  .features {
+    background-attachment: scroll;
+  }
+
 }
+
+
+/* ---------- Mobile ---------- */
+
 @media (max-width: 640px) {
-  .hero h1 { font-size: 32px; }
-  .head h2 { font-size: 32px; }
-  .feature-grid { grid-template-columns: 1fr; }
+
+  .hero h1 {
+    font-size: 32px;
+  }
+
+  .hero > p {
+    font-size: 15px;
+  }
+
+  .hero-actions {
+    grid-template-columns: 1fr;
+    max-width: 380px;
+  }
+
+  .portal-card {
+    min-height: 270px;
+  }
+
+  .portal-card h2 {
+    font-size: 22px;
+  }
+
+  .portal-icon {
+    font-size: 50px;
+  }
+
+  .head h2 {
+    font-size: 32px;
+  }
+
+  .feature-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .feature {
+    min-height: auto;
+  }
+
 }
-/* ---------- Timetable Automation button (second hero button) ---------- */
-.hero .tt-entry { margin-top: 14px; }
