@@ -8,6 +8,7 @@ from sqlalchemy import engine_from_config, pool
 
 import app.models
 from app.config import settings
+from app.db_url import prepare_db_url
 from app.database import Base
 
 config = context.config
@@ -27,7 +28,11 @@ target_metadata = Base.metadata
 if not config.get_main_option("sqlalchemy.url"):
     config.set_main_option("sqlalchemy.url", settings.DATABASE_URL.replace("%", "%%"))
 
-_url = config.get_main_option("sqlalchemy.url")
+# Same URL clean-up and TLS settings as the app (app/db_url.py), so a pasted
+# Aiven URL works for migrations too.
+_db_url, _connect_args = prepare_db_url(config.get_main_option("sqlalchemy.url"), settings.DB_SSL_CA)
+_url = _db_url.render_as_string(hide_password=False)
+config.set_main_option("sqlalchemy.url", _url.replace("%", "%%"))
 # SQLite cannot ALTER most things in place; "batch" mode makes it copy the table instead.
 _COMMON = {"target_metadata": target_metadata, "compare_type": True, "render_as_batch": _url.startswith("sqlite")}
 
@@ -42,6 +47,7 @@ def run_migrations_offline() -> None:
 def run_migrations_online() -> None:
     connectable = engine_from_config(
         config.get_section(config.config_ini_section, {}), prefix="sqlalchemy.", poolclass=pool.NullPool,
+        connect_args=_connect_args,
     )
     with connectable.connect() as connection:
         context.configure(connection=connection, **_COMMON)
