@@ -27,10 +27,16 @@
 
   let names;
   let entryById = new Map();
+  let pendingCount = 0;
 
   function describeEntry(id) {
     const e = entryById.get(id);
     return e ? TT.entryLabel(e, names) : "Class #" + id;
+  }
+
+  function renderSummary() {
+    summary.textContent = pendingCount + " pending request" + (pendingCount === 1 ? "" : "s") +
+      (me.role === "hod" ? " in your department." : " across all departments.");
   }
 
   async function decide(swap, card, approve) {
@@ -52,6 +58,8 @@
       TT.showMsg(fresh.querySelector(".form-msg"), approve
         ? "Approved. Both classes now have their new times."
         : "Rejected. The teacher has been notified.", "ok");
+      pendingCount = Math.max(0, pendingCount - 1);
+      renderSummary();
     } catch (err) {
       TT.showError(msg, err);   // e.g. 409 conflicts appeared since the request was made
       card.querySelectorAll("button").forEach((b) => { b.disabled = false; });
@@ -95,8 +103,8 @@
       TT.clear(list);
       swaps.forEach((s) => list.appendChild(requestCard(s)));
       empty.hidden = swaps.length > 0;
-      summary.textContent = swaps.length + " pending request" + (swaps.length === 1 ? "" : "s") +
-        (me.role === "hod" ? " in your department." : " across all departments.");
+      pendingCount = swaps.length;
+      renderSummary();
       TT.showMsg(pageMsg, "");
     } catch (err) {
       summary.textContent = "The list could not be loaded.";
