@@ -1291,9 +1291,10 @@ body.dash-page {
                 .upload-grid, .papers-grid, .paper-card,
                 .btn.solid, .btn.dark, .form-msg, .empty, .hint
    Every rule starts with .tt-page, so nothing here can change
-   an Archive page. The nav copies the look of the Archive nav
-   that common.js injects (white bar, dark pill for the active
-   item) but with variables instead of hardcoded colors.
+   an Archive page. The nav is a navy rounded bar in the same
+   blue/white look as the Archive dashboard: every link is an
+   outlined pill, the current page is a solid white pill, and
+   Log out is a white button at the far right.
    ========================================================= */
 
 body.tt-page {
@@ -1321,49 +1322,128 @@ body.tt-page {
 .tt-page .page-body.tt-wide { max-width: 1240px; }
 
 
-/* ----- Top nav (same look as the Archive's injected nav) ----- */
+/* ----- Top nav: navy rounded bar fixed at the top of the screen -----
+   Text logo (the way back to the Archive), links as pills, and the bell
+   and Log out at the far right.
+   The photo header starts at the very top of the page and gets extra top
+   padding as tall as the bar (--tt-nav-h, measured by tt-layout.js), so the
+   photo shows around the bar instead of the white page background. */
+.tt-page .page-head { padding-top: calc(var(--tt-nav-h, 56px) + 32px); }
+
 .tt-page .tt-nav {
+  position: fixed;
+  top: 10px;
+  left: 12px;
+  right: 12px;
+  z-index: 50;
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
-  gap: 6px;
-  min-height: 56px;
-  padding: 10px 16px;
-  background: white;
-  border-bottom: 1px solid var(--tt-line);
-  font: 500 14px system-ui, sans-serif;
+  gap: 12px;
+  padding: 8px;
+  background: var(--navy);
+  border-radius: 999px;
+  box-shadow: 0 8px 24px rgba(11, 42, 111, 0.25);
+  font: 500 14px "Plus Jakarta Sans", "Segoe UI", Arial, sans-serif;
 }
 
-.tt-page .tt-nav a,
-.tt-page .tt-nav button {
-  padding: 8px 12px;
-  color: var(--tt-pill);
-  background: none;
-  border: 0;
-  border-radius: 8px;
+/* "← NUML Archive" in the same text-logo style as the Archive's .logo */
+.tt-page .tt-logo {
+  flex: none;
+  padding: 0 10px 0 8px;
+  font-size: 18px;
+  font-weight: 800;
+  color: white;
+  white-space: nowrap;
+}
+.tt-page .tt-logo-arrow { margin-right: 2px; font-weight: 600; opacity: 0.75; }
+.tt-page .tt-logo-accent { color: #7cc4ff; }
+.tt-page .tt-logo:hover .tt-logo-arrow { opacity: 1; }
+
+.tt-page .tt-nav-links {
+  display: flex;
+  flex: 1;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-width: 0;
+}
+
+/* Every link looks like a button: outlined pill, white text */
+.tt-page .tt-nav-links a {
+  padding: 9px 16px;
+  font-weight: 600;
+  color: white;
+  white-space: nowrap;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 999px;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.tt-page .tt-nav-links a:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.45);
+}
+
+/* The page you are on */
+.tt-page .tt-nav-links a.active {
+  color: var(--navy);
+  background: white;
+  border-color: white;
+}
+
+/* Right side: who is logged in, the bell, Log out */
+.tt-page .tt-nav-end {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 8px;
+}
+
+.tt-page .tt-nav .who {
+  padding: 0 4px;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.8);
+  white-space: nowrap;
+}
+
+.tt-page .tt-nav .tt-logout {
+  padding: 9px 18px;
   font: inherit;
+  font-weight: 700;
+  color: var(--navy);
+  background: white;
+  border: 0;
+  border-radius: 999px;
   cursor: pointer;
 }
 
-.tt-page .tt-nav a:hover,
-.tt-page .tt-nav button:hover { background: var(--tt-hover); }
+.tt-page .tt-nav .tt-logout:hover { background: #eaf2ff; }
 
-.tt-page .tt-nav a.active { color: white; background: var(--tt-pill); }
-.tt-page .tt-nav .spacer { flex: 1; }
-.tt-page .tt-nav .who { padding: 0 8px; color: var(--tt-soft-ink); }
+.tt-page .tt-nav a:focus-visible,
+.tt-page .tt-nav button:focus-visible { outline: 3px solid #7cc4ff; outline-offset: 2px; }
 
 
 /* ----- Notification bell ----- */
-.tt-page .tt-bell-wrap { position: relative; }
+/* Not positioned on purpose: the panel below is placed against the nav bar
+   itself, so it lines up with the bar's right edge and can never hang off
+   the screen, wherever the bell ends up (on a phone it is not at the edge). */
+.tt-page .tt-bell-wrap { position: static; }
 
 .tt-page .tt-nav .tt-bell {
   position: relative;
   display: grid;
   place-items: center;
-  width: 38px;
-  height: 38px;
+  width: 40px;
+  height: 40px;
   padding: 0;
+  color: white;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 50%;
+  cursor: pointer;
 }
+
+.tt-page .tt-nav .tt-bell:hover { background: rgba(255, 255, 255, 0.2); }
 
 .tt-page .tt-bell svg {
   width: 20px;
@@ -1392,13 +1472,13 @@ body.tt-page {
 }
 
 .tt-page .tt-bell-panel {
-  position: absolute;
-  right: 0;
+  position: absolute;             /* against .tt-nav */
+  right: 8px;
   top: calc(100% + 8px);
   z-index: 20;
   width: 340px;
-  max-width: calc(100vw - 32px);
-  max-height: 420px;
+  max-width: calc(100vw - 40px);  /* 12px bar margin + 8px, on each side */
+  max-height: min(420px, calc(100vh - var(--tt-nav-h, 56px) - 40px));
   overflow-y: auto;
   padding: 10px;
   background: white;
@@ -1415,7 +1495,18 @@ body.tt-page {
 }
 
 .tt-page .tt-bell-head strong { color: var(--navy); }
-.tt-page .tt-nav .tt-link-btn { padding: 4px 8px; font-size: 13px; color: var(--blue); }
+.tt-page .tt-nav .tt-link-btn {
+  padding: 4px 8px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--blue);
+  background: none;
+  border: 0;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.tt-page .tt-nav .tt-link-btn:hover { background: #eaf2ff; }
 
 .tt-page .tt-note {
   padding: 10px 6px;
@@ -1465,8 +1556,44 @@ body.tt-page {
 .tt-page .tt-status.cancelled { color: white; background: var(--muted); }
 
 
-@media (max-width: 640px) {
-  .tt-page .tt-nav .who { flex-basis: 100%; order: 10; padding: 4px 12px 0; }
+/* Smaller laptops: the name goes first, so logo, links, bell and Log out
+   still fit on one line. */
+@media (max-width: 1100px) {
+  .tt-page .tt-nav .who { display: none; }
+}
+
+/* Tablet and phone: two rows inside a rounded card. Top row: the logo on the
+   left, the bell and Log out on the right. Below: the page links share one
+   row equally (a long name wraps inside its pill), so the fixed bar stays
+   short and no link is ever cut off. */
+@media (max-width: 900px) {
+  .tt-page .tt-nav {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas: "logo end" "links links";
+    gap: 10px;
+    padding: 10px;
+    border-radius: 22px;
+  }
+  .tt-page .tt-logo { grid-area: logo; align-self: center; }
+  .tt-page .tt-nav-end { grid-area: end; }
+  .tt-page .tt-nav-links {
+    grid-area: links;
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(0, 1fr);
+  }
+  .tt-page .tt-nav-links a {
+    display: grid;
+    place-items: center;
+    min-width: 0;
+    padding: 8px 6px;
+    font-size: 13px;
+    line-height: 1.2;
+    text-align: center;
+    white-space: normal;
+    border-radius: 14px;
+  }
 }
 
 
