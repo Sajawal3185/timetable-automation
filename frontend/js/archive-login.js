@@ -38,10 +38,7 @@
     e.preventDefault();
     const identifier = idInput.value.trim();
     const password = pwInput.value;
-    if (!identifier || !password) return fail("Enter your email or ID and your password.");
-    /* TEMPORARY PREVIEW - DELETE THIS BLOCK BEFORE YOU COMMIT OR PUSH.
-   Only works on localhost. Any @numls.edu.pk email + any password opens the admin dashboard. */
-
+    if (!identifier || !password) return fail("Enter your email address and your password.");
     if (!NUML.isLive) return fail("The backend is not connected, so login is unavailable.");
 
     btn.disabled = true;
@@ -54,9 +51,9 @@
 
       NUML.setToken(data.token);
       NUML.setUser({ id: u.id, name: u.name, role: u.role, identifier: u.identifier });
-window.location.replace(mode === "admin" ? NUML.PAGES.reviewUploads : NUML.PAGES.dashboard);
+      window.location.replace(mode === "admin" ? NUML.PAGES.reviewUploads : NUML.PAGES.dashboard);
     } catch (err) {
-      fail(err.status === 401 ? "Incorrect email/ID or password." : "Could not reach the server. Try again in a minute.");
+      fail(err.status === 401 ? "Incorrect email address or password." : "Could not reach the server. Try again in a minute.");
     } finally {
       btn.disabled = false;
       btn.textContent = "Log in";
