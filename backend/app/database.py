@@ -3,6 +3,7 @@ from sqlalchemy import MetaData, create_engine, event
 from sqlalchemy.orm import DeclarativeBase, sessionmaker
 
 from app.config import settings
+from app.db_url import prepare_db_url
 
 NAMING_CONVENTION = {
     "ix": "ix_%(column_0_label)s",
@@ -12,11 +13,13 @@ NAMING_CONVENTION = {
     "pk": "pk_%(table_name)s",
 }
 
-is_sqlite = settings.DATABASE_URL.startswith("sqlite")
-connect_args = {"check_same_thread": False} if is_sqlite else {}
+db_url, connect_args = prepare_db_url(settings.DATABASE_URL, settings.DB_SSL_CA)
+is_sqlite = db_url.get_backend_name() == "sqlite"
+if is_sqlite:
+    connect_args = {"check_same_thread": False}
 
 engine = create_engine(
-    settings.DATABASE_URL,
+    db_url,
     connect_args=connect_args,
     pool_pre_ping=True,
 )
