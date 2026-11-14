@@ -32,6 +32,10 @@ class Settings(BaseSettings):
     # data on the next restart. Failing at startup is the safer outcome.
     # Example: mysql+pymysql://user:pass@host:3306/timetable
     DATABASE_URL: str
+    # Optional path to the database provider's CA certificate (Aiven: "CA
+    # certificate" on the service page; on Render, upload it as a Secret File
+    # and set this to /etc/secrets/<file name>). See app/db_url.py.
+    DB_SSL_CA: str | None = None
 
     # --- Auth / JWT -------------------------------------------------------
     # Required, no default: anyone who knows the key can forge a token for any
