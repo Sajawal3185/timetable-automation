@@ -1,50 +1,63 @@
-/* ==========================================================================
-   auth.js  -  LOGIN page only.
-   The server decides who may log in. The browser never checks passwords.
-   Requires common.js, then api.js, to be loaded before this file.
-   ========================================================================== */
+(function () {
+  const DASHBOARD_PAGE = "dashboard.html"; 
 
-// Already logged in? Skip the login form.
-if (document.getElementById("loginForm") && NUML.getUser() && NUML.getToken()) {
-  window.location.replace(NUML.PAGES.dashboard);
-}
+  const form = document.getElementById("loginForm");
+  const msg = document.getElementById("msg");
+  const emailInput = document.getElementById("email");
+  const passwordInput = document.getElementById("password");
 
-const loginForm = document.getElementById("loginForm");
+  if (!form) return;
 
-if (loginForm) {
-  loginForm.addEventListener("submit", async (event) => {
-    event.preventDefault();
+  function showError(text) {
+    msg.textContent = text;
+    msg.style.color = "#dc2626";
+    msg.style.display = "block";
+  }
 
-    const identifier = document.getElementById("identifier").value.trim();
-    const password = document.getElementById("password").value;
-    const msg = document.getElementById("msg");
-    msg.textContent = "";
-    msg.className = "msg";
+  [emailInput, passwordInput].forEach(function (input) {
+    input.addEventListener("input", function () {
+      msg.textContent = "";
+    });
+  });
 
-    if (!identifier || !password) {
-      msg.textContent = "Enter your roll number and password";
-      msg.className = "msg error";
+  form.addEventListener("submit", function (e) {
+    e.preventDefault();
+
+    const email = emailInput.value.trim().toLowerCase();
+    const password = passwordInput.value;
+
+    if (email === "" || password === "") {
+      showError("Please enter both email and password.");
       return;
     }
 
+    let users = [];
     try {
-      const data = await NUML.api("/api/auth/login", {
-        method: "POST",
-        body: { identifier, password }
-      });
-NUML.setToken(data.token);
-      const me = await NUML.api("/api/auth/me");
-      NUML.setUser(me);
-
-      // Every role goes to the dashboard for now. Role start pages come later.
-      window.location.href = NUML.PAGES.dashboard;
+      users = JSON.parse(localStorage.getItem("numlUsers") || "[]");
     } catch (err) {
-      NUML.clearToken();
-      msg.textContent =
-        err.status === 401
-          ? "Invalid roll number or password"
-          : "Something went wrong. Try again.";
-      msg.className = "msg error";
+      users = [];
     }
+
+ 
+    const user = users.find(function (u) {
+      return u.email === email && u.password === password;
+    });
+
+    if (!user) {
+      showError("Incorrect email or password.");
+      return;
+    }
+
+
+    sessionStorage.setItem(
+      "numlCurrentUser",
+      JSON.stringify({
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email
+      })
+    );
+
+    window.location.href = DASHBOARD_PAGE;
   });
-}
+})();
