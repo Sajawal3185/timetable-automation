@@ -1,9 +1,12 @@
 /* ==========================================================================
    tt-login.js  -  timetable-login.html only.
 
-   Login is by "NUML email or ID" (backend field `identifier`): a student's
-   numl-f24-26789 or full NUML email, a staff member's NUML email, or an
-   older roll number / staff ID (Login & Signup Plan, 12 Nov). The browser
+   Login is by "NUML email or ID" (backend field `identifier`): a staff
+   member's NUML email or staff ID (Login & Signup Plan, 12 Nov).
+   The Timetable is for staff only (team decision, 13 Nov). The login API is
+   shared with the Archive, so a student's login still succeeds there; this
+   page drops the token and tells them to use the Archive. The backend also
+   refuses students on every Timetable endpoint (403). The browser
    never decides whether a password
    is right: it sends both to POST /api/auth/login and believes the answer.
    The 8-character check below is only a hint so nobody waits for a server
@@ -27,7 +30,10 @@
   function goToStart(role) {
     const page = C.START_PAGE[role];
     if (!page) {
-      show("Your account role (" + role + ") has no timetable page.", true);
+      window.TTApi.clearToken();   // no half-logged-in student left behind
+      show(role === "student"
+        ? "The Timetable is for teachers and staff only. Students can use the NUML Archive."
+        : "Your account role (" + role + ") has no timetable page.", true);
       return;
     }
     window.location.replace(page);

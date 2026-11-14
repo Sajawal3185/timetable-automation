@@ -24,7 +24,7 @@
   /* Which pages each role may open. The nav, the guard and the README all
      follow this one list. */
   const NAV_ITEMS = [
-    { href: P.timetable, label: "My Timetable", roles: ["student", "teacher", "hod"] },
+    { href: P.timetable, label: "My Timetable", roles: ["teacher", "hod"] },
     { href: P.swaps, label: "Swap Requests", roles: ["teacher"] },
     { href: P.approvals, label: "Swap Approvals", roles: ["hod", "admin"] },
     { href: P.makeup, label: "Makeup Classes", roles: ["teacher", "hod"] },

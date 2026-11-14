@@ -1,20 +1,21 @@
 /* ==========================================================================
    tt-signup.js  -  signup.html (Login & Signup Plan, 12 Nov).
 
-   There is no list of students or teachers from the university, so the
-   official NUML email is the proof of identity:
-     1. The person types their email. Its format picks the form:
-          numl-<letter><yy>-<digits>@numls.edu.pk -> student form
-          any other @numls.edu.pk address        -> staff form
-          any other domain                        -> refused here
-     2. They fill in the form. POST /api/auth/signup sends a 6-digit code to
-        that email. Nothing is a real account yet.
-     3. They type the code. POST /api/auth/verify-email:
-          student -> active, gets a token, goes to their start page
-          staff   -> a teacher account waiting for an admin or HOD's approval
+   The Timetable is for staff only (team decision, 13 Nov). There is no list
+   of teachers from the university, so the official NUML email is the proof
+   of identity:
+     1. The person types their email.
+          a student email (numl-<letter><yy>-<digits>@...) -> refused here,
+                                                              students use the Archive
+          any other @numls.edu.pk address                  -> next step
+          any other domain                                 -> refused here
+     2. They fill in name and password. POST /api/auth/signup sends a 6-digit
+        code to that email. Nothing is a real account yet.
+     3. They type the code. POST /api/auth/verify-email creates a teacher
+        account waiting for an admin or HOD's approval.
 
-   The role is never sent: the backend decides it from the email. Every check
-   here is only a hint; the backend rechecks all of them.
+   The role is never sent. Every check here is only a hint; the backend
+   rechecks all of them.
    The password is only sent to the server, never stored in the browser.
    ========================================================================== */
 (function () {
@@ -25,12 +26,7 @@
   const $ = (id) => document.getElementById(id);
 
   const steps = { email: $("suEmailStep"), details: $("suDetailsStep"), code: $("suCodeStep"), pending: $("suPending") };
-  const deptSelect = $("suDept");
-  const sectionSelect = $("suSection");
-
   let email = "";
-  let isStudent = false;
-  let options = null;          // {departments, sections} from the server
   let resendTimer = null;
 
   function show(node, text, isError) {
@@ -42,7 +38,7 @@
     Object.keys(steps).forEach((k) => { steps[k].hidden = k !== step; });
     // "Already have an account?" only makes sense before the account exists
     $("suLinks").hidden = step === "pending";
-    const first = steps[step].querySelector("input:not([disabled]), select:not([disabled]), a");
+    const first = steps[step].querySelector("input, a");
     if (first) first.focus();
   }
 
@@ -54,7 +50,7 @@
   }
 
   /* ---- Step 1: email ---------------------------------------------------- */
-  steps.email.addEventListener("submit", async (event) => {
+  steps.email.addEventListener("submit", (event) => {
     event.preventDefault();
     const msg = $("suEmailMsg");
     const typed = $("suEmail").value.trim().toLowerCase();
@@ -66,49 +62,18 @@
       return;
     }
 
-    email = typed;
-    isStudent = A.STUDENT_EMAIL.test(email);
-    $("suEmailShown").textContent = email;
-    $("suKind").textContent = isStudent ? "Student account" : "Staff account";
-    $("suStudentFields").hidden = !isStudent;
-    $("suStaffNote").hidden = isStudent;
-    show(msg, "");
-
-    if (!options) {
-      try {
-        options = await window.TTApi.request("GET", "/api/auth/signup-options", { redirectOn401: false });
-        fillDepartments();
-      } catch (err) {
-        show(msg, "Could not load the departments. " + err.message, true);
-        return;
-      }
+    if (A.STUDENT_EMAIL.test(typed)) {
+      show(msg, "The Timetable is for teachers and staff only. Students can use the NUML Archive.", true);
+      return;
     }
+
+    email = typed;
+    $("suEmailShown").textContent = email;
+    show(msg, "");
     goTo("details");
   });
 
   /* ---- Step 2: details -------------------------------------------------- */
-  function option(value, text) {
-    const o = document.createElement("option");
-    o.value = value;
-    o.textContent = text;
-    return o;
-  }
-
-  function fillDepartments() {
-    deptSelect.replaceChildren(option("", "Choose your department"));
-    options.departments.forEach((d) => deptSelect.appendChild(option(d.id, d.name)));
-  }
-
-  deptSelect.addEventListener("change", () => {
-    const deptId = Number(deptSelect.value);
-    const list = deptId ? options.sections.filter((s) => s.department_id === deptId) : [];
-    sectionSelect.replaceChildren(option("", deptId
-      ? (list.length ? "Choose your section" : "No sections yet: ask your admin to add yours")
-      : "Choose your department first"));
-    list.forEach((s) => sectionSelect.appendChild(option(s.id, s.name)));
-    sectionSelect.disabled = list.length === 0;
-  });
-
   $("suChangeEmail").addEventListener("click", () => goTo("email"));
 
   steps.details.addEventListener("submit", async (event) => {
@@ -117,15 +82,9 @@
     const name = $("suName").value.trim();
     const pw = $("suPassword").value;
     const pw2 = $("suPassword2").value;
-    const roll = $("suRoll").value.trim().toLowerCase();
 
     // Quick checks, in the order of the form, so the first problem is shown
     if (!name) { show(msg, "Enter your full name.", true); $("suName").focus(); return; }
-    if (!deptSelect.value) { show(msg, "Choose your department.", true); deptSelect.focus(); return; }
-    if (isStudent) {
-      if (!sectionSelect.value) { show(msg, "Choose your section.", true); sectionSelect.focus(); return; }
-      if (!A.ROLL_NUMBER.test(roll)) { show(msg, "Roll number should look like se-9244330.", true); $("suRoll").focus(); return; }
-    }
     if (pw.length < C.MIN_PASSWORD || new TextEncoder().encode(pw).length > C.MAX_PASSWORD) {
       show(msg, "Password must be " + C.MIN_PASSWORD + " to " + C.MAX_PASSWORD + " characters.", true);
       $("suPassword").focus();
@@ -133,8 +92,7 @@
     }
     if (pw !== pw2) { show(msg, "The two passwords don't match.", true); $("suPassword2").focus(); return; }
 
-    const body = { email, name, department_id: Number(deptSelect.value), password: pw };
-    if (isStudent) Object.assign(body, { section_id: Number(sectionSelect.value), roll_number: roll });
+    const body = { email, name, password: pw };
 
     const btn = $("suDetailsBtn");
     btn.disabled = true;
@@ -201,15 +159,9 @@
     btn.disabled = true;
     show(msg, "Checking…");
     try {
-      const res = await window.TTApi.request("POST", "/api/auth/verify-email", { body: { email, code }, redirectOn401: false });
+      await window.TTApi.request("POST", "/api/auth/verify-email", { body: { email, code }, redirectOn401: false });
       clearInterval(resendTimer);
-      if (res.status === "active" && res.token) {
-        // Students are active straight away: save the token only and go in.
-        window.TTApi.setToken(res.token);
-        window.location.replace(C.START_PAGE[res.user.role] || C.PAGES.login);
-        return;
-      }
-      goTo("pending");   // staff: no token until an admin or HOD approves
+      goTo("pending");   // no token until an admin or HOD approves
     } catch (err) {
       if (err.status === 429) show(msg, "Too many attempts. Try again later.", true);
       else show(msg, err.message, true);

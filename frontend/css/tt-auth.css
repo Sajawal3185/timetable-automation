@@ -32,19 +32,6 @@ body.auth-page.tt-auth { padding: 24px 16px; }
 .tt-auth .auth-links a { color: var(--blue); font-weight: 600; }
 .tt-auth .auth-links a:hover { text-decoration: underline; }
 
-/* Which form the email picked */
-.tt-auth .kind {
-  display: block;
-  width: fit-content;
-  margin: 0 auto 14px;
-  padding: 4px 12px;
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--blue);
-  background: #e6efff;
-  border-radius: 20px;
-}
-
 /* The email the code was sent to, with a way to change it */
 .tt-auth .sent-to {
   margin: 0 0 14px;

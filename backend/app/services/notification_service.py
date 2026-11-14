@@ -13,7 +13,6 @@ from sqlalchemy.orm import Session
 from app.models.notification import Notification, NotificationType
 from app.models.teacher import Teacher
 from app.models.timetable_entry import TimetableEntry
-from app.models.user import User
 
 
 def create_notification(
@@ -102,22 +101,14 @@ def _teacher_user_ids(db: Session, teacher_ids: set[int]) -> set[int]:
     return set(rows.scalars())
 
 
-def _student_user_ids(db: Session, section_ids: set[int]) -> set[int]:
-    rows = db.execute(
-        select(User.id).where(User.section_id.in_(list(section_ids)), User.role == "student")
-    )
-    return set(rows.scalars())
-
-
 def recipients_for_swap(
     db: Session, entry_a: TimetableEntry, entry_b: TimetableEntry
 ) -> set[int]:
-    """A swap notifies both teachers plus the students of both sections."""
-    return _teacher_user_ids(db, {entry_a.teacher_id, entry_b.teacher_id}) | _student_user_ids(
-        db, {entry_a.section_id, entry_b.section_id}
-    )
+    """A swap notifies both teachers. Students are not told: the Timetable is
+    for staff only (team decision, 13 Nov 2026)."""
+    return _teacher_user_ids(db, {entry_a.teacher_id, entry_b.teacher_id})
 
 
-def recipients_for_makeup(db: Session, teacher_id: int, section_id: int) -> set[int]:
-    """A makeup class notifies the teacher plus the section's students."""
-    return _teacher_user_ids(db, {teacher_id}) | _student_user_ids(db, {section_id})
+def recipients_for_makeup(db: Session, teacher_id: int) -> set[int]:
+    """A makeup class notifies its teacher (staff only, no students)."""
+    return _teacher_user_ids(db, {teacher_id})

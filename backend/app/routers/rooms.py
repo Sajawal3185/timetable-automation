@@ -2,19 +2,23 @@
 
 Needed by the empty-room dashboard and by the makeup solver (room capacities).  Endpoints:
 
-  GET    /api/rooms                 list (filter: min_capacity, building, search)
-  GET    /api/rooms/empty           rooms free on a day between two times  (dashboard)
-  GET    /api/rooms/{id}
+  GET    /api/rooms                 list (filter: min_capacity, building, search)  staff
+  GET    /api/rooms/empty           rooms free on a day between two times  (dashboard)  staff
+  GET    /api/rooms/{id}            staff
   POST   /api/rooms                 admin/HOD
   PUT    /api/rooms/{id}            admin/HOD
   GET    /api/departments
   GET    /api/courses               filter: department_id, search
+
+Rooms are Timetable data, and the Timetable is for staff only (team decision,
+13 Nov 2026), so students get 403 on them. Departments and courses stay open
+to any logged-in user because the Archive (past papers, slides) uses them too.
 """
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import exists, select
 from sqlalchemy.orm import Session
 
-from app.core.permissions import ADMINS, require_roles
+from app.core.permissions import ADMINS, STAFF, require_roles
 from app.database import get_db
 from app.dependencies import get_current_user
 from app.models.course import Course
@@ -27,7 +31,7 @@ from app.services.timetable_import import normalize_day, parse_time
 router = APIRouter(prefix="/api", tags=["Rooms & Reference Data"], dependencies=[Depends(get_current_user)])
 
 
-@router.get("/rooms", response_model=list[RoomOut])
+@router.get("/rooms", response_model=list[RoomOut], dependencies=[Depends(require_roles(*STAFF))])
 def list_rooms(
     min_capacity: int | None = Query(None, gt=0),
     building: str | None = None,
@@ -46,7 +50,7 @@ def list_rooms(
     return db.execute(stmt.offset(skip).limit(limit)).scalars().all()
 
 
-@router.get("/rooms/empty", response_model=list[RoomOut])
+@router.get("/rooms/empty", response_model=list[RoomOut], dependencies=[Depends(require_roles(*STAFF))])
 def empty_rooms(
     day: str = Query(..., description="Monday ... Sunday (Mon, Tue ... also accepted)"),
     start: str = Query(..., description="HH:MM, e.g. 10:00"),
@@ -77,7 +81,7 @@ def empty_rooms(
     return db.execute(stmt).scalars().all()
 
 
-@router.get("/rooms/{room_id}", response_model=RoomOut)
+@router.get("/rooms/{room_id}", response_model=RoomOut, dependencies=[Depends(require_roles(*STAFF))])
 def get_room(room_id: int, db: Session = Depends(get_db)):
     room = db.get(Room, room_id)
     if room is None:

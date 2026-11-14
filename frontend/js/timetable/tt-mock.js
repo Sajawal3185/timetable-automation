@@ -301,8 +301,6 @@
     const ids = new Set();
     db.teachers.filter((t) => t.id === a.teacher_id || t.id === b.teacher_id)
       .forEach((t) => { if (t.user_id != null) ids.add(t.user_id); });
-    db.users.filter((u) => u.role === "student" && (u.section_id === a.section_id || u.section_id === b.section_id))
-      .forEach((u) => ids.add(u.id));
     Array.from(ids).sort((x, y) => x - y).forEach((uid) => {
       db.notifications.push({ id: nextId(db.notifications), user_id: uid, type, message, related_id: swapId, is_read: false, created_at: nowIso() });
     });
@@ -385,51 +383,24 @@
     db.email_codes = db.email_codes.filter((c) => c !== row);   // single use
   }
 
-  // PENDING (signup plan): departments and sections for the signup dropdowns.
-  // Public, because the person has no account yet. Names only.
-  route("GET", /^\/api\/auth\/signup-options$/, (db) => ({
-    status: 200,
-    data: {
-      departments: db.departments.slice().sort((a, b) => a.name.localeCompare(b.name)).map((d) => pick(d, ["id", "name", "code"])),
-      sections: db.sections.slice().sort((a, b) => a.name.localeCompare(b.name)).map((x) => pick(x, ["id", "name", "department_id"]))
-    }
-  }));
-
-  // PENDING (signup plan): start a signup. The email decides student or staff;
-  // the role is never read from the request. Nothing is a real account until
+  // PENDING (signup plan): start a signup. Staff only (team decision, 13 Nov):
+  // a student email is refused, students use the Archive. The role is never
+  // read from the request; every signup becomes a teacher waiting for approval. Nothing is a real account until
   // the code is entered, and a new signup replaces an unfinished one, so
   // nobody can block someone else's email.
   route("POST", /^\/api\/auth\/signup$/, async (db, req) => {
     const b = req.body || {};
     const email = cleanEmail(b.email);
     const name = requireText(b.name, "name", "Full name");
-    const dept = byId(db.departments, b.department_id);
-    if (!dept) throw new HttpError(422, [{ loc: ["body", "department_id"], msg: "Choose your department", type: "missing" }]);
     const password = checkPassword(b.password, "password");
+    if (AUTH.STUDENT_EMAIL.test(email)) {
+      throw new HttpError(400, "The Timetable is for teachers and staff only. Students can use the NUML Archive.");
+    }
     if (db.users.some((u) => u.email === email)) {
       throw new HttpError(409, "This email already has an account. Log in instead.");
     }
 
-    const isStudent = AUTH.STUDENT_EMAIL.test(email);
-    const local = email.slice(0, email.indexOf("@"));
-    const signup = { email, name, department_id: dept.id, kind: isStudent ? "student" : "staff" };
-    if (isStudent) {
-      const section = byId(db.sections, b.section_id);
-      if (!section || section.department_id !== dept.id) {
-        throw new HttpError(422, [{ loc: ["body", "section_id"], msg: "Choose a section of your department", type: "value_error" }]);
-      }
-      const roll = requireText(b.roll_number, "roll_number", "Roll number").toLowerCase();
-      if (!AUTH.ROLL_NUMBER.test(roll)) {
-        throw new HttpError(422, [{ loc: ["body", "roll_number"], msg: "Roll number should look like se-9244330", type: "value_error" }]);
-      }
-      const parts = /^numl-([a-z])(\d{2})-(\d+)$/.exec(local);
-      Object.assign(signup, {
-        identifier: local, section_id: section.id, roll_number: roll,
-        sys_id: parts[3], join_term: parts[1] + parts[2]
-      });
-    } else {
-      signup.identifier = email;   // staff log in with their full email
-    }
+    const signup = { email, name, kind: "staff", identifier: email };   // staff log in with their full email
     if (db.users.some((u) => u.identifier === signup.identifier)) {
       throw new HttpError(409, "This email already has an account. Log in instead.");
     }
@@ -441,8 +412,8 @@
     return { status: 202, data: { email, kind: signup.kind, expires_in: CODE_MINUTES * 60 } };
   });
 
-  // PENDING (signup plan): enter the signup code. Students become active and
-  // are logged in; staff become a pending teacher who cannot log in yet.
+  // PENDING (signup plan): enter the signup code. The account becomes a
+  // pending teacher who cannot log in until an admin or HOD approves.
   route("POST", /^\/api\/auth\/verify-email$/, async (db, req) => {
     const b = req.body || {};
     const email = cleanEmail(b.email);
@@ -457,13 +428,10 @@
       name: signup.name,
       identifier: signup.identifier,
       email,
-      role: signup.kind === "student" ? "student" : "teacher",
-      department_id: signup.department_id,
-      section_id: signup.section_id || null,
-      roll_number: signup.roll_number || null,
-      sys_id: signup.sys_id || null,
-      join_term: signup.join_term || null,
-      status: signup.kind === "student" ? "active" : "pending",
+      role: "teacher",
+      department_id: null,   // not asked at signup; an admin sets it later
+      section_id: null,
+      status: "pending",
       email_verified_at: nowIso(),
       password_sha256: signup.password_sha256,
       is_active: true
@@ -471,12 +439,7 @@
     db.users.push(user);
     db.pending_signups = db.pending_signups.filter((p) => p !== signup);
 
-    if (user.status === "pending") return { status: 200, data: { status: "pending" } };
-    const token = randomToken();
-    const sessions = readSessions();
-    sessions[token] = user.id;
-    writeSessions(sessions);
-    return { status: 200, data: { status: "active", token, user: pick(user, SHAPES.UserOut) } };
+    return { status: 200, data: { status: "pending" } };
   });
 
   // PENDING (signup plan): send a new signup code, at most once a minute.
@@ -531,8 +494,9 @@
     if (!body.password) errors.push({ loc: ["body", "password"], msg: "String should have at least 1 character", type: "string_too_short" });
     if (errors.length) throw new HttpError(422, errors);
 
-    // "NUML email or ID": a roll number / staff ID, a student's
-    // numl-f24-26789, or the full NUML email (signup plan).
+    // "NUML email or ID": a roll number / staff ID or the full NUML email
+    // (signup plan). Shared with the Archive, so students can still log in;
+    // the Timetable endpoints below refuse them (403).
     const typed = String(body.identifier).trim().toLowerCase();
     const user = findAccount(db, typed);
     // Hash even for unknown users, like the backend's DUMMY_HASH, so the code
@@ -561,7 +525,7 @@
 
   // routers/timetable.py list_timetable()
   route("GET", /^\/api\/timetable$/, (db, req) => {
-    currentUser(db, req.token);
+    requireRoles(currentUser(db, req.token), STAFF);   // staff only: students use the Archive
     const q = req.query;
     let rows = db.timetable_entries.slice();
     ["section_id", "teacher_id", "room_id", "course_id"].forEach((k) => {
@@ -585,7 +549,7 @@
 
   // routers/rooms.py list_rooms(), list_departments(), list_courses()
   route("GET", /^\/api\/rooms$/, (db, req) => {
-    currentUser(db, req.token);
+    requireRoles(currentUser(db, req.token), STAFF);   // staff only: students use the Archive
     const q = req.query;
     let rows = db.rooms.slice().sort((a, b) => a.name.localeCompare(b.name));
     if (q.min_capacity) rows = rows.filter((r) => r.capacity >= Number(q.min_capacity));
@@ -596,12 +560,12 @@
   });
 
   route("GET", /^\/api\/departments$/, (db, req) => {
-    currentUser(db, req.token);
+    currentUser(db, req.token);   // shared with the Archive, so any user
     return { status: 200, data: db.departments.slice().sort((a, b) => a.name.localeCompare(b.name)).map((d) => pick(d, SHAPES.DepartmentOut)) };
   });
 
   route("GET", /^\/api\/courses$/, (db, req) => {
-    currentUser(db, req.token);
+    currentUser(db, req.token);   // shared with the Archive, so any user
     const q = req.query;
     let rows = db.courses.slice().sort((a, b) => a.code.localeCompare(b.code));
     if (q.department_id) rows = rows.filter((c) => c.department_id === Number(q.department_id));
@@ -615,7 +579,7 @@
 
   // routers/makeup.py list_makeup_classes()
   route("GET", /^\/api\/makeup$/, (db, req) => {
-    currentUser(db, req.token);
+    requireRoles(currentUser(db, req.token), STAFF);   // staff only: students use the Archive
     const q = req.query;
     let rows = db.makeup_classes.filter((m) => m.status === "scheduled");
     if (q.section_id) rows = rows.filter((m) => m.section_id === Number(q.section_id));

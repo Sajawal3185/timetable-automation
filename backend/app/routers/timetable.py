@@ -5,7 +5,8 @@
   GET  /api/timetable          list entries (filter: section_id, teacher_id, room_id,
                                course_id, department_id, day)
 
-The personal-timetable screen calls GET /api/timetable with teacher_id or section_id.
+The personal-timetable screen calls GET /api/timetable with teacher_id.
+The Timetable is for staff only (team decision, 13 Nov 2026): students get 403.
 """
 import os
 import tempfile
@@ -15,9 +16,8 @@ from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, Upload
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.core.permissions import ADMINS, require_roles
+from app.core.permissions import ADMINS, STAFF, require_roles
 from app.database import get_db
-from app.dependencies import get_current_user
 from app.models.section import Section
 from app.models.timetable_entry import TimetableEntry
 from app.schemas.portal import ImportIssueOut, ImportPreviewRow, ImportReport, TimetableEntryOut
@@ -29,7 +29,7 @@ MAX_IMPORT_MB = 10
 PREVIEW_ROWS = 25
 
 
-@router.get("", response_model=list[TimetableEntryOut], dependencies=[Depends(get_current_user)])
+@router.get("", response_model=list[TimetableEntryOut], dependencies=[Depends(require_roles(*STAFF))])
 def list_timetable(
     section_id: int | None = None,
     teacher_id: int | None = None,
