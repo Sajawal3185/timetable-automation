@@ -41,12 +41,7 @@
     if (!identifier || !password) return fail("Enter your email or ID and your password.");
     /* TEMPORARY PREVIEW - DELETE THIS BLOCK BEFORE YOU COMMIT OR PUSH.
    Only works on localhost. Any @numls.edu.pk email + any password opens the admin dashboard. */
-if (["localhost", "127.0.0.1"].includes(location.hostname) && /@numls\.edu\.pk$/i.test(identifier)) {
-  NUML.setToken("preview-only");
-  NUML.setUser({ id: 0, name: "Preview Admin", role: "admin", identifier: identifier });
-window.location.replace(NUML.PAGES.reviewUploads);
-  return;
-}
+
     if (!NUML.isLive) return fail("The backend is not connected, so login is unavailable.");
 
     btn.disabled = true;
