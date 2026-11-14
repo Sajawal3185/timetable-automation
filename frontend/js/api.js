@@ -1,15 +1,17 @@
 // frontend/js/api.js
 // Owner: Taha. Others ask Taha for changes.
 (function () {
-  const API_BASE = "";              // empty = use mock files
+  const API_BASE = "https://numl-archive.onrender.com";  // "" = use mock files
   const MOCK_DIR = "../mock/";
   const TOKEN_KEY = "numlToken";
-  const LOGIN_PAGE = "login.html";
+  const LOGIN_PAGE = "archive-login.html";
   const LOGIN_PATH = "/api/auth/login";
 
   window.NUML = window.NUML || {};
   const NUML = window.NUML;
 
+  NUML.isLive = !!API_BASE;
+  NUML.apiBase = API_BASE;
   NUML.getToken = () => localStorage.getItem(TOKEN_KEY);
   NUML.setToken = (t) => localStorage.setItem(TOKEN_KEY, t);
   NUML.clearToken = () => localStorage.removeItem(TOKEN_KEY);

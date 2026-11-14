@@ -103,3 +103,23 @@ button:hover { background: var(--blue-dark); }
 
 .card .msg { margin: 12px 0 0; font-size: 13px; color: var(--success); }
 .card .msg.error { color: var(--error); }
+
+/* ----- Login page: account tabs, password toggle, link rows ----- */
+.card { max-width: 92vw; }
+
+.role-tabs { display: flex; gap: 4px; margin-bottom: 18px; padding: 4px; background: var(--field-bg); border-radius: 8px; }
+.role-tabs button { padding: 8px; font-size: 13px; color: var(--blue); background: transparent; border-radius: 6px; }
+.role-tabs button:hover { background: rgba(30, 95, 191, .12); }
+.role-tabs button[aria-selected="true"] { color: white; background: var(--blue); }
+
+.pw-wrap { position: relative; margin: 5px 0 15px; }
+.pw-wrap input { margin: 0; padding-right: 64px; }
+.pw-wrap button { position: absolute; top: 50%; right: 6px; transform: translateY(-50%); width: auto; padding: 6px 10px; font-size: 13px; line-height: 1; color: var(--blue); background: transparent; }
+.pw-wrap button:hover { background: rgba(30, 95, 191, .12); }
+
+.auth-links { margin: -6px 0 15px; text-align: right; font-size: 13px; }
+.auth-links a { color: var(--blue); }
+.auth-links.split { display: flex; justify-content: space-between; margin: 15px 0 0; }
+
+button:focus-visible, a:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+button:disabled { opacity: .6; cursor: default; }

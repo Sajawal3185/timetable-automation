@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Review Uploads | NUML Archive</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/master.css">
+  <link rel="stylesheet" href="../css/archive-review-uploads.css">
+</head>
+<body class="ru-page">
+
+  <header class="ru-bar">
+    <nav aria-label="Main menu">
+      <a class="ru-pill" href="archive-review-uploads.html" aria-current="page">Review Uploads</a>
+    </nav>
+    <div class="ru-bar-right">
+      <span class="ru-name" id="adminName"></span>
+      <button type="button" class="ru-link" id="logoutBtn">Log out</button>
+    </div>
+  </header>
+
+  <section class="ru-hero">
+    <a class="ru-back" href="admin-dashboard.html">← Back to NUML Archive</a>
+    <h1>Review Uploads</h1>
+    <p>Compact list for working through many uploads quickly.</p>
+  </section>
+
+  <main class="ru-card">
+    <div class="ru-banner" id="banner" role="status" hidden></div>
+
+    <div class="ru-top">
+      <div class="ru-tabs" role="tablist" aria-label="Upload status">
+        <button type="button" role="tab" class="ru-tab" data-status="pending" aria-selected="true">Pending</button>
+        <button type="button" role="tab" class="ru-tab" data-status="approved" aria-selected="false">Approved</button>
+        <button type="button" role="tab" class="ru-tab" data-status="rejected" aria-selected="false">Rejected</button>
+      </div>
+      <div class="ru-filters">
+        <select class="ru-year" id="yearFilter" aria-label="Filter by year"></select>
+        <input type="search" class="ru-search" id="search" placeholder="Search title" aria-label="Search title">
+      </div>
+    </div>
+
+    <div class="ru-bulk" id="bulk" hidden>
+      <strong id="selCount">0 selected</strong>
+      <button type="button" class="ru-btn ok" id="bulkApprove">Approve selected</button>
+      <button type="button" class="ru-btn no" id="bulkReject">Reject selected</button>
+    </div>
+
+    <div class="ru-scroll">
+      <table class="ru-table">
+        <thead>
+          <tr>
+            <th class="ru-chk"><input type="checkbox" id="selectAll" aria-label="Select all"></th>
+            <th>Title</th><th>Type</th><th>Uploaded by</th><th>Date</th><th>Approvals</th><th></th>
+          </tr>
+        </thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </div>
+    <p class="ru-empty" id="empty" hidden></p>
+  </main>
+
+  <dialog class="ru-dialog" id="dialog" aria-labelledby="dTitle">
+    <h2 id="dTitle"></h2>
+    <dl class="ru-facts">
+      <dt>Type</dt><dd id="dType"></dd>
+      <dt>Uploaded by</dt><dd id="dBy"></dd>
+      <dt>Date</dt><dd id="dDate"></dd>
+      <dt>Approvals</dt><dd id="dVotes"></dd>
+    </dl>
+    <p class="ru-banner" id="dMsg" hidden></p>
+    <div class="ru-actions">
+      <button type="button" class="ru-btn" id="dOpen">Open file</button>
+      <button type="button" class="ru-btn ok" id="dApprove">Approve</button>
+      <button type="button" class="ru-btn no" id="dReject">Reject</button>
+      <button type="button" class="ru-btn" id="dClose">Close</button>
+    </div>
+  </dialog>
+
+  <script src="../js/common.js"></script>
+  <script src="../js/api.js"></script>
+  <script src="../js/archive-review-uploads.js"></script>
+</body>
+</html>

@@ -1671,3 +1671,15 @@ body.tt-page {
 @media (max-width: 600px) {
   .tt-page .tt-slot { grid-template-columns: 1fr; }
 }
+
+/* Profile menu: link to the other dashboard (admins only) */
+.dash-page .profile-menu .dash-switch {
+  display: block;
+  padding: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--blue);
+  border-radius: 10px;
+}
+
+.dash-page .profile-menu .dash-switch:hover { background: #eef3fb; }

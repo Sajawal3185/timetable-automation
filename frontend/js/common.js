@@ -21,12 +21,13 @@
 
   const PAGES = {
     home: "index.html",
-    login: "login_student.html",
+    login: "archive-login.html",
     signup: "signup_student.html",
-    forgot: "forgot-password.html",
+    forgot: "archive-forgot-password.html",
 
     dashboard: "dashboard.html",
     adminDashboard: "admin-dashboard.html",
+    reviewUploads: "archive-review-uploads.html",
 
     papers: "pastpapers.html",
     lectures: "lecture.html",
@@ -45,8 +46,8 @@
   /* Role-based starting pages. */
   const START_PAGE = {
     student: PAGES.dashboard,
-    admin: PAGES.adminDashboard,
-    hod: PAGES.adminDashboard
+    admin: PAGES.reviewUploads,
+    hod: PAGES.reviewUploads
   };
 
   /* Student navigation links. */
@@ -153,6 +154,12 @@
 
   /* ---- 4. Role-based dashboard ---- */
 
+  /* Admins and HODs also use every student page. This only picks what to
+     show; the backend checks the role on every admin endpoint. */
+  function isAdmin(user) {
+    return !!user && (user.role === "admin" || user.role === "hod");
+  }
+
   function homeFor(role) {
     return START_PAGE[role] || null;
   }
@@ -198,7 +205,7 @@
     const here = currentPage();
 
     /* Admin and HOD dashboards are only for admin and HOD users. */
-    if (here === PAGES.adminDashboard) {
+    if (here === PAGES.adminDashboard || here === PAGES.reviewUploads) {
       if (user.role !== "admin" && user.role !== "hod") {
         redirectByRole(user.role);
         return false;
@@ -208,7 +215,7 @@
     }
 
     /* All other protected Archive pages are for students. */
-    if (user.role !== "student") {
+    if (user.role !== "student" && !isAdmin(user)) {
       redirectByRole(user.role);
       return false;
     }
@@ -399,7 +406,7 @@
     if (!requireLogin()) return;
 
     /* Admin and HOD dashboards have their own navigation. */
-    if (here === PAGES.adminDashboard) return;
+    if (here === PAGES.adminDashboard || here === PAGES.reviewUploads) return;
 
     /* Student dashboard has its own header and quick links. */
     if (here !== PAGES.dashboard) {
@@ -440,6 +447,7 @@
     clearSession,
     logout,
     requireLogin,
+    isAdmin,
 
     renderQuickLinks
   };

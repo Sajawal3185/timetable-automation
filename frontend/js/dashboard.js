@@ -94,3 +94,17 @@ document.querySelectorAll(".dash-logout").forEach((link) => {
     NUML.logout();
   });
 });
+
+
+/* ===== Admins: link back to the admin dashboard from the student pages ===== */
+if (user && NUML.isAdmin(user) && !document.body.classList.contains("admin-page")) {
+  const menu = document.getElementById("profileMenu");
+  const out = menu && menu.querySelector(".dash-logout");
+  if (out) {
+    const a = document.createElement("a");
+    a.href = NUML.PAGES.adminDashboard;
+    a.className = "dash-switch";
+    a.textContent = "Admin dashboard";
+    menu.insertBefore(a, out);
+  }
+}
