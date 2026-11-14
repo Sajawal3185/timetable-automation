@@ -41,7 +41,7 @@ This only decides what is shown. The backend's 403 is what protects data.
 
 ## Mock mode vs real backend
 
-One switch: `API_BASE` in `js/timetable/tt-config.js`.
+One switch: `API_BASE` in `js/timetable/tt-config.js` (and the Archive's own in `js/api.js`). Both point at the deployed backend; set them to `""` for mock mode.
 
 - `""` (default): **mock mode**. `js/timetable/tt-mock.js` answers requests
   from `mock/db/*.json`.
