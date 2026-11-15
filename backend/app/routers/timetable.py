@@ -1,11 +1,11 @@
-"""Timetable view + import (Wajiha).
+"""Timetable view + import.
 
   POST /api/timetable/import   upload a department sheet (.xlsx/.csv). Admin/HOD only.
                                dry_run=true (default) only previews; nothing is saved.
   GET  /api/timetable          list entries (filter: section_id, teacher_id, room_id,
                                course_id, department_id, day)
 
-Amna's personal-timetable screen calls GET /api/timetable with teacher_id or section_id.
+The personal-timetable screen calls GET /api/timetable with teacher_id or section_id.
 """
 import os
 import tempfile
@@ -15,10 +15,11 @@ from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, Upload
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.core.permissions import ADMINS, require_roles
 from app.database import get_db
+from app.dependencies import get_current_user
 from app.models.section import Section
 from app.models.timetable_entry import TimetableEntry
-from app.routers.portal_deps import ADMINS, get_current_user, require_roles
 from app.schemas.portal import ImportIssueOut, ImportPreviewRow, ImportReport, TimetableEntryOut
 from app.services import timetable_import as ti
 

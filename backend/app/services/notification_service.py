@@ -94,7 +94,11 @@ def mark_all_read(db: Session, user_id: int) -> int:
 # ---- Who gets notified (task spec, file 2) ---------------------------------
 
 def _teacher_user_ids(db: Session, teacher_ids: set[int]) -> set[int]:
-    rows = db.execute(select(Teacher.user_id).where(Teacher.id.in_(list(teacher_ids))))
+    # Imported teachers often have no login yet (user_id is NULL); they are skipped,
+    # otherwise a NULL would reach notifications.user_id and fail the whole request.
+    rows = db.execute(
+        select(Teacher.user_id).where(Teacher.id.in_(list(teacher_ids)), Teacher.user_id.is_not(None))
+    )
     return set(rows.scalars())
 
 

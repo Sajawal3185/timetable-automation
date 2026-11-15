@@ -1,4 +1,4 @@
-"""Lecture material archive (Wajiha) - proposal 4.2.
+"""Lecture material archive - proposal 4.2.
 
 Notes and slides from DIFFERENT instructors for the SAME course, side by side.
 
@@ -16,12 +16,14 @@ from fastapi.responses import FileResponse
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
+from app.core.permissions import ADMINS, STAFF, require_roles, role_of
 from app.database import get_db
+from app.dependencies import get_current_user
 from app.models.course import Course
 from app.models.lecture_material import LectureMaterial
-from app.routers.portal_deps import ADMINS, STAFF, get_current_user, require_roles
 from app.schemas.portal import LectureMaterialOut, MaterialsByCourse, MaterialsByInstructor, MaterialType
 from app.utils.file_storage import MATERIAL_EXTENSIONS, delete_file, resolve_path, save_upload
+from app.utils.instructor import resolve_instructor_name
 
 router = APIRouter(prefix="/api/lecture-materials", tags=["Lecture Material Archive"])
 
@@ -36,7 +38,7 @@ def upload_material(
     course_id: int = Form(...),
     title: str = Form(..., min_length=1, max_length=200),
     material_type: MaterialType = Form(...),
-    instructor_name: str | None = Form(None, max_length=100, description="defaults to the uploader's name"),
+    instructor_name: str | None = Form(None, max_length=100, description="HOD/admin only; defaults to the uploader's name. A teacher's upload always uses their own name."),
     term: str | None = Form(None, max_length=40),
     description: str | None = Form(None, max_length=2000),
     file: UploadFile = File(...),
@@ -47,11 +49,7 @@ def upload_material(
     if course is None:
         raise HTTPException(404, "Course not found")
         
-    user_role = (getattr(user, "role", "") or "").lower()
-    if user_role == "teacher" or not instructor_name:
-        final_instructor_name = (getattr(user, "name", "") or "Unknown").strip()
-    else:
-        final_instructor_name = instructor_name.strip()
+    final_instructor_name = resolve_instructor_name(instructor_name, user)
 
     saved = save_upload(file, "lecture_materials", MATERIAL_EXTENSIONS)
     material = LectureMaterial(
@@ -164,13 +162,14 @@ def download_material(material_id: int, db: Session = Depends(get_db)):
     return FileResponse(
         file_path, filename=m.original_filename,
         media_type=media_type or "application/octet-stream",
+        content_disposition_type="attachment",  # uploads are downloaded, never rendered in the page
     )
 
 
 @router.delete("/{material_id}", status_code=204)
 def delete_material(material_id: int, db: Session = Depends(get_db), user=Depends(get_current_user)):
     m = _get_or_404(db, material_id)
-    if m.uploaded_by != user.id and user.role not in ADMINS:
+    if m.uploaded_by != user.id and role_of(user) not in ADMINS:
         raise HTTPException(403, "Only the uploader or an admin/HOD can delete this material")
     path = m.file_path
     db.delete(m)

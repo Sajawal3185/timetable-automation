@@ -11,7 +11,7 @@
    ========================================================================== */
 
 window.TT_CONFIG = Object.freeze({
-    API_BASE: "",
+    API_BASE: "https://numl-archive.onrender.com",
 
     // Separate from the Archive's "numlUser" key so the two sessions never mix.
     // Only the token is stored. The profile is re-read from /api/auth/me on

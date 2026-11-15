@@ -1,4 +1,4 @@
-"""timetable_entries table (Sajawal).
+"""timetable_entries table.
 
 NOTE: The unique constraint prevents identical duplicate rows on re-import.
 Time-range overlaps (e.g. 09:00-10:30 vs 10:00-11:30) and parallel elective

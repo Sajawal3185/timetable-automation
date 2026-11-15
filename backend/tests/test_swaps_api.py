@@ -244,3 +244,27 @@ def test_list_is_scoped_by_role(world):
     assert ids("hod_cs") == []                    # other department
     assert ids("admin") == [mine]
     assert world["as"]("student").get("/api/swap-requests").status_code == 403
+
+
+# ---- entries and teachers that are not linked to anyone --------------------
+
+def test_swap_for_an_entry_with_no_teacher_is_refused_not_a_crash(world):
+    db = world["db"]()
+    orphan = _entry(world["sec_b"], world["c2"], world["t2"], world["r2"], "Thursday", 14, 15)
+    orphan.teacher_id = None  # as left by an import row with a blank teacher cell
+    db.add(orphan)
+    db.commit()
+    r = world["as"]("teacher").post(
+        "/api/swap-requests", json={"entry_id": orphan.id, "target_entry_id": world["e3"].id}
+    )
+    assert r.status_code == 403
+
+
+def test_swap_with_a_teacher_who_has_no_login_still_works(world):
+    db = world["db"]()
+    db.get(Teacher, world["t2"].id).user_id = None  # imported teacher, account not linked yet
+    db.commit()
+    assert _create(world).status_code == 201
+    recipients = {n.user_id for n in world["db"]().execute(select(Notification)).scalars()}
+    u = world["users"]
+    assert recipients == {u["teacher"].id, u["student"].id}

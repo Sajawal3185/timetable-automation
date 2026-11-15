@@ -1,10 +1,10 @@
-"""Timetable import (Wajiha) - reads department sheets into ONE common dataset.
+"""Timetable import - reads department sheets into ONE common dataset.
 
 Three stages, each usable on its own:
 
   1. parse_workbook()  file -> list[TimetableRow] (+ issues). No database.
   2. validate_rows()   checks the rows (times, days, duplicates).
-  3. load_rows()       writes rows into Sajawal's tables inside the caller's
+  3. load_rows()       writes rows into the core tables inside the caller's
                        transaction (the router commits or rolls back).
 
 Two sheet layouts are recognised automatically:
@@ -39,8 +39,6 @@ from app.models.room import Room
 from app.models.section import Section
 from app.models.teacher import Teacher
 from app.models.timetable_entry import TimetableEntry
-
-DEFAULT_NEW_ROOM_CAPACITY = 40  # used when the sheet names a room we have never seen
 
 DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 _DAY_BY_PREFIX = {d[:3].lower(): d for d in DAYS}
@@ -109,7 +107,7 @@ class LoadSummary:
     sections_created: int = 0
     courses_created: int = 0
     teachers_created: int = 0
-    rooms_created: list[str] = field(default_factory=list)  # their capacity is a placeholder
+    rooms_created: list[str] = field(default_factory=list)  # capacity unknown (None) until an admin sets it
 
 
 # --------------------------------------------------------------------------- cell helpers
@@ -376,7 +374,7 @@ def parse_workbook(path: str | Path, department_code: str) -> ParseResult:
 def validate_rows(rows: list[TimetableRow]) -> tuple[list[TimetableRow], list[Issue]]:
     """Stage 2: drop impossible rows and exact duplicates. Returns (good_rows, issues).
 
-    Teacher/room/section CLASH detection is Taha's conflict_checker.py. Run it
+    Teacher/room/section CLASH detection is done by services/conflict_checker.py. Run it
     after the import; this stage only checks that each row makes sense by itself.
     """
     good: list[TimetableRow] = []
@@ -410,9 +408,8 @@ def load_rows(db: Session, rows: list[TimetableRow], department_code: str) -> Lo
     """Stage 3: write rows into the database. Caller commits (or rolls back on error).
 
     Re-importing the same sheet is safe: an identical entry is skipped, not duplicated.
-    ASSUMPTION: TimetableEntry has section_id, course_id, teacher_id, room_id,
-    day_of_week (full day name), start_time, end_time. Adjust the names below if
-    Sajawal's final model differs.
+    Writes TimetableEntry rows with section_id, course_id, teacher_id, room_id,
+    day_of_week (full day name), start_time, end_time (see models/timetable_entry.py).
     """
     summary = LoadSummary()
     code = department_code.strip().upper()
@@ -471,7 +468,10 @@ def load_rows(db: Session, rows: list[TimetableRow], department_code: str) -> Lo
             if rkey not in rooms:
                 rm = _ci_first(db, Room, Room.name, row.room)
                 if rm is None:
-                    rm = Room(name=row.room, capacity=DEFAULT_NEW_ROOM_CAPACITY)
+                    # The sheet has no capacity, so store None (unknown), never a made-up number.
+                    # The makeup solver rejects rooms with unknown capacity; an admin fixes them
+                    # with PUT /api/rooms/{id} (the names are returned in rooms_created).
+                    rm = Room(name=row.room)
                     db.add(rm)
                     db.flush()
                     summary.rooms_created.append(row.room)

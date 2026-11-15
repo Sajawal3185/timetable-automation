@@ -1,5 +1,5 @@
 """
-routers/auth.py  (owner: Sajawal)
+routers/auth.py
 
 Endpoints:
     POST /api/auth/login      any user logs in, gets a JWT + their role
@@ -25,6 +25,7 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
+from app.core.permissions import require_roles
 from app.database import get_db
 from app.dependencies import get_current_user
 from app.core.security import (
@@ -33,6 +34,7 @@ from app.core.security import (
     hash_password,
     verify_password,
 )
+from app.models.department import Department
 from app.models.teacher import Teacher
 from app.models.user import User
 
@@ -82,6 +84,7 @@ class CreateUserRequest(BaseModel):
     identifier: str = Field(min_length=1)
     password: str = Field(min_length=8)
     role: str
+    department_id: int | None = None
 
     _pw_len = field_validator("password")(_check_password_length)
 
@@ -194,18 +197,24 @@ def me(current_user: User = Depends(get_current_user), db: Session = Depends(get
 def create_staff_user(
     data: CreateUserRequest,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    _admin: User = Depends(require_roles("admin")),
 ):
-    # Inline role check so this file has no dependency on Taha's permissions.py.
-    # Once require_roles() exists there, replace these lines with:
-    #     current_user = Depends(require_roles("admin"))
-    if current_user.role != "admin":
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not allowed")
-
     if data.role not in STAFF_ROLES:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"role must be one of: {', '.join(sorted(STAFF_ROLES))}",
+        )
+
+    # BE-07: a HOD must belong to a department, otherwise can_decide_swap refuses them forever.
+    if data.role == "hod" and data.department_id is None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="department_id is required when role is hod",
+        )
+    if data.department_id is not None and db.get(Department, data.department_id) is None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Department not found",
         )
 
     # Step 1: friendly early check, so the common duplicate case returns 409
@@ -219,6 +228,7 @@ def create_staff_user(
         identifier=identifier,
         password_hash=hash_password(data.password),
         role=data.role,
+        department_id=data.department_id,
         is_active=True,
     )
     db.add(user)

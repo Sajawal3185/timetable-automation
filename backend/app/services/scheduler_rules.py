@@ -1,4 +1,4 @@
-"""Hard and Soft scheduling rules (Sajawal) - proposal section 3.1.
+"""Hard and Soft scheduling rules - proposal section 3.1.
 
 Pure functions with zero database or HTTP dependencies so conflict_checker.py
 and makeup_solver.py can call them directly.

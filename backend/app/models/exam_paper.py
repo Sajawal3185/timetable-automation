@@ -1,4 +1,4 @@
-"""exam_papers table (Wajiha) - past examination papers, proposal 4.1."""
+"""exam_papers table - past examination papers, proposal 4.1."""
 from datetime import datetime
 from sqlalchemy import DateTime, ForeignKey, Integer, String, func
 from sqlalchemy.orm import Mapped, mapped_column
