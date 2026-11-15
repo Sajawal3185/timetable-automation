@@ -43,12 +43,18 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 DUMMY_HASH = hash_password("timing-dummy")
 
 
-def create_access_token(user_id: int, role: str, expires_delta: timedelta | None = None) -> str:
-    """Create a signed JWT containing sub (user_id), lowercase role, and exp."""
+def create_access_token(user_id: int, role: str, expires_delta: timedelta | None = None,
+                        token_version: int = 0) -> str:
+    """Create a signed JWT containing sub (user_id), lowercase role, exp and tv.
+
+    tv is the user's token_version. A password reset bumps it, and
+    get_current_user refuses any token whose tv no longer matches.
+    """
     expire = datetime.now(timezone.utc) + (
         expires_delta or timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     )
-    payload = {"sub": str(user_id), "role": role.strip().lower(), "exp": expire}
+    payload = {"sub": str(user_id), "role": role.strip().lower(), "exp": expire,
+               "tv": token_version}
     return jwt.encode(payload, settings.JWT_SECRET_KEY, algorithm=settings.JWT_ALGORITHM)
 
 

@@ -79,4 +79,10 @@ def get_current_user(
     if user is None or not user.is_active:
         raise _unauthorized("User not found or inactive")
 
+    # Step 5: a password reset (routers/signup.py) bumps users.token_version,
+    # which logs the account out everywhere: older tokens carry the old number.
+    # Tokens from before this check existed have no "tv" and count as 0.
+    if payload.get("tv", 0) != user.token_version:
+        raise _unauthorized("Invalid or expired token")
+
     return user
