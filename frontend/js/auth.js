@@ -32,13 +32,14 @@ if (loginForm) {
         method: "POST",
         body: { identifier, password }
       });
-NUML.setToken(data.token);
+      NUML.setToken(data.token);
       const me = await NUML.api("/api/auth/me");
       NUML.setUser(me);
 
       // Admins and HODs start on the admin dashboard, everyone else on the dashboard.
       window.location.href = NUML.homeFor(me);
     } catch (err) {
+      console.error("Login failed:", err);
       NUML.clearToken();
       msg.textContent =
         err.status === 401
