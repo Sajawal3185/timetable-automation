@@ -1,4 +1,4 @@
-"""users table (Sajawal)."""
+"""users table."""
 from datetime import datetime
 from sqlalchemy import Boolean, CheckConstraint, DateTime, ForeignKey, String, func
 from sqlalchemy.orm import Mapped, mapped_column

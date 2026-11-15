@@ -1,27 +1,20 @@
 /* ==========================================================================
    common.js  -  shared session + navigation for every page of the portal.
 
-   WHY THIS FILE EXISTS
-   - Before: each page decided on its own where to go, login never saved the
-     user, and no page linked back to the dashboard. Result: login -> dashboard
-     -> bounced back to login (dashboard.js found no "numlUser").
-   - Now: ONE place knows the page filenames, the session, and the nav bar.
-
-   LOAD ORDER (every page): <script src="common.js"></script> FIRST (no defer),
-   then api.js if the page calls the backend, then the page's own script.
-   Everything is wrapped in an IIFE and exposed as window.NUML, so it cannot
-   clash with the top-level `const $` / `SUBJECTS` that pastpaper.js and
-   lecture.js already declare.
+   LOAD ORDER (every page): common.js FIRST (no defer), then api.js,
+   then the page's own script.
+   Everything is wrapped in an IIFE and exposed as window.NUML.
    ========================================================================== */
 (function () {
   "use strict";
 
-  /* ---- 1. Page map: the ONLY place filenames live. Rename here if yours differ. ---- */
+  /* ---- 1. Page map: the ONLY place filenames live. ---- */
   const PAGES = {
     home: "index.html",
     login: "login.html",
     forgot: "forgot-password.html",
     dashboard: "dashboard.html",
+    adminDashboard: "admin-dashboard.html",
     papers: "pastpapers.html",
     lectures: "lecture.html",
     resources: "tools-resources.html",
@@ -40,18 +33,17 @@
     { href: PAGES.gpa, label: "GPA Calculator", desc: "Semester GPA and cumulative CGPA" }
   ];
 
-  const USER_KEY = "numlUser";          // same key dashboard.js already reads
-  const TOKEN_KEY = "numlToken";        // same key api.js uses
-  const TT_TOKEN_KEY = "ttAuthToken";   // token used by the timetable pages
-  const PROFILES_KEY = "numlProfiles";  // name/department saved at signup (NO passwords)
-  const MIN_PASSWORD = 8;               // login and signup used 6 and 8; one rule now
+  const USER_KEY = "numlUser";
+  const TOKEN_KEY = "numlToken";
+  const TT_TOKEN_KEY = "ttAuthToken";
+  const OLD_PROFILES_KEY = "numlProfiles"; // removed feature; only cleaned up on logout
+  const MIN_PASSWORD = 8;
 
   /* f = fall, s = spring, 2-digit year, numeric system id */
   const EMAIL_PATTERN = /^numl-([fs])(\d{2})-(\d+)@numls\.edu\.pk$/i;
 
   /* ---- 2. Small helpers ---- */
   function currentPage() {
-    // "/site/Dashboard.html?x=1" -> "dashboard.html"; bare "/" -> "index.html"
     const file = window.location.pathname.split("/").pop().toLowerCase();
     return file || "index.html";
   }
@@ -61,7 +53,7 @@
       const raw = localStorage.getItem(key);
       return raw ? JSON.parse(raw) : fallback;
     } catch (e) {
-      return fallback; // corrupted or blocked storage: behave as "nothing saved"
+      return fallback;
     }
   }
 
@@ -85,21 +77,24 @@
     localStorage.setItem(USER_KEY, JSON.stringify(user));
   }
 
-  function findProfile(email) {
-    return readJSON(PROFILES_KEY, {})[String(email).toLowerCase()] || null;
+  /* Admins and HODs. This only picks which page to show; the backend must
+     still check the role on every admin endpoint. */
+  const ADMIN_ROLES = ["admin", "hod"];
+
+  function isAdmin(user) {
+    return !!user && ADMIN_ROLES.includes(user.role);
   }
 
-  function saveProfile(profile) {
-    const all = readJSON(PROFILES_KEY, {});
-    all[profile.email.toLowerCase()] = profile;
-    localStorage.setItem(PROFILES_KEY, JSON.stringify(all));
+  function homeFor(user) {
+    return isAdmin(user) ? PAGES.adminDashboard : PAGES.dashboard;
   }
 
-  /* Log out: clear the user AND both tokens, then go to login. */
+  /* Log out: clear the user AND both tokens (and old saved profiles). */
   function logout() {
     localStorage.removeItem(USER_KEY);
     localStorage.removeItem(TOKEN_KEY);
     localStorage.removeItem(TT_TOKEN_KEY);
+    localStorage.removeItem(OLD_PROFILES_KEY);
     window.location.href = PAGES.login;
   }
 
@@ -110,6 +105,32 @@
       return false;
     }
     return true;
+  }
+
+  /* Ask the server "who am I". A fake numlUser/numlToken fails here:
+     api.js clears the token and goes to login on a 401.
+     Runs only ONE request per page, however many scripts call it. */
+  let sessionPromise = null;
+
+  async function checkSession() {
+    if (!window.NUML || typeof window.NUML.api !== "function") {
+      console.error("verifySession: api.js is not loaded on this page");
+      return null;
+    }
+    try {
+      const res = await window.NUML.api("/api/auth/me");
+      const user = res && res.user ? res.user : res; // real backend: user object; mock may wrap it
+      if (user && user.name) setUser(user);
+      return user;
+    } catch (err) {
+      console.error("Session check failed:", err);
+      return null;
+    }
+  }
+
+  function verifySession() {
+    if (!sessionPromise) sessionPromise = checkSession();
+    return sessionPromise;
   }
 
   /* ---- 4. Navigation UI (built with DOM calls, never innerHTML) ---- */
@@ -137,7 +158,7 @@
   }
 
   function renderNav() {
-    if (document.querySelector(".numl-nav")) return; // never add twice
+    if (document.querySelector(".numl-nav")) return;
     injectStyles();
 
     const here = currentPage();
@@ -164,7 +185,7 @@
     if (user) {
       const who = document.createElement("span");
       who.className = "who";
-      who.textContent = user.name; // textContent: a name like "<b>" stays text
+      who.textContent = user.name;
       nav.appendChild(who);
     }
 
@@ -177,8 +198,6 @@
     document.body.insertBefore(nav, document.body.firstChild);
   }
 
-  /* Dashboard -> every other page. Goes into <section id="quickLinks"> if you
-     add one in dashboard.html, otherwise into <main>, otherwise <body>. */
   function renderQuickLinks() {
     if (document.querySelector(".numl-quick")) return;
     injectStyles();
@@ -206,18 +225,20 @@
     const here = currentPage();
     if (PUBLIC_PAGES.includes(here)) return;       // login/forgot: nothing to do
     if (!requireLogin()) return;                   // bounce to login, stop here
-    if (here !== PAGES.dashboard) renderNav();     // dashboard has its own header + quick links
+    if (here !== PAGES.dashboard && here !== PAGES.adminDashboard) renderNav();
+    if (window.NUML && typeof window.NUML.api === "function") verifySession();
   }
+
+  /* Export FIRST, so window.NUML exists before init() can run. */
+  window.NUML = {
+    PAGES, MIN_PASSWORD, EMAIL_PATTERN,
+    parseEmail, getUser, setUser,
+    logout, requireLogin, verifySession, renderQuickLinks, isAdmin, homeFor
+  };
 
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", init);
   } else {
     init();
   }
-
-  window.NUML = {
-    PAGES, MIN_PASSWORD, EMAIL_PATTERN,
-    parseEmail, getUser, setUser, findProfile, saveProfile,
-    logout, requireLogin, renderQuickLinks
-  };
 })();

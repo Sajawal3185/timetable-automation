@@ -1,10 +1,10 @@
-"""Institutional event calendar (Wajiha) - proposal 4.6.
+"""Institutional event calendar - proposal 4.6.
 
   GET    /api/events         list (filter: month=YYYY-MM, from_date, to_date, event_type,
                              department_id).  An event overlapping the range is included.
   GET    /api/events/{id}
   POST   /api/events         admin / HOD
-  PATCH  /api/events/{id}    admin / HOD
+  PUT    /api/events/{id}    admin / HOD   (send only the fields you want to change)
   DELETE /api/events/{id}    admin / HOD
 """
 import calendar
@@ -15,10 +15,11 @@ from sqlalchemy import func, or_, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
+from app.core.permissions import ADMINS, require_roles
 from app.database import get_db
+from app.dependencies import get_current_user
 from app.models.department import Department
 from app.models.event import Event
-from app.routers.portal_deps import ADMINS, get_current_user, require_roles
 from app.schemas.portal import EventIn, EventOut, EventType, EventUpdate
 
 router = APIRouter(prefix="/api/events", tags=["Event Calendar"])
@@ -95,7 +96,7 @@ def create_event(body: EventIn, db: Session = Depends(get_db), user=Depends(requ
     return event
 
 
-@router.patch("/{event_id}", response_model=EventOut, dependencies=[Depends(require_roles(*ADMINS))])
+@router.put("/{event_id}", response_model=EventOut, dependencies=[Depends(require_roles(*ADMINS))])
 def update_event(event_id: int, body: EventUpdate, db: Session = Depends(get_db)):
     event = _get_or_404(db, event_id)
     data = body.model_dump(exclude_unset=True)

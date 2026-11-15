@@ -1,5 +1,5 @@
 """API tests: lecture material archive."""
-from test.helpers import PDF, pdf_file
+from tests.helpers import PDF, PPTX, any_file, pdf_file
 
 
 def upload_material(c, seed, **over):
@@ -45,6 +45,17 @@ def test_material_permissions_download_delete(client, seed):
     assert client("teacher2").delete(f"/api/lecture-materials/{mid}").status_code == 403
     assert client("admin").delete(f"/api/lecture-materials/{mid}").status_code == 204
     assert client("student").get(f"/api/lecture-materials/{mid}").status_code == 404
-    pptx = client("teacher").post("/api/lecture-materials", files=pdf_file("a.pptx"), data={
+    pptx = client("teacher").post("/api/lecture-materials", files=any_file("a.pptx", PPTX), data={
         "course_id": seed.c1.id, "title": "ppt", "material_type": "slides"})
     assert pptx.status_code == 201  # slides are allowed here (not in exam papers)
+
+
+def test_material_instructor_name_rule(client, seed):
+    """A teacher's file is filed under their own name; HOD/admin may name another instructor."""
+    teacher = client("teacher")
+    name_of = lambda r: (r.status_code, r.json()["instructor_name"])  # noqa: E731
+    assert name_of(upload_material(teacher, seed, instructor_name="Ms. Sara")) == (201, "Dr. Teacher")   # ignored
+    assert name_of(upload_material(teacher, seed)) == (201, "Dr. Teacher")                                # omitted
+    assert name_of(upload_material(teacher, seed, instructor_name="   ")) == (201, "Dr. Teacher")        # blank
+    assert name_of(upload_material(client("admin"), seed, instructor_name="Dr. Ali")) == (201, "Dr. Ali")
+    assert name_of(upload_material(client("hod"), seed, instructor_name="  Ms. Sara  ")) == (201, "Ms. Sara")  # trimmed

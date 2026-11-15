@@ -1,8 +1,11 @@
-"""File upload helpers (Wajiha) - used by exam papers and lecture materials.
+"""File upload helpers - used by exam papers and lecture materials.
 
 Files go to UPLOAD_DIR (default: ./uploads, ignored by git). The database stores
 only a RELATIVE path. Stored names are random UUIDs so users cannot overwrite
 each other and a hostile file name can never escape the upload folder.
+
+A file is accepted only if its first bytes match its extension (a "x.pdf" that is
+really an .exe is refused), not just because of what it is called.
 """
 import os
 import re
@@ -16,6 +19,23 @@ CHUNK = 1024 * 1024
 
 PAPER_EXTENSIONS = {".pdf", ".png", ".jpg", ".jpeg", ".doc", ".docx"}
 MATERIAL_EXTENSIONS = {".pdf", ".ppt", ".pptx", ".doc", ".docx", ".txt", ".zip", ".png", ".jpg", ".jpeg"}
+
+_OLE = b"\xd0\xcf\x11\xe0\xa1\xb1\x1a\xe1"  # old Word / PowerPoint (.doc / .ppt)
+_ZIP = b"PK\x03\x04"                           # .docx / .pptx / .zip are zip files
+# The bytes a genuine file of each type starts with. Every extension in the two
+# sets above needs a rule here (or the special case for .txt in
+# content_matches_extension); an extension with no rule is refused.
+SIGNATURES: dict[str, tuple[bytes, ...]] = {
+    ".pdf": (b"%PDF-",),
+    ".png": (b"\x89PNG\r\n\x1a\n",),
+    ".jpg": (b"\xff\xd8\xff",),
+    ".jpeg": (b"\xff\xd8\xff",),
+    ".docx": (_ZIP,),
+    ".pptx": (_ZIP,),
+    ".zip": (_ZIP,),
+    ".doc": (_OLE, b"{\\rtf"),  # some tools save RTF with a .doc name
+    ".ppt": (_OLE,),
+}
 
 
 def upload_dir() -> Path:
@@ -40,8 +60,19 @@ def _clean_name(name: str) -> str:
     return re.sub(r"[^A-Za-z0-9._ -]", "_", name)[:200] or "file"
 
 
+def content_matches_extension(ext: str, head: bytes) -> bool:
+    """True if the first bytes of a file are what a file with this extension starts with."""
+    if ext == ".txt":
+        # plain text has no signature: refuse binary data (NUL bytes), allow UTF-16 text (it has a BOM).
+        # Known limit (fine for the demo): a UTF-16 BOM followed by ANY binary data also passes as .txt,
+        # because UTF-16 text legitimately contains NUL bytes. Downloads are served as attachments, so
+        # such a file is only ever saved, never displayed in the page.
+        return b"\x00" not in head or head.startswith((b"\xff\xfe", b"\xfe\xff"))
+    return any(head.startswith(sig) for sig in SIGNATURES.get(ext, ()))
+
+
 def save_upload(file: UploadFile, subfolder: str, allowed_extensions: set[str]) -> SavedFile:
-    """Validate and store an upload. Raises HTTPException (400/413) on bad input."""
+    """Validate (extension, then content) and store an upload. Raises HTTPException (400/413) on bad input."""
     original = _clean_name(file.filename or "")
     ext = Path(original).suffix.lower()
     if ext not in allowed_extensions:
@@ -55,6 +86,8 @@ def save_upload(file: UploadFile, subfolder: str, allowed_extensions: set[str]) 
     try:
         with open(target, "wb") as out:
             while chunk := file.file.read(CHUNK):
+                if size == 0 and not content_matches_extension(ext, chunk):
+                    raise HTTPException(400, f"File content does not look like a real {ext} file")
                 size += len(chunk)
                 if size > limit:
                     raise HTTPException(413, f"File too large (max {max_upload_mb()} MB)")

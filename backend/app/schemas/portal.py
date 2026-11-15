@@ -1,4 +1,4 @@
-"""Pydantic request/response models for Wajiha's modules.
+"""Pydantic request/response models for the portal modules (rooms, timetable, exams, materials, GPA, software, events).
 
 (One file for the portal modules keeps the review small. Split per module later if it grows.)
 """
@@ -31,7 +31,7 @@ class CourseOut(ORM):
 class RoomOut(ORM):
     id: int
     name: str
-    capacity: int
+    capacity: int | None = None  # None = unknown (rooms created by a timetable import)
     building: str | None = None
 
 

@@ -1,4 +1,4 @@
-"""events table (Wajiha) - institutional event calendar, proposal 4.6."""
+"""events table - institutional event calendar, proposal 4.6."""
 from datetime import date, datetime
 from enum import Enum as PyEnum
 from sqlalchemy import Date, DateTime, Enum, ForeignKey, String, Text, CheckConstraint, func

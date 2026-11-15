@@ -1,0 +1,4 @@
+# Netlify: the pages live in /html/, so send the bare site address to the home page.
+# A redirect (302), not a rewrite (200): the pages use relative links like
+# "login.html", which only work when the browser is really at /html/.
+/    /html/index.html    302

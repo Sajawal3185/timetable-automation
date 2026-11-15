@@ -1,0 +1,56 @@
+# Who GitHub asks to review a PR that touches these files.
+# The LAST matching line wins, so general rules come first and specific ones after.
+# Source: Rule 4 and the module owners in docs/release-plan.md (v2).
+
+# Default: the backend lead reviews anything not listed
+*                                                @Sajawal3185
+
+# ---- Shared files with ONE owner (Rule 4) ----
+/backend/app/main.py                             @Sajawal3185
+/backend/requirements.txt                        @Sajawal3185
+/backend/alembic/                                @WajihaMehboob7
+/backend/alembic.ini                             @WajihaMehboob7
+
+# ---- Core: settings, database, models, login, makeup ----
+/backend/app/config.py                           @Sajawal3185
+/backend/app/database.py                         @Sajawal3185
+/backend/app/dependencies.py                     @Sajawal3185
+/backend/app/core/security.py                    @Sajawal3185
+/backend/app/models/                             @Sajawal3185
+/backend/app/routers/auth.py                     @Sajawal3185
+/backend/app/routers/makeup.py                   @Sajawal3185
+/backend/app/schemas/makeup.py                   @Sajawal3185
+/backend/app/services/makeup_solver.py           @Sajawal3185
+/backend/app/services/scheduler_rules.py         @Sajawal3185
+
+# ---- Swaps, notifications, permissions, conflict checker (v2 Part 7.4: BE-06/07/09) ----
+/backend/app/core/permissions.py                 @Eishashahzad
+/backend/app/routers/swaps.py                    @Eishashahzad
+/backend/app/routers/notifications.py            @Eishashahzad
+/backend/app/schemas/swap_request.py             @Eishashahzad
+/backend/app/schemas/notification.py             @Eishashahzad
+/backend/app/services/conflict_checker.py        @Eishashahzad
+/backend/app/services/swap_service.py            @Eishashahzad
+/backend/app/services/notification_service.py    @Eishashahzad
+
+# ---- Portal: rooms, timetable import, exams, materials, GPA, software, events ----
+/backend/app/routers/rooms.py                    @WajihaMehboob7
+/backend/app/routers/timetable.py                @WajihaMehboob7
+/backend/app/routers/exams.py                    @WajihaMehboob7
+/backend/app/routers/materials.py                @WajihaMehboob7
+/backend/app/routers/gpa.py                      @WajihaMehboob7
+/backend/app/routers/software.py                 @WajihaMehboob7
+/backend/app/routers/events.py                   @WajihaMehboob7
+/backend/app/schemas/portal.py                   @WajihaMehboob7
+/backend/app/services/timetable_import.py        @WajihaMehboob7
+/backend/app/services/gpa_calculator.py          @WajihaMehboob7
+/backend/app/utils/                              @WajihaMehboob7
+/docs/postman/                                   @WajihaMehboob7
+
+# ---- Docs: changing the contract needs the backend lead and the frontend lead ----
+/docs/api-contract.md                            @Sajawal3185 @Taha-ops116
+
+# ---- Frontend (Rule 4: common.js and api.js have one owner) ----
+/frontend/                                       @AmnaNaseer-245 @Taha-ops116
+/frontend/js/common.js                           @Taha-ops116
+/frontend/js/api.js                              @Taha-ops116
