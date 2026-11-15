@@ -1,0 +1,27 @@
+/* =========================================================
+   ARCHIVE-AUTH.CSS: small additions for the Archive's demo auth pages
+   Link order : master.css, auth.css, (tt-auth.css), then this file
+
+   auth.css and tt-auth.css are NOT changed. This file only adds two things:
+   1. The yellow "demo mode" note, for pages that do not load tt-auth.css
+      (the login page). Same look as .demo-note in tt-auth.css.
+   2. Keeps the Archive's 330px card on the verify-code and
+      set-new-password pages, which reuse tt-auth.css for the code box,
+      the small text buttons and the "done" message.
+   ========================================================= */
+
+.card .demo-note {
+  margin: 14px 0 0;
+  padding: 10px 12px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: #6b4e00;
+  text-align: left;
+  background: #fff7db;
+  border-radius: 8px;
+}
+
+body.auth-page.tt-auth.archive-flow .card {
+  width: 330px;
+  max-width: 100%;
+}

@@ -6,19 +6,15 @@
   <title>Log in | NUML Archive</title>
   <link rel="stylesheet" href="../css/master.css">
   <link rel="stylesheet" href="../css/auth.css">
+  <link rel="stylesheet" href="../css/archive-auth.css">
 </head>
 <body class="auth-page">
   <div class="card">
     <h2>NUML Archive</h2>
     <p>National University of Modern Languages</p>
 
-    <div class="role-tabs" role="tablist" aria-label="Account type">
-      <button type="button" role="tab" id="tabStudent" aria-selected="true">Student login</button>
-      <button type="button" role="tab" id="tabAdmin" aria-selected="false">Admin login</button>
-    </div>
-
     <form id="loginForm" novalidate>
-<label for="identifier" id="idLabel">Email Address</label>
+      <label for="identifier" id="idLabel">Email Address</label>
       <input type="text" id="identifier" placeholder="Enter your registered email address" autocomplete="username" required>
 
       <label for="password">Password</label>
@@ -37,10 +33,12 @@
 
     <p class="signup" id="signupLine">New student? <a href="signup_student.html">Create account</a></p>
     <a href="index.html" class="back-btn">← Back to NUML Archive</a>
+
+    <p class="demo-note" id="loginDemo" hidden></p>
   </div>
 
   <script src="../js/common.js"></script>
-  <script src="../js/api.js"></script>
+  <script src="../js/auth-service.js"></script>
   <script src="../js/archive-login.js"></script>
 </body>
 </html>

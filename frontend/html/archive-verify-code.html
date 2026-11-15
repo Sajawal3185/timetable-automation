@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Verify your email | NUML Archive</title>
+  <link rel="stylesheet" href="../css/master.css">
+  <link rel="stylesheet" href="../css/auth.css">
+  <link rel="stylesheet" href="../css/tt-auth.css">
+  <link rel="stylesheet" href="../css/archive-auth.css">
+</head>
+<body class="auth-page tt-auth archive-flow">
+  <div class="card">
+    <h2>Verify your email</h2>
+    <p id="vIntro">Enter the code we sent to your email.</p>
+
+    <!-- Step: type the 6-digit code -->
+    <form id="verifyForm" novalidate>
+      <p class="sent-to">We sent a 6-digit code to <strong id="vEmail"></strong>.</p>
+
+      <label for="vCode">Code</label>
+      <input type="text" id="vCode" class="code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" required>
+
+      <button type="submit" id="vBtn">Verify</button>
+      <p class="msg" id="vMsg" role="alert"></p>
+
+      <div class="row-actions">
+        <button type="button" class="text-btn" id="vBack">← Different email</button>
+        <button type="button" class="text-btn" id="vResend">Resend code</button>
+      </div>
+    </form>
+
+    <!-- Done (signup only): the account is ready, then login -->
+    <div class="done" id="vDone" hidden>
+      <h3>Email verified</h3>
+      <p>Your account is ready. Taking you to the login page…</p>
+      <a href="archive-login.html" class="button-link">Log in now</a>
+    </div>
+
+    <p class="demo-note" id="vDemo" hidden></p>
+
+    <div class="auth-links" id="vLinks">
+      <a href="archive-login.html">← Back to login</a>
+    </div>
+  </div>
+
+  <script src="../js/common.js"></script>
+  <script src="../js/auth-service.js"></script>
+  <script src="../js/archive-verify-code.js"></script>
+</body>
+</html>

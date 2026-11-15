@@ -99,33 +99,21 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
 
-    try {
-      const users = JSON.parse(localStorage.getItem("numlUsers") || "[]");
+    // 6. Next step: email verification.
+    // FRONTEND-ONLY DEMO: AuthService.startSignup() sends no email and does not
+    // store the password (see auth-service.js). The verify page asks for the code.
+    const submitBtn = form.querySelector('button[type="submit"]');
+    submitBtn.disabled = true;
+    showMessage("Sending your verification code…", "success");
 
-      const alreadyExists = users.some(function (u) {
-        return u.email === data.email;
+    AuthService.startSignup(data)
+      .then(function () {
+        window.location.href = NUML.PAGES.verify;
+      })
+      .catch(function (err) {
+        submitBtn.disabled = false;
+        showMessage(err.message || "Something went wrong. Please try again.", "error");
+        console.error(err);
       });
-
-      if (alreadyExists) {
-        markInvalid(email);
-        showMessage("An account with this email already exists.", "error");
-        return;
-      }
-
-      users.push({
-        firstName: data.firstName,
-        lastName: data.lastName,
-        email: data.email,
-        password: data.password
-      });
-      localStorage.setItem("numlUsers", JSON.stringify(users));
-
-      form.reset();
-      showMessage("Your account has been created successfully!", "success");
-
-    } catch (err) {
-      showMessage("Something went wrong. Please try again.", "error");
-      console.error(err);
-    }
   });
 });

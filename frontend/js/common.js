@@ -24,6 +24,8 @@
     login: "archive-login.html",
     signup: "signup_student.html",
     forgot: "archive-forgot-password.html",
+    verify: "archive-verify-code.html",
+    setPassword: "archive-set-new-password.html",
 
     dashboard: "dashboard.html",
     adminDashboard: "admin-dashboard.html",
@@ -40,7 +42,9 @@
     PAGES.home,
     PAGES.login,
     PAGES.signup,
-    PAGES.forgot
+    PAGES.forgot,
+    PAGES.verify,
+    PAGES.setPassword
   ];
 
   /* Role-based starting pages. */
