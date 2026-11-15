@@ -1,5 +1,6 @@
 const $ = id => document.getElementById(id);
 const thisYear = new Date().getFullYear();
+const FIRST_YEAR = 2018;
 
 // ---------- Departments ----------
 const DEPARTMENTS = [
@@ -304,7 +305,7 @@ function getYearOptions(dept, subjectName) {
 function getUploadYearOptions() {
   const years = [];
 
-  for (let year = thisYear; year >= 2018; year--) {
+  for (let year = thisYear; year >= FIRST_YEAR; year--) {
     years.push({
       value: year,
       label: String(year)
@@ -485,8 +486,8 @@ function setupFilters() {
     lock($("fTitle"), true);
 
     $("hint").textContent = hasLectures
-  ? "Choose a year. You can also search by lecture title."
-  : "No lectures uploaded for this subject yet.";
+      ? "Choose a year. You can also search by lecture title."
+      : "No lectures uploaded for this subject yet.";
     $("hint").hidden = false;
 
     showLectures();
@@ -597,11 +598,11 @@ function setupUpload() {
     // Check year.
     if (
       !Number.isInteger(year) ||
-      year < 2020 ||
+      year < FIRST_YEAR ||
       year > thisYear
     ) {
       message.textContent =
-        `Please select a year from 2020 to ${thisYear}.`;
+        `Please select a year from ${FIRST_YEAR} to ${thisYear}.`;
       message.classList.add("error");
       return;
     }
