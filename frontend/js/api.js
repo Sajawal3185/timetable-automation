@@ -1,7 +1,7 @@
 // frontend/js/api.js
 // Owner: Taha. Others ask Taha for changes.
 (function () {
-  const API_BASE = "";              // empty = use mock files
+  const API_BASE = "https://numl-archive.onrender.com";  // "" = use mock files
   const MOCK_DIR = "../mock/";
   const TOKEN_KEY = "numlToken";
   const LOGIN_PAGE = "login.html";
