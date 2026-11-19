@@ -59,6 +59,18 @@ class Settings(BaseSettings):
     # Default = common local static-server addresses for the frontend.
     CORS_ORIGINS: str = "http://localhost:5500,http://127.0.0.1:5500"
 
+    # --- Email (signup and forgot-password codes) --------------------------
+    # "console": print the code to the server log instead of sending it. For
+    #            local runs and tests only; nobody receives anything.
+    # "brevo":   send through Brevo's HTTPS API. Render's free plan blocks
+    #            outgoing SMTP (ports 25/465/587), so an HTTPS API is needed.
+    #            Needs BREVO_API_KEY and EMAIL_FROM (a sender address verified
+    #            in Brevo under Senders).
+    EMAIL_PROVIDER: str = "console"
+    BREVO_API_KEY: str | None = None
+    EMAIL_FROM: str | None = None
+    EMAIL_FROM_NAME: str = "NUML Timetable"
+
     @property
     def cors_origins(self) -> list[str]:
         """CORS_ORIGINS split into a clean list, ignoring blanks and spaces."""
