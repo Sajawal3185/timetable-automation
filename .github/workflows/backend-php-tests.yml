@@ -11,9 +11,14 @@ on:
       - ".github/workflows/backend-php-tests.yml"
 permissions:
   contents: read
+# A new push to the same PR cancels the run still going for the old one.
+concurrency:
+  group: backend-php-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   test:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     defaults:
       run:
         working-directory: backend-php
@@ -24,19 +29,28 @@ jobs:
           php-version: "8.3"
           extensions: mbstring, pdo_sqlite, sqlite3, zip, gd, intl, bcmath
           coverage: none
+      # Ask Composer where its cache is (~/.composer/cache/files doesn't exist on these runners).
+      - id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> "$GITHUB_OUTPUT"
       - uses: actions/cache@v4
         with:
-          path: ~/.composer/cache/files
-          key: composer-${{ hashFiles('backend-php/composer.lock') }}
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: composer-${{ runner.os }}-${{ hashFiles('backend-php/composer.lock') }}
+          restore-keys: composer-${{ runner.os }}-
       - run: composer install --no-interaction --prefer-dist --no-progress
       # Tests use SQLite in memory (phpunit.xml); they only need an app key.
       - run: cp .env.example .env && php artisan key:generate
       - run: php artisan test
+      # Warns about packages with known security problems (that's why we're on Laravel 13).
+      # Not blocking: a new advisory shouldn't fail every PR; read the warning instead.
+      - run: composer audit
+        continue-on-error: true
 
   # Builds the same image Render builds and calls it through Apache, so a broken
   # Dockerfile or start script shows up in the PR, not on deploy day.
   docker:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - run: docker build -t timetable-php backend-php

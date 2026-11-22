@@ -66,6 +66,7 @@
 /backend-php/**/Notification*                    @Eishashahzad
 /backend-php/**/Swap*                            @Eishashahzad
 /backend-php/**/Gpa*                             @Eishashahzad
+/backend-php/**/GradeRecord*                     @Eishashahzad
 /backend-php/**/Event*                           @Eishashahzad
 /backend-php/**/Exam*                            @Eishashahzad
 
@@ -77,6 +78,14 @@
 /backend-php/**/FileStorage*                     @WajihaMehboob7
 /backend-php/**/*Material*                       @WajihaMehboob7
 /backend-php/**/Instructor*                      @WajihaMehboob7
+
+# Models of Eisha's modules: Wajiha writes all models, so both review them.
+# (Must stay below the app/Models/ line: the last matching line wins.)
+/backend-php/app/Models/Swap*                    @Eishashahzad @WajihaMehboob7
+/backend-php/app/Models/Notification*            @Eishashahzad @WajihaMehboob7
+/backend-php/app/Models/Event*                   @Eishashahzad @WajihaMehboob7
+/backend-php/app/Models/Exam*                    @Eishashahzad @WajihaMehboob7
+/backend-php/app/Models/GradeRecord*             @Eishashahzad @WajihaMehboob7
 
 # One owner for packages, so composer.lock doesn't conflict in every PR
 /backend-php/composer.json                       @Sajawal3185
