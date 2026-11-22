@@ -6,6 +6,8 @@ use App\Http\Middleware\RequireRoles;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull;
+use Illuminate\Foundation\Http\Middleware\TrimStrings;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -20,6 +22,11 @@ return Application::configure(basePath: dirname(__DIR__))
             'jwt' => AuthenticateJwt::class,
             'role' => RequireRoles::class,
         ]);
+
+        // Input arrives exactly as sent, like FastAPI. Laravel would otherwise trim
+        // every string (passwords too: "my pass " would be saved as "my pass") and
+        // turn "" into null. Code that wants trimming does it itself (Identifiers::normalize).
+        $middleware->remove([TrimStrings::class, ConvertEmptyStringsToNull::class]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         // Every error as {"detail": ...}, like FastAPI (app/Exceptions/DetailErrors.php).

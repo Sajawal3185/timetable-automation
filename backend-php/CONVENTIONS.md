@@ -23,6 +23,11 @@ the name to pick your reviewer.
 
 ## An endpoint, start to finish
 
+The complete worked example is auth: `routes/api.php` (auth group),
+`app/Http/Controllers/Api/AuthController.php`, `app/Http/Requests/LoginRequest.php`,
+`app/Http/Resources/UserResource.php` and `tests/Feature/AuthApiTest.php`
+(a port of `test_auth.py`). Open them side by side with `backend/app/routers/auth.py`.
+
 ```php
 // routes/api.php: one group per Python router, alphabetical
 Route::get('/rooms', [RoomController::class, 'index'])->middleware('jwt');
@@ -69,6 +74,14 @@ Resources are not wrapped in `{"data": ...}` (turned off once in
 - **No role checks inside controllers.** Rules that need data (only the HOD
   of the same department, only the teacher who owns the entry) go in one
   service method, like `can_decide_swap` in Python, and the controller calls it.
+
+## Input arrives exactly as sent
+
+Laravel normally trims every string and turns `""` into `null`. That's
+switched off (`bootstrap/app.php`) because FastAPI doesn't do it, and a
+trimmed password would be a different password. Where Python calls
+`.strip()` or `.lower()`, do the same yourself (`Identifiers::normalize()`
+for identifiers and emails).
 
 ## Errors
 
