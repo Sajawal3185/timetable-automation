@@ -1,5 +1,6 @@
 <?php
 
+use App\Support\DbTls;
 use Illuminate\Support\Str;
 use Pdo\Mysql;
 
@@ -59,9 +60,10 @@ return [
             'prefix_indexes' => true,
             'strict' => true,
             'engine' => null,
-            'options' => extension_loaded('pdo_mysql') ? array_filter([
-                (PHP_VERSION_ID >= 80500 ? Mysql::ATTR_SSL_CA : PDO::MYSQL_ATTR_SSL_CA) => env('MYSQL_ATTR_SSL_CA'),
-            ]) : [],
+            // Aiven TLS (#91): see app/Support/DbTls.php.
+            'options' => extension_loaded('pdo_mysql')
+                ? DbTls::options(env('DB_URL'), env('DB_SSL_CA'))
+                : [],
         ],
 
         'mariadb' => [

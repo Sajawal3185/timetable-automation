@@ -32,5 +32,9 @@
         <env name="PULSE_ENABLED" value="false"/>
         <env name="TELESCOPE_ENABLED" value="false"/>
         <env name="NIGHTWATCH_ENABLED" value="false"/>
+        <!-- Tests sign real tokens; a placeholder secret is enough. Codes are never emailed. -->
+        <env name="JWT_SECRET_KEY" value="test-only-not-a-real-secret-0123456789abcdef"/>
+        <env name="EMAIL_PROVIDER" value="console"/>
+        <env name="APP_DEBUG" value="false"/>
     </php>
 </phpunit>
