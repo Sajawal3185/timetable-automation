@@ -32,3 +32,34 @@ jobs:
       # Tests use SQLite in memory (phpunit.xml); they only need an app key.
       - run: cp .env.example .env && php artisan key:generate
       - run: php artisan test
+
+  # Builds the same image Render builds and calls it through Apache, so a broken
+  # Dockerfile or start script shows up in the PR, not on deploy day.
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build -t timetable-php backend-php
+      - name: Start the container (SQLite instead of Aiven)
+        run: |
+          docker run -d --name api -p 8080:8080 \
+            -e APP_KEY="base64:$(openssl rand -base64 32)" \
+            -e JWT_SECRET_KEY="$(openssl rand -hex 32)" \
+            -e DB_CONNECTION=sqlite -e DB_DATABASE=/var/www/html/database/ci.sqlite \
+            timetable-php
+          for i in $(seq 1 30); do curl -fs localhost:8080/api/health && break; sleep 1; done
+      - name: Call it like the frontend does
+        run: |
+          set -x
+          curl -fsS localhost:8080/api/health | grep -q '"status":"ok"'
+          test "$(curl -s -o /dev/null -w '%{http_code}' localhost:8080/api/no-such-thing)" = 404
+          curl -fsS localhost:8080/docs > /dev/null
+          # A real login + /me: proves the Authorization header reaches PHP through Apache.
+          docker exec api php artisan tinker --execute="App\Models\User::create(['name'=>'CI','identifier'=>'ci-admin','role'=>'admin','password_hash'=>App\Services\Security::hashPassword('ci-password-1')]);"
+          TOKEN=$(curl -fsS -X POST localhost:8080/api/auth/login -H 'Content-Type: application/json' \
+            -d '{"identifier":"ci-admin","password":"ci-password-1"}' | jq -r .token)
+          curl -fsS localhost:8080/api/auth/me -H "Authorization: Bearer $TOKEN" | grep -q '"identifier":"ci-admin"'
+          test "$(curl -s -o /dev/null -w '%{http_code}' localhost:8080/api/auth/me)" = 401
+      - name: Container log
+        if: always()
+        run: docker logs api

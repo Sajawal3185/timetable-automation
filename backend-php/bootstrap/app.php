@@ -27,6 +27,11 @@ return Application::configure(basePath: dirname(__DIR__))
         // every string (passwords too: "my pass " would be saved as "my pass") and
         // turn "" into null. Code that wants trimming does it itself (Identifiers::normalize).
         $middleware->remove([TrimStrings::class, ConvertEmptyStringsToNull::class]);
+
+        // Render's proxy handles HTTPS in front of the app. Trust its X-Forwarded-*
+        // headers so Laravel knows the real scheme (the /docs page calls https://)
+        // and the real client IP (rate limits).
+        $middleware->trustProxies(at: '*');
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         // Every error as {"detail": ...}, like FastAPI (app/Exceptions/DetailErrors.php).

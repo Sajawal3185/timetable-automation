@@ -2,6 +2,7 @@
 
 The PHP version of `backend/` (FastAPI). Same API, same database; see
 `docs/api-contract.md`. How to write code here: **[CONVENTIONS.md](CONVENTIONS.md)**.
+How it runs on Render: **[DEPLOY.md](DEPLOY.md)**.
 
 ## Run it on your laptop
 
