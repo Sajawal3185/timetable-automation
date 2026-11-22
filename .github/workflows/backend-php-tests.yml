@@ -12,9 +12,10 @@ on:
 permissions:
   contents: read
 # A new push to the same PR cancels the run still going for the old one.
+# Runs on main are never cancelled, so back-to-back merges each get checked.
 concurrency:
-  group: backend-php-${{ github.ref }}
-  cancel-in-progress: true
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -41,7 +42,8 @@ jobs:
       # Tests use SQLite in memory (phpunit.xml); they only need an app key.
       - run: cp .env.example .env && php artisan key:generate
       - run: php artisan test
-      # Warns about packages with known security problems (that's why we're on Laravel 13).
-      # Not blocking: a new advisory shouldn't fail every PR; read the warning instead.
-      - run: composer audit
-        continue-on-error: true
+      # Packages with known security problems (that's why we're on Laravel 13).
+      # Never fails the PR (a new advisory isn't the PR's fault), but shows a yellow
+      # warning on the run's summary page instead of hiding in a green step's log.
+      - name: composer audit (warning only)
+        run: composer audit || echo "::warning title=composer audit::Some packages have security advisories. Open this step's log and update them."
