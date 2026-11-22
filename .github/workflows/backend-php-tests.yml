@@ -1,0 +1,34 @@
+name: backend-php-tests
+on:
+  pull_request:
+    paths:
+      - "backend-php/**"
+      - ".github/workflows/backend-php-tests.yml"
+  push:
+    branches: [main]
+    paths:
+      - "backend-php/**"
+      - ".github/workflows/backend-php-tests.yml"
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend-php
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.3"
+          extensions: mbstring, pdo_sqlite, sqlite3, zip, gd, intl, bcmath
+          coverage: none
+      - uses: actions/cache@v4
+        with:
+          path: ~/.composer/cache/files
+          key: composer-${{ hashFiles('backend-php/composer.lock') }}
+      - run: composer install --no-interaction --prefer-dist --no-progress
+      # Tests use SQLite in memory (phpunit.xml); they only need an app key.
+      - run: cp .env.example .env && php artisan key:generate
+      - run: php artisan test
