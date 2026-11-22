@@ -5,6 +5,57 @@ The rule for every port: **the Python code and its tests are the specification.*
 Same URLs, same JSON fields, same status codes, same error messages
 (`docs/api-contract.md` is the source of truth).
 
+## Getting started
+
+**Once, on your laptop** (PHP 8.3+ and Composer; Laravel Herd installs both):
+
+```
+git switch main
+git pull
+cd backend-php
+composer install
+cp .env.example .env
+php artisan key:generate
+php artisan test
+```
+
+- With Herd's PHP 8.3, check that `php -m` lists `pdo_sqlite` and `mbstring`. If not,
+  Herd left `php83\php.ini` without the standard extensions: ask Sajawal for the lines.
+- In `.env`, set `JWT_SECRET_KEY` (needed by `php artisan serve`, not by the tests):
+  `php -r "echo bin2hex(random_bytes(32)), PHP_EOL;"`
+- Working on tables? Create a local database once:
+  `New-Item database/database.sqlite` (PowerShell) or `touch database/database.sqlite`,
+  then `php artisan migrate`. Start over any time with `php artisan migrate:fresh`.
+
+**For every task, a new branch.** Never work on `main`:
+
+```
+git switch main
+git pull
+git switch -c php/conflict-checker        (a short name for your task)
+```
+
+**While you work:**
+
+1. Write the code and port the Python tests (see the rest of this page).
+2. `php artisan test` until everything is green.
+3. Commit, `git push -u origin <your branch>`, and open a PR with the template
+   filled in (under ~300 lines). CODEOWNERS asks the right reviewer.
+
+**After someone else's PR is merged** (especially one that touches
+`composer.json` or adds settings):
+
+```
+git switch main
+git pull
+cd backend-php
+composer install
+```
+
+Then compare `.env.example` with your `.env` and copy over any new lines.
+To bring the new `main` into a branch you're still working on:
+`git switch <your branch>` then `git merge main`.
+
 ## Where files go
 
 | What | Where | Make it with |
