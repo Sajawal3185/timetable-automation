@@ -54,3 +54,39 @@
 /frontend/                                       @AmnaNaseer-245 @Taha-ops116
 /frontend/js/common.js                           @Taha-ops116
 /frontend/js/api.js                              @Taha-ops116
+
+# ---- PHP backend (Laravel) — split from "Python to PHP Migration", 21 Nov ----
+# Default and shared files (composer.json, bootstrap/, routes/, config/,
+# CONVENTIONS.md, Dockerfile, auth, makeup, software, signup, seeder): backend lead
+/backend-php/                                    @Sajawal3185
+
+# Eisha: conflict checker, scheduler rules, notifications, swaps, GPA, events, exam papers
+/backend-php/**/ConflictChecker*                 @Eishashahzad
+/backend-php/**/SchedulerRules*                  @Eishashahzad
+/backend-php/**/Notification*                    @Eishashahzad
+/backend-php/**/Swap*                            @Eishashahzad
+/backend-php/**/Gpa*                             @Eishashahzad
+/backend-php/**/GradeRecord*                     @Eishashahzad
+/backend-php/**/Event*                           @Eishashahzad
+/backend-php/**/Exam*                            @Eishashahzad
+
+# Wajiha: migrations, models, timetable + import, rooms, file storage, materials, instructor
+/backend-php/database/migrations/                @WajihaMehboob7
+/backend-php/app/Models/                         @WajihaMehboob7
+/backend-php/**/Timetable*                       @WajihaMehboob7
+/backend-php/**/Room*                            @WajihaMehboob7
+/backend-php/**/FileStorage*                     @WajihaMehboob7
+/backend-php/**/*Material*                       @WajihaMehboob7
+/backend-php/**/Instructor*                      @WajihaMehboob7
+
+# Models of Eisha's modules: Wajiha writes all models, so both review them.
+# (Must stay below the app/Models/ line: the last matching line wins.)
+/backend-php/app/Models/Swap*                    @Eishashahzad @WajihaMehboob7
+/backend-php/app/Models/Notification*            @Eishashahzad @WajihaMehboob7
+/backend-php/app/Models/Event*                   @Eishashahzad @WajihaMehboob7
+/backend-php/app/Models/Exam*                    @Eishashahzad @WajihaMehboob7
+/backend-php/app/Models/GradeRecord*             @Eishashahzad @WajihaMehboob7
+
+# One owner for packages, so composer.lock doesn't conflict in every PR
+/backend-php/composer.json                       @Sajawal3185
+/backend-php/composer.lock                       @Sajawal3185
