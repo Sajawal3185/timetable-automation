@@ -35,7 +35,7 @@ No token needed. One login for every role.
 | 200 | `{"token": "<JWT>", "user": {UserOut}}` |
 | 401 | `{"detail": "Invalid credentials"}`: wrong password, unknown identifier, not activated yet, or disabled. Always the same message, on purpose. |
 | 422 | `identifier` or `password` missing or empty |
-| 429 | `{"detail": "Too Many Attempts."}` plus a `Retry-After` header: more than 10 tries a minute for one account from one address, or 100 a minute from one address. **PHP only**: Python has no limit. |
+| 429 | `{"detail": "Too Many Attempts."}` plus a `Retry-After` header: more than 10 tries a minute for one account from one address, 30 a minute for one account from any address, or 100 a minute from one address. **PHP only**: Python has no limit. |
 
 Send the token on later calls as `Authorization: Bearer <JWT>`. It lasts
 `ACCESS_TOKEN_EXPIRE_MINUTES` (60).

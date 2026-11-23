@@ -43,9 +43,11 @@ class AppServiceProvider extends ServiceProvider
 
         // 'throttle:auth' on login and activate (not in the Python backend; added
         // in review). 10 tries a minute per account per address stops password
-        // guessing; 100 a minute per address stops trying many accounts. The
-        // second is high on purpose: a whole campus can share one address.
-        // Over the limit: 429 {"detail": "Too Many Attempts."} plus Retry-After.
+        // guessing; 100 a minute per address stops trying many accounts (high on
+        // purpose: a whole campus can share one address). The address comes from
+        // X-Forwarded-For behind Render's proxy, which a client can fake, so 30 a
+        // minute per account from ANY address caps guessing even then.
+        // Over a limit: 429 {"detail": "Too Many Attempts."} plus Retry-After.
         RateLimiter::for('auth', function (Request $request) {
             $identifier = $request->input('identifier');   // not validated yet: may be anything
             $account = is_string($identifier) ? Identifiers::normalize($identifier) : '';
@@ -53,6 +55,7 @@ class AppServiceProvider extends ServiceProvider
             return [
                 Limit::perMinute(10)->by('id:'.$account.'|'.$request->ip()),
                 Limit::perMinute(100)->by('ip:'.$request->ip()),
+                Limit::perMinute(30)->by('account:'.$account),
             ];
         });
 
