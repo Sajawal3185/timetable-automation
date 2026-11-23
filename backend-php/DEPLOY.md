@@ -20,7 +20,9 @@ Use the same Aiven MySQL service as FastAPI, but a new database inside it:
 3. Download the **CA certificate** from the same page (`ca.pem`).
 
 Never point PHP staging at `defaultdb`: Laravel's migrations would create
-their tables next to FastAPI's.
+their tables next to FastAPI's. The container checks this on every start: if
+the database has FastAPI's `alembic_version` table, it stops with "This is
+FastAPI's database" before migrating anything.
 
 ## 2. The Render service
 
@@ -37,8 +39,10 @@ Render dashboard → **New** → **Web Service** → this repository, then:
 | Health Check Path (Advanced) | `/api/health` |
 
 There's no build or start command to type: the Dockerfile has both. On every
-deploy, the container runs `php artisan migrate --force` (like `alembic
-upgrade head`), then starts Apache.
+deploy, the container runs `php artisan migrate:deploy` (like `alembic
+upgrade head`, see `routes/console.php`), then starts Apache. It holds a MySQL
+lock while migrating, so if the service ever runs more than one instance, the
+containers take turns instead of running the same migration twice.
 
 ## 3. Environment
 
@@ -52,7 +56,7 @@ In the service's **Environment** tab:
 | `DB_SSL_CA` | `/etc/secrets/ca.pem` (see below) |
 | `JWT_SECRET_KEY` | a new random value, **at least 32 characters**: `php -r "echo bin2hex(random_bytes(32));"`. Don't reuse FastAPI's |
 | `CORS_ORIGINS` | the Netlify address, plus `http://localhost:5500,http://127.0.0.1:5500` for local testing |
-| `CORS_ORIGIN_PATTERNS` | optional, for deploy previews: `#^https://deploy-preview-\d+--numl-archive\.netlify\.app$#` |
+| `CORS_ORIGIN_PATTERNS` | optional, for deploy previews: `#^https://deploy-preview-\d+--numl-archive\.netlify\.app$#`, no quotes here (several: separate them with spaces) |
 | `EMAIL_PROVIDER` | `console` on staging (codes appear in the Render log) |
 
 **Secret file:** Environment → **Secret Files** → add `ca.pem` with the
@@ -69,6 +73,21 @@ After the first deploy (a few minutes; the log ends with Apache starting):
 - `https://<service>.onrender.com/api/health` → `{"status":"ok"}`
 - `https://<service>.onrender.com/docs` → the API docs page
 - `https://<service>.onrender.com/api/auth/me` → `401 {"detail":"Not authenticated"}`
+- The deploy log shows the migrations running against `timetable_php` (or
+  "Nothing to migrate" on later deploys).
+
+**Check that the connection is encrypted and verified** (CI only tests
+SQLite and a local MySQL, so this has to be done once on staging). With the
+same three `$env:` lines as below, in PowerShell from `backend-php/`:
+
+```
+php artisan tinker --execute="dump(DB::select('SHOW SESSION STATUS LIKE ?', ['Ssl_cipher']), DB::scalar('SELECT DATABASE()'));"
+```
+
+`Ssl_cipher` must have a value (for example `TLS_AES_256_GCM_SHA384`), and the
+database must be `timetable_php`. An empty cipher means TLS is off: check
+`DB_SSL_CA`. A wrong or missing `ca.pem` fails right away with a certificate
+or "DB_SSL_CA file not found" error instead of connecting unverified.
 
 The database is empty until the seeder exists (day 3). To make a first admin
 before that, run tinker **on your laptop against the staging database** (free

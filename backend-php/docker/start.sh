@@ -15,7 +15,9 @@ fi
 # Settings are read once here and cached, so a missing one fails now, not mid-request.
 php artisan config:cache
 
-# Bring the database up to date (like "alembic upgrade head").
-php artisan migrate --force
+# Bring the database up to date (like "alembic upgrade head"). migrate:deploy
+# (routes/console.php) refuses FastAPI's database and takes turns with other
+# containers starting at the same moment.
+php artisan migrate:deploy
 
 exec apache2-foreground

@@ -14,7 +14,15 @@
     RewriteRule .* - [E=HTTP_X_XSRF_TOKEN:%{HTTP:X-XSRF-Token}]
 
     # Redirect Trailing Slashes If Not A Folder...
-    # 307 like FastAPI (keeps POST a POST; Laravel's default 301 turns it into a GET)
+    # 307 like FastAPI (keeps POST a POST; Laravel's default 301 turns it into a GET).
+    # Behind Render's proxy Apache only sees http, so when the browser used https
+    # (X-Forwarded-Proto) the redirect must say https too: an http Location would
+    # take a second hop through Render's http->https redirect.
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{HTTP:X-Forwarded-Proto} =https
+    RewriteCond %{REQUEST_URI} (.+)/$
+    RewriteRule ^ https://%{HTTP_HOST}%1 [L,R=307]
+
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteCond %{REQUEST_URI} (.+)/$
     RewriteRule ^ %1 [L,R=307]

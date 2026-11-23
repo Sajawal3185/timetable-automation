@@ -113,6 +113,19 @@ jobs:
             -d '{"identifier":"ci-admin","password":"ci-password-1"}' | jq -r .token)
           curl -fsS localhost:8080/api/auth/me -H "Authorization: Bearer $TOKEN" | grep -q '"identifier":"ci-admin"'
           test "$(curl -s -o /dev/null -w '%{http_code}' localhost:8080/api/auth/me)" = 401
+      - name: A trailing slash keeps a POST a POST (307, like FastAPI)
+        run: |
+          set -x
+          # The redirect: 307 to the same path without the slash.
+          REDIRECT=$(curl -s -o /dev/null -w '%{http_code} %{redirect_url}' -X POST localhost:8080/api/auth/login/)
+          test "$REDIRECT" = "307 http://localhost:8080/api/auth/login"
+          # Behind Render's https proxy the Location must stay https.
+          HTTPS_REDIRECT=$(curl -s -o /dev/null -w '%{redirect_url}' -H 'X-Forwarded-Proto: https' -X POST localhost:8080/api/auth/login/)
+          test "$HTTPS_REDIRECT" = "https://localhost:8080/api/auth/login"
+          # Followed for real: curl -d (without -X) re-sends the POST body only for
+          # 307/308. After a 301 it would send a GET, and login would answer 405.
+          BODY='{"identifier":"ci-admin","password":"ci-password-1"}'
+          curl -fsSL localhost:8080/api/auth/login/ -H 'Content-Type: application/json' -d "$BODY" | jq -e .token
       - name: Container log
         if: always()
         run: docker logs api
