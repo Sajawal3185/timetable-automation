@@ -1,5 +1,6 @@
 <?php
 
+use App\Exceptions\ApiException;
 use App\Exceptions\DetailErrors;
 use App\Http\Middleware\AuthenticateJwt;
 use App\Http\Middleware\RequireRoles;
@@ -23,4 +24,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withExceptions(function (Exceptions $exceptions): void {
         // Every error as {"detail": ...}, like FastAPI (app/Exceptions/DetailErrors.php).
         DetailErrors::register($exceptions);
+
+        // An ApiException is an answer (a 409 swap clash), not a bug: no stack trace in the log.
+        $exceptions->dontReport(ApiException::class);
     })->create();

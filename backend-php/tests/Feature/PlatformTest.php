@@ -131,4 +131,18 @@ class PlatformTest extends TestCase
         $this->assertSame(array_slice($ids, 0, 2), $this->getJson('/api/_test/sections')->json());
         $this->assertSame(array_slice($ids, 2, 2), $this->getJson('/api/_test/sections?skip=2')->json());
     }
+
+    public function test_paging_adds_the_id_as_the_last_sort_key(): void
+    {
+        // The test above passes on SQLite even without the tiebreaker (it happens to
+        // return rows in id order), so check the query Paging builds instead. The
+        // builder's order list, not the SQL text: quoting differs per database.
+        $query = Section::query()->orderBy('student_count');
+        Paging::get($query, Request::create('/x'));
+
+        $this->assertSame([
+            ['column' => 'student_count', 'direction' => 'asc'],
+            ['column' => 'sections.id', 'direction' => 'asc'],
+        ], $query->getQuery()->orders);
+    }
 }

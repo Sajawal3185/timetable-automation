@@ -15,6 +15,15 @@ use Illuminate\Support\Facades\Schema;
 // copied over from FastAPI's database, ids included. Copied users keep their
 // Python "$2b$" bcrypt hashes, which password_verify accepts (SecurityTest has
 // a real one). Python's INT ids fit in id()'s BIGINT UNSIGNED.
+//
+// Copy order (the foreign keys force it): departments -> sections -> users ->
+// teachers -> the timetable tables. Inserting explicit ids moves MySQL's
+// AUTO_INCREMENT past them, so new rows don't collide.
+//
+// Tokens across the cutover: only if production keeps FastAPI's JWT_SECRET_KEY
+// do Python tokens keep working. They carry no "tv", which AuthenticateJwt
+// reads as 0, so users whose token_version is 1 or more (they reset their
+// password once) are logged out one time and simply log in again.
 return new class extends Migration
 {
     public function up(): void
@@ -39,8 +48,12 @@ return new class extends Migration
             $table->dateTime('created_at')->useCurrent();
         });
 
+        // MySQL only (SQLite can't add a CHECK after CREATE TABLE). COLLATE
+        // utf8mb4_bin makes it case-sensitive: under the table's default
+        // utf8mb4_unicode_ci collation 'Admin' would equal 'admin' and get in.
+        // (Python's constraint has that gap; a copied 'Admin' row fails here.)
         if (DB::getDriverName() === 'mysql') {
-            DB::statement("ALTER TABLE users ADD CONSTRAINT ck_users_user_role_lowercase CHECK (role IN ('student', 'teacher', 'hod', 'admin'))");
+            DB::statement("ALTER TABLE users ADD CONSTRAINT ck_users_user_role_lowercase CHECK (role COLLATE utf8mb4_bin IN ('student', 'teacher', 'hod', 'admin'))");
         }
     }
 

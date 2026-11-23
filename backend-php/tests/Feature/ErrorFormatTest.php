@@ -6,6 +6,7 @@ use App\Exceptions\ApiException;
 use App\Models\Department;
 use App\Support\Roles;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Exceptions;
 use Illuminate\Support\Facades\Route;
 use Tests\TestCase;
 
@@ -55,6 +56,17 @@ class ErrorFormatTest extends TestCase
     {
         $this->getJson('/api/_test/clash')->assertStatus(409)
             ->assertExactJson(['detail' => ['message' => 'Clash', 'conflicts' => [['id' => 1]]]]);
+    }
+
+    public function test_api_errors_are_answers_not_logged_crashes(): void
+    {
+        Exceptions::fake();
+
+        $this->getJson('/api/_test/clash')->assertStatus(409);
+        Exceptions::assertNotReported(ApiException::class);
+
+        $this->getJson('/api/_test/crash')->assertStatus(500);
+        Exceptions::assertReported(\LogicException::class);   // real bugs still reach the log
     }
 
     public function test_crash_hides_internals(): void
