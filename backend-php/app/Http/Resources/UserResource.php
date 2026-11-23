@@ -2,7 +2,6 @@
 
 namespace App\Http\Resources;
 
-use App\Models\Teacher;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -27,7 +26,8 @@ class UserResource extends JsonResource
             'section_id' => $this->section_id,
             // The linked teacher record (teachers.user_id); the timetable filters
             // "my classes" by it. null for students and unlinked staff.
-            'teacher_id' => Teacher::where('user_id', $this->id)->value('id'),
+            // For a list of users, ->load('teacher') first: one query, not one per user.
+            'teacher_id' => $this->teacher?->id,
         ];
     }
 }

@@ -16,8 +16,9 @@ use Illuminate\Support\Facades\Route;
 
 // --- auth (routers/auth.py) ---------------------------------------------------
 Route::prefix('auth')->controller(AuthController::class)->group(function () {
-    Route::post('/login', 'login');
-    Route::post('/activate', 'activate');
+    // throttle:auth = 10 tries a minute per account (AppServiceProvider)
+    Route::post('/login', 'login')->middleware('throttle:auth');
+    Route::post('/activate', 'activate')->middleware('throttle:auth');
     Route::get('/me', 'me')->middleware('jwt');
     Route::post('/users', 'createUser')->middleware('role:admin');
 });

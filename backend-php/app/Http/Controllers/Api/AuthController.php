@@ -69,7 +69,15 @@ class AuthController extends Controller
             abort(400, 'This account cannot be activated');
         }
 
-        $user->update(['password_hash' => Security::hashPassword($request->validated('new_password'))]);
+        // Set the password ONLY IF it's still empty, in one UPDATE. Two requests
+        // racing for the same account both pass the check above; this way the
+        // database lets exactly one win, and the other gets the same 400.
+        $hash = Security::hashPassword($request->validated('new_password'));
+        $claimed = User::whereKey($user->id)->whereNull('password_hash')->update(['password_hash' => $hash]);
+        if ($claimed !== 1) {
+            abort(400, 'This account cannot be activated');
+        }
+        $user->password_hash = $hash;
 
         return $this->loggedIn($user);
     }

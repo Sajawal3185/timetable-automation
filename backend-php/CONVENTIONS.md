@@ -89,10 +89,14 @@ Route::post('/rooms', [RoomController::class, 'store'])->middleware('role:hod,ad
 // app/Http/Controllers/Api/RoomController.php
 public function store(StoreRoomRequest $request): JsonResponse
 {
-    if (Room::where('name', $request->name)->exists()) {
-        abort(409, 'Room name already exists');           // exact Python message
+    // An exists() check alone isn't enough: two requests at the same moment both
+    // pass it and the second crashes (500). Always catch the UNIQUE violation.
+    // (An extra exists() first is fine when it saves work, as createUser does.)
+    try {
+        $room = Room::create($request->validated());
+    } catch (UniqueConstraintViolationException) {    // Illuminate\Database\...
+        abort(409, 'Room name already exists');        // exact Python message
     }
-    $room = Room::create($request->validated());
 
     return (new RoomResource($room))->response()->setStatusCode(201);
 }
@@ -147,6 +151,12 @@ Every error is `{"detail": ...}` (`app/Exceptions/DetailErrors.php` does it):
 | an exception you didn't expect | `500 {"detail": "Internal Server Error"}` (the real error is in `storage/logs/laravel.log`) |
 
 Copy messages **exactly** from the Python code, including capitals and full stops.
+
+422 is the one exception: `loc` matches FastAPI, but `msg` is Laravel's
+wording ("The capacity field must be an integer.") and `type` is always
+`value_error`. That's fine because the frontend never shows a 422's `msg`
+(`api.js` only displays `detail` when it's a string). Don't write frontend code
+or tests that depend on 422 `msg` text.
 Don't use `findOrFail()` for rows the user asked for: its 404 says "Not Found",
 but Python says "Room not found". Use `Room::find($id) ?? abort(404, 'Room not found')`.
 

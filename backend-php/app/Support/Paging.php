@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 /**
  * ?skip= & ?limit= paging plus the X-Total-Count header, as the exam papers
  * and materials lists do in Python (skip >= 0, 1 <= limit <= 200, default 50).
+ * Order the query first (->orderByDesc('year')); Paging adds id as the last tiebreaker.
  *
  *   [$papers, $total] = Paging::get($query, $request);
  *   return Paging::response(ExamPaperResource::collection($papers), $total);
@@ -28,6 +29,12 @@ final class Paging
 
         // Count before skip/limit; ordering doesn't change the count.
         $total = (clone $query)->toBase()->getCountForPagination();
+
+        // id last, as a tiebreaker: rows with the same sort value (same year,
+        // same created_at) would otherwise come back in any order, so a row
+        // could show on two pages or on none.
+        $query->orderBy($query->getModel()->getQualifiedKeyName());
+
         $rows = $query->skip((int) ($valid['skip'] ?? 0))->take((int) ($valid['limit'] ?? $defaultLimit))->get();
 
         return [$rows, $total];

@@ -25,7 +25,9 @@ class RequireRoles
         // The user the 'jwt' check found for THIS request; if it didn't run, run it now.
         $user = $request->attributes->get(AuthenticateJwt::USER) ?? $this->jwt->authenticate($request);
 
-        $allowed = array_map('strtolower', $roles);
+        // trim: Laravel passes 'role:hod, admin' on as "hod" and " admin", and
+        // " admin" would silently deny every admin.
+        $allowed = array_map(fn (string $role) => strtolower(trim($role)), $roles);
         if (! in_array(Roles::of($user), $allowed, true)) {
             throw new AccessDeniedHttpException(Roles::DENIED);
         }

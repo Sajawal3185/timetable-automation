@@ -61,8 +61,9 @@ class DetailErrors
         // Anything else is a bug: log it (Laravel does), tell the client nothing.
         $detail = 'Internal Server Error';
         $response = self::json(500, $detail);
-        if (config('app.debug')) {
-            // Local only (APP_DEBUG=true): show what broke. Never on Render.
+        if (config('app.debug') && app()->environment('local', 'testing')) {
+            // Laptop only: needs APP_DEBUG=true AND APP_ENV=local, so a debug flag
+            // left on in production (APP_ENV=production) still shows nothing.
             $response->setData(['detail' => $detail, 'debug' => [
                 'exception' => $e::class, 'message' => $e->getMessage(),
                 'at' => $e->getFile().':'.$e->getLine(),

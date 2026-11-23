@@ -21,6 +21,9 @@ final class Roles
 
     public const ADMIN = 'admin';
 
+    /** Every role that exists. A 'role:' name outside this list is a typo (RoleNamesTest). */
+    public const ALL = [self::STUDENT, self::TEACHER, self::HOD, self::ADMIN];
+
     /** May upload files, manage software, request makeups. */
     public const STAFF = [self::TEACHER, self::HOD, self::ADMIN];
 

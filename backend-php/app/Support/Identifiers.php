@@ -17,10 +17,23 @@ final class Identifiers
      */
     public const ROLL_NUMBER_PATTERN = '/^[a-z]{2,4}-\d{6,8}$/';
 
-    /** "SE-123 " and "se-123" must be the same user: trim, then lowercase. */
+    /**
+     * What Python's str.strip() removes: ASCII whitespace, the separators
+     * 0x1C-0x1F, NEL (0x85) and every Unicode space (\p{Z}: no-break space,
+     * ideographic space...). Not NUL, which PHP's trim() would also remove.
+     */
+    private const PY_WHITESPACE = '[\s\x{1C}-\x{1F}\x{85}\p{Z}]';
+
+    /**
+     * "SE-123 " and "se-123" must be the same user: trim, then lowercase.
+     * Exactly Python's identifier.strip().lower(), so rows Python saved are found
+     * (PHP's trim() would keep a pasted no-break space).
+     */
     public static function normalize(string $identifier): string
     {
-        return mb_strtolower(trim($identifier));
+        $ws = self::PY_WHITESPACE;
+
+        return mb_strtolower(preg_replace("/^$ws+|$ws+$/u", '', $identifier) ?? $identifier);
     }
 
     /** The account for a typed "NUML email or ID": the identifier first, then the email. */
