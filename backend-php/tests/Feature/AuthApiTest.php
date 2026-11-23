@@ -6,7 +6,10 @@ use App\Models\Department;
 use App\Models\Section;
 use App\Models\Teacher;
 use App\Models\User;
+use App\Services\Security;
+use App\Support\Identifiers;
 use Database\Factories\UserFactory;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Testing\TestResponse;
 use Tests\TestCase;
 
@@ -275,5 +278,88 @@ class AuthApiTest extends TestCase
         ])->status();
 
         $this->assertContains($status, [404, 405]);
+    }
+
+    // ------------------------------------------------------------------ races (review on #98)
+
+    public function test_two_activations_at_once_only_one_wins(): void
+    {
+        // Simulate a second request that activates the account between our
+        // "has no password yet" check and our UPDATE.
+        User::retrieved(function (User $user) {
+            if ($user->identifier === 'se-654321' && $user->password_hash === null) {
+                DB::table('users')->where('id', $user->id)->update(['password_hash' => Security::hashPassword('first-wins')]);
+            }
+        });
+
+        $this->postJson('/api/auth/activate', ['identifier' => 'se-654321', 'new_password' => 'second-loses'])
+            ->assertStatus(400)->assertExactJson(['detail' => 'This account cannot be activated']);
+
+        $this->login('se-654321', 'first-wins')->assertOk();
+        $this->login('se-654321', 'second-loses')->assertStatus(401);
+    }
+
+    public function test_two_creates_of_the_same_identifier_at_once_give_409(): void
+    {
+        // Simulate a second request that inserts the same identifier after our
+        // exists() check passed: the UNIQUE index must turn it into a 409, not a 500.
+        User::creating(function (User $user) {
+            if ($user->identifier === 't-race' && ! DB::table('users')->where('identifier', 't-race')->exists()) {
+                DB::table('users')->insert(['name' => 'Other', 'identifier' => 't-race', 'role' => 'teacher']);
+            }
+        });
+
+        $this->loginAs('a-root')->postJson('/api/auth/users', $this->newStaff(['identifier' => 'T-Race']))
+            ->assertStatus(409)->assertExactJson(['detail' => 'Identifier already exists']);
+        $this->assertSame(1, User::where('identifier', 't-race')->count());
+    }
+
+    // ------------------------------------------------------------------ rate limit (review on #98)
+
+    public function test_login_and_activate_are_rate_limited_per_account(): void
+    {
+        for ($i = 0; $i < 10; $i++) {
+            $this->login('se-123456', 'wrong-guess-'.$i)->assertStatus(401);
+        }
+        $this->login('se-123456')->assertStatus(429)
+            ->assertExactJson(['detail' => 'Too Many Attempts.'])
+            ->assertHeader('Retry-After');
+
+        // Another account from the same address is not affected.
+        $this->login('t-ali')->assertOk();
+
+        for ($i = 0; $i < 10; $i++) {
+            $this->postJson('/api/auth/activate', ['identifier' => 't-ali', 'new_password' => 'guess-'.$i.'-xx']);
+        }
+        $this->postJson('/api/auth/activate', ['identifier' => 'T-ALI ', 'new_password' => 'guess-xx-xx'])
+            ->assertStatus(429);   // same account after normalising
+    }
+
+    // ------------------------------------------------------------------ identifiers (review on #98)
+
+    public function test_identifier_is_trimmed_like_python_strip(): void
+    {
+        // Python's str.strip() also removes a no-break space and an ideographic
+        // space (pasted from a PDF roster); PHP's trim() wouldn't.
+        $padded = mb_chr(0xA0).'SE-123456'.mb_chr(0x3000)."\t";
+        $this->assertSame('se-123456', Identifiers::normalize($padded));
+        $this->login($padded)->assertOk();
+
+        // A no-break space in the MIDDLE is part of the identifier, as in Python.
+        $this->assertSame('se'.mb_chr(0xA0).'1', Identifiers::normalize(' SE'.mb_chr(0xA0).'1 '));
+    }
+
+    // ------------------------------------------------------------------ docs page
+
+    public function test_docs_lock_only_the_endpoints_that_need_a_token(): void
+    {
+        $paths = $this->getJson('/openapi.json')->assertOk()->json('paths');
+
+        foreach (['/auth/login' => 'post', '/auth/activate' => 'post', '/health' => 'get'] as $path => $method) {
+            $this->assertSame([], $paths[$path][$method]['security'] ?? null, "$path should not need a token");
+        }
+        foreach (['/auth/me' => 'get', '/auth/users' => 'post'] as $path => $method) {
+            $this->assertArrayNotHasKey('security', $paths[$path][$method], "$path should need a token");
+        }
     }
 }
