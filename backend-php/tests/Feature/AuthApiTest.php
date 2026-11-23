@@ -335,6 +335,16 @@ class AuthApiTest extends TestCase
             ->assertStatus(429);   // same account after normalising
     }
 
+    public function test_changing_address_does_not_escape_the_account_limit(): void
+    {
+        // Each try "from" a different address (what a faked X-Forwarded-For does).
+        for ($i = 0; $i < 30; $i++) {
+            $this->withServerVariables(['REMOTE_ADDR' => "203.0.113.$i"])
+                ->login('se-123456', 'wrong-guess-'.$i)->assertStatus(401);
+        }
+        $this->withServerVariables(['REMOTE_ADDR' => '203.0.113.200'])->login('se-123456')->assertStatus(429);
+    }
+
     // ------------------------------------------------------------------ identifiers (review on #98)
 
     public function test_identifier_is_trimmed_like_python_strip(): void
