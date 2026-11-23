@@ -84,8 +84,9 @@ Route::post('/rooms', [RoomController::class, 'store'])->middleware('role:hod,ad
 // app/Http/Controllers/Api/RoomController.php
 public function store(StoreRoomRequest $request): JsonResponse
 {
-    // No exists() check first: two requests at the same moment would both pass
-    // it and the second would crash (500). The UNIQUE index decides instead.
+    // An exists() check alone isn't enough: two requests at the same moment both
+    // pass it and the second crashes (500). Always catch the UNIQUE violation.
+    // (An extra exists() first is fine when it saves work, as createUser does.)
     try {
         $room = Room::create($request->validated());
     } catch (UniqueConstraintViolationException) {    // Illuminate\Database\...
