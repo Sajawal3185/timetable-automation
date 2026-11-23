@@ -18,7 +18,7 @@ return [
     |
     */
 
-    'driver' => env('SESSION_DRIVER', 'database'),
+    'driver' => env('SESSION_DRIVER', 'array'),   // the API keeps no sessions
 
     /*
     |--------------------------------------------------------------------------

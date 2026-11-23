@@ -60,8 +60,9 @@ return [
             'prefix_indexes' => true,
             'strict' => true,
             'engine' => null,
-            // Aiven TLS (#91): see app/Support/DbTls.php.
-            'options' => extension_loaded('pdo_mysql')
+            // Aiven TLS (#91): see app/Support/DbTls.php. Only worked out when
+            // MySQL is in use, so a stray DB_SSL_CA can't break a SQLite laptop.
+            'options' => env('DB_CONNECTION') === 'mysql' && extension_loaded('pdo_mysql')
                 ? DbTls::options(env('DB_URL'), env('DB_SSL_CA'))
                 : [],
         ],

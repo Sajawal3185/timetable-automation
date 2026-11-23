@@ -9,6 +9,12 @@ use Illuminate\Support\Facades\Schema;
 // #93's 2026_11_15_c4b8db037e9e_signup_email_codes.py columns folded in
 // (email_verified_at, roll_number, sys_id, token_version; identifier widened to 150).
 // One migration instead of two because every PHP database starts empty.
+//
+// Cutover plan: these migrations build a FRESH database (timetable_php); Aiven's
+// Alembic database is never baselined or migrated by Laravel. Rows are then
+// copied over from FastAPI's database, ids included. Copied users keep their
+// Python "$2b$" bcrypt hashes, which password_verify accepts (SecurityTest has
+// a real one). Python's INT ids fit in id()'s BIGINT UNSIGNED.
 return new class extends Migration
 {
     public function up(): void
