@@ -4,6 +4,7 @@ namespace Tests\Unit;
 
 use App\Support\DbTls;
 use PHPUnit\Framework\TestCase;
+use RuntimeException;
 
 /** Port of backend/tests/test_db_url.py: TLS for hosted MySQL (Aiven). */
 class DbTlsTest extends TestCase
@@ -24,14 +25,46 @@ class DbTlsTest extends TestCase
         $this->assertSame('required', DbTls::sslMode(self::AIVEN));
     }
 
+    private static string $ca;
+
+    public static function setUpBeforeClass(): void
+    {
+        self::$ca = tempnam(sys_get_temp_dir(), 'ca');   // DbTls only checks that the file exists
+    }
+
+    public static function tearDownAfterClass(): void
+    {
+        @unlink(self::$ca);
+    }
+
     public function test_ca_file_turns_on_verification(): void
     {
-        $options = DbTls::options(self::AIVEN, '/etc/secrets/ca.pem');
+        $verified = [self::attr('SSL_CA') => self::$ca, self::attr('SSL_VERIFY_SERVER_CERT') => true];
 
-        $this->assertSame([
-            self::attr('SSL_CA') => '/etc/secrets/ca.pem',
-            self::attr('SSL_VERIFY_SERVER_CERT') => true,
-        ], $options);
+        $this->assertSame($verified, DbTls::options(self::AIVEN, self::$ca));
+        $this->assertSame($verified, DbTls::options('mysql://h/db?ssl-mode=VERIFY_IDENTITY', self::$ca));
+        // DB_HOST/DB_PORT style (no DB_URL): the CA still applies.
+        $this->assertSame($verified, DbTls::options(null, self::$ca));
+        $this->assertSame($verified, DbTls::options('', self::$ca));
+    }
+
+    public function test_missing_ca_file_stops_startup(): void
+    {
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('DB_SSL_CA file not found');
+        DbTls::options(self::AIVEN, '/etc/secrets/no-such-ca.pem');
+    }
+
+    public function test_verify_modes_without_a_ca_stop_startup(): void
+    {
+        foreach (['VERIFY_CA', 'verify-identity'] as $mode) {
+            try {
+                DbTls::options("mysql://h/db?ssl-mode=$mode");
+                $this->fail("$mode connected without verifying");
+            } catch (RuntimeException $e) {
+                $this->assertStringContainsString('needs DB_SSL_CA', $e->getMessage());
+            }
+        }
     }
 
     public function test_local_mysql_without_ssl_mode_is_unchanged(): void
@@ -43,7 +76,7 @@ class DbTlsTest extends TestCase
     {
         $this->assertSame([], DbTls::options('sqlite:///:memory:'));
         $this->assertSame([], DbTls::options(null));
-        $this->assertSame([], DbTls::options('', '/etc/secrets/ca.pem'));
+        $this->assertSame([], DbTls::options('sqlite:///:memory:', self::$ca));
     }
 
     public function test_other_ssl_mode_spellings(): void

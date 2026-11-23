@@ -19,11 +19,15 @@ return [
     'jwt' => [
         // Required, no default: anyone who knows it can forge a token for any
         // user. AppServiceProvider refuses to serve requests without it.
-        // firebase/php-jwt needs at least 32 bytes for HS256.
+        // At least 32 characters (Security::MIN_SECRET_BYTES). Always HS256:
+        // the algorithm is fixed in Security, not read from JWT_ALGORITHM.
         'secret' => env('JWT_SECRET_KEY'),
-        'algorithm' => env('JWT_ALGORITHM', 'HS256'),
         'expire_minutes' => (int) env('ACCESS_TOKEN_EXPIRE_MINUTES', 60),
     ],
+
+    // --- API docs ------------------------------------------------------------
+    // /docs and /openapi.json. Public, like FastAPI's; set false to hide them.
+    'docs_enabled' => (bool) env('DOCS_ENABLED', true),
 
     // --- File uploads -------------------------------------------------------
     'upload_dir' => env('UPLOAD_DIR', 'uploads'),

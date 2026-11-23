@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\User;
 use App\Services\Security;
 use App\Support\Roles;
+use Firebase\JWT\JWT;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Tests\TestCase;
@@ -23,7 +24,69 @@ class JwtAndRolesTest extends TestCase
             Route::get('/me', fn (Request $r) => ['id' => $r->user()->id])->middleware('jwt');
             Route::get('/admins', fn () => ['ok' => true])->middleware('role:'.Roles::list(Roles::ADMINS));
             Route::get('/staff', fn () => ['ok' => true])->middleware(['jwt', 'role:teacher,hod,admin']);
+            Route::get('/spaced', fn () => ['ok' => true])->middleware('role:hod, admin');
         });
+    }
+
+    /** Every 401 carries WWW-Authenticate: Bearer, whatever was wrong. */
+    private function assertRefused(?string $token, string $detail = 'Invalid or expired token', string $why = ''): void
+    {
+        $request = $token === null ? $this->withoutToken() : $this->withToken($token);
+        $response = $request->getJson('/api/_test/me');
+        $this->assertSame(401, $response->status(), "not refused: $why");
+        $response->assertExactJson(['detail' => $detail])
+            ->assertHeader('WWW-Authenticate', 'Bearer');
+    }
+
+    public function test_every_bad_token_is_401_with_bearer_challenge(): void
+    {
+        $user = User::factory()->create(['token_version' => 1]);
+        $secret = config('timetable.jwt.secret');
+        $b64 = fn (array $part) => rtrim(strtr(base64_encode(json_encode($part)), '+/', '-_'), '=');
+        $good = Security::createAccessToken($user->id, 'student', 1);
+        [$head, $body, $sig] = explode('.', $good);
+
+        $bad = [
+            'expired' => Security::createAccessToken($user->id, 'student', 1, expiresInMinutes: -1),
+            'tampered payload' => $head.'.'.$b64(['sub' => '999', 'exp' => time() + 60, 'tv' => 1]).'.'.$sig,
+            'wrong secret' => JWT::encode(['sub' => (string) $user->id, 'exp' => time() + 60, 'tv' => 1], str_repeat('w', 40), 'HS256'),
+            'HS512' => JWT::encode(['sub' => (string) $user->id, 'exp' => time() + 60, 'tv' => 1], str_pad($secret, 64, 'x'), 'HS512'),
+            'alg none' => $b64(['alg' => 'none', 'typ' => 'JWT']).'.'.$body.'.',
+            'missing exp' => JWT::encode(['sub' => (string) $user->id, 'tv' => 1], $secret, 'HS256'),
+            'missing sub' => JWT::encode(['exp' => time() + 60, 'tv' => 1], $secret, 'HS256'),
+            'non-numeric sub' => JWT::encode(['sub' => 'abc', 'exp' => time() + 60, 'tv' => 1], $secret, 'HS256'),
+            'old tv' => Security::createAccessToken($user->id, 'student', 0),
+            'no tv, but token_version is 1' => JWT::encode(['sub' => (string) $user->id, 'exp' => time() + 60], $secret, 'HS256'),
+        ];
+        foreach ($bad as $why => $token) {
+            $this->assertRefused($token, why: $why);
+        }
+
+        $this->assertRefused(null, 'Not authenticated');
+        $user->update(['is_active' => false]);
+        $this->assertRefused($good, 'User not found or inactive');
+    }
+
+    public function test_a_token_made_by_python_is_accepted(): void
+    {
+        // Signed by PyJWT with the phpunit.xml secret for user 1; it has no "tv",
+        // which counts as 0 (every user's starting token_version).
+        User::factory()->admin()->create(['id' => 1, 'token_version' => 0]);
+
+        $this->withToken(\Tests\Unit\SecurityTest::PYTHON_TOKEN)->getJson('/api/_test/admins')->assertOk();
+    }
+
+    public function test_spaces_in_the_role_list_are_ignored(): void
+    {
+        // 'role:hod, admin' arrives as "hod" and " admin"; admins must still pass.
+        $this->asRole('admin');
+        $this->getJson('/api/_test/spaced')->assertOk();
+    }
+
+    public function test_role_is_compared_lowercase(): void
+    {
+        // The CHECK constraint keeps real rows lowercase; this is the belt to those braces.
+        $this->assertSame('admin', Roles::of(new User(['role' => 'Admin'])));
     }
 
     public function test_role_groups(): void

@@ -62,6 +62,16 @@ class ErrorFormatTest extends TestCase
         $this->getJson('/api/_test/crash')->assertStatus(500)->assertExactJson(['detail' => 'Internal Server Error']);
     }
 
+    public function test_crash_details_need_debug_and_a_local_environment(): void
+    {
+        config(['app.debug' => true]);
+        $this->getJson('/api/_test/crash')->assertStatus(500)->assertJsonStructure(['detail', 'debug']);
+
+        // APP_DEBUG=true left on in production still shows nothing.
+        $this->app['env'] = 'production';
+        $this->getJson('/api/_test/crash')->assertStatus(500)->assertExactJson(['detail' => 'Internal Server Error']);
+    }
+
     public function test_unknown_url_wrong_method_and_missing_row(): void
     {
         $this->getJson('/api/no-such-thing')->assertStatus(404)->assertExactJson(['detail' => 'Not Found']);

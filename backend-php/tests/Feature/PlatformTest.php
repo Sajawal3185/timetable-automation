@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Department;
+use App\Models\Section;
 use App\Support\Paging;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -72,5 +73,62 @@ class PlatformTest extends TestCase
         $this->getJson('/api/_test/departments?skip=-1')->assertStatus(422)
             ->assertJsonPath('detail.0.loc', ['query', 'skip']);
         $this->getJson('/api/_test/departments?limit=201')->assertStatus(422);
+    }
+
+    public function test_preflight_answer_is_cached_for_ten_minutes(): void
+    {
+        $this->call('OPTIONS', '/api/health', server: [
+            'HTTP_ORIGIN' => 'http://localhost:5500',
+            'HTTP_ACCESS_CONTROL_REQUEST_METHOD' => 'GET',
+            'HTTP_ACCESS_CONTROL_REQUEST_HEADERS' => 'authorization',
+        ])->assertHeader('Access-Control-Max-Age', '600');
+    }
+
+    public function test_origin_patterns_are_space_separated_and_may_contain_commas(): void
+    {
+        $value = '#^https://deploy-preview-\d{1,3}--numl\.netlify\.app$#  #^https://x\.example$#';
+        $_ENV['CORS_ORIGIN_PATTERNS'] = $_SERVER['CORS_ORIGIN_PATTERNS'] = $value;
+        try {
+            $cors = require config_path('cors.php');
+        } finally {
+            unset($_ENV['CORS_ORIGIN_PATTERNS'], $_SERVER['CORS_ORIGIN_PATTERNS']);
+        }
+
+        $this->assertSame([
+            '#^https://deploy-preview-\d{1,3}--numl\.netlify\.app$#',
+            '#^https://x\.example$#',
+        ], $cors['allowed_origins_patterns']);
+
+        config(['cors.allowed_origins_patterns' => $cors['allowed_origins_patterns']]);
+        $this->getJson('/api/health', ['Origin' => 'https://deploy-preview-42--numl.netlify.app'])
+            ->assertHeader('Access-Control-Allow-Origin', 'https://deploy-preview-42--numl.netlify.app');
+    }
+
+    public function test_openapi_locks_only_endpoints_that_need_a_token(): void
+    {
+        Route::get('/api/_test/private', fn () => ['ok' => true])->middleware('jwt');
+        Route::get('/api/_test/admin-only', fn () => ['ok' => true])->middleware('role:admin');
+
+        $paths = $this->getJson('/openapi.json')->assertOk()->json('paths');
+
+        $this->assertSame([], $paths['/health']['get']['security'], '/health must not ask for a token');
+        $this->assertArrayNotHasKey('security', $paths['/_test/private']['get']);      // inherits the global lock
+        $this->assertArrayNotHasKey('security', $paths['/_test/admin-only']['get']);
+    }
+
+    public function test_paging_breaks_ties_by_id(): void
+    {
+        // Every section has 40 students: without the id tiebreaker the database
+        // may return them in any order, page by page.
+        Route::get('/api/_test/sections', function (Request $request) {
+            $query = Section::query()->orderBy('student_count');
+            [$rows] = Paging::get($query, $request, defaultLimit: 2);
+
+            return $rows->pluck('id');
+        });
+        $ids = Section::factory()->count(4)->create(['student_count' => 40])->pluck('id')->sort()->values()->all();
+
+        $this->assertSame(array_slice($ids, 0, 2), $this->getJson('/api/_test/sections')->json());
+        $this->assertSame(array_slice($ids, 2, 2), $this->getJson('/api/_test/sections?skip=2')->json());
     }
 }

@@ -2,6 +2,8 @@
 
 namespace App\Support;
 
+use RuntimeException;
+
 /**
  * TLS options for hosted MySQL (Aiven). PHP twin of backend/app/db_url.py.
  *
@@ -10,27 +12,47 @@ namespace App\Support;
  * ssl-mode parameter is ignored), but PDO only turns TLS on when it is given
  * an SSL option, so config/database.php asks this class for them:
  *
- *   DB_SSL_CA set           -> encrypt AND verify the server with that CA file
- *   ssl-mode asks for TLS   -> encrypt, don't verify (fine for a demo,
- *                              not for real student data: set DB_SSL_CA)
- *   neither, or not MySQL   -> no options (local MySQL, SQLite)
+ *   DB_SSL_CA set               -> encrypt AND verify the server with that CA file
+ *                                  (with or without DB_URL; the file must exist)
+ *   ssl-mode=verify_ca/identity -> needs DB_SSL_CA; without it, refuse to start
+ *                                  rather than silently skip verification
+ *   ssl-mode=required/preferred -> encrypt, don't verify (fine for a demo,
+ *                                  not for real student data: set DB_SSL_CA)
+ *   neither, or not MySQL       -> no options (local MySQL, SQLite)
  */
 class DbTls
 {
-    private const SSL_ON = ['required', 'verify_ca', 'verify_identity', 'preferred'];
+    private const ENCRYPT_ONLY = ['required', 'preferred'];
 
-    /** @return array<int, mixed> PDO options for the mysql connection */
+    private const MUST_VERIFY = ['verify_ca', 'verify_identity'];
+
+    /**
+     * @return array<int, mixed> PDO options for the mysql connection
+     *
+     * @throws RuntimeException when the settings ask for verification that can't happen
+     */
     public static function options(?string $url, ?string $caFile = null): array
     {
-        if (! $url || ! in_array(strtolower((string) parse_url($url, PHP_URL_SCHEME)), ['mysql', 'mariadb'], true)) {
+        // A DB_URL for another database (sqlite://...) gets nothing.
+        if ($url && ! in_array(strtolower((string) parse_url($url, PHP_URL_SCHEME)), ['mysql', 'mariadb'], true)) {
             return [];
         }
 
+        $mode = $url ? self::sslMode($url) : null;
+
         if ($caFile) {
+            if (! is_file($caFile)) {
+                throw new RuntimeException("DB_SSL_CA file not found: $caFile");
+            }
+
             return [self::attr('SSL_CA') => $caFile, self::attr('SSL_VERIFY_SERVER_CERT') => true];
         }
 
-        if (in_array(self::sslMode($url), self::SSL_ON, true)) {
+        if (in_array($mode, self::MUST_VERIFY, true)) {
+            throw new RuntimeException("ssl-mode=$mode needs DB_SSL_CA (the server's CA certificate) to verify the server");
+        }
+
+        if (in_array($mode, self::ENCRYPT_ONLY, true)) {
             // PDO has no "TLS on" switch: TLS starts when any SSL option is set.
             // Pointing it at the system CA folder turns it on; verification is off.
             return [self::attr('SSL_CAPATH') => self::systemCaDir(), self::attr('SSL_VERIFY_SERVER_CERT') => false];
