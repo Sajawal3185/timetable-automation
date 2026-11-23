@@ -26,8 +26,11 @@ return [
     ],
 
     // --- API docs ------------------------------------------------------------
-    // /docs and /openapi.json. Public, like FastAPI's; set false to hide them.
-    'docs_enabled' => (bool) env('DOCS_ENABLED', true),
+    // /docs and /openapi.json. Public, like FastAPI's: admins create staff
+    // accounts there (there's no admin screen for it yet), so on by default,
+    // production included. Fails closed: only true/1/yes/on turn it on; a
+    // typo or "off"/"no" hides it. ((bool) "off" would have been true.)
+    'docs_enabled' => filter_var(env('DOCS_ENABLED', true), FILTER_VALIDATE_BOOLEAN),
 
     // --- File uploads -------------------------------------------------------
     'upload_dir' => env('UPLOAD_DIR', 'uploads'),

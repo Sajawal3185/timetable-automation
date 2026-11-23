@@ -4,6 +4,7 @@ namespace App\Services;
 
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
+use Illuminate\Support\Facades\Log;
 use InvalidArgumentException;
 use UnexpectedValueException;
 
@@ -73,9 +74,15 @@ class Security
             return self::DUMMY_HASH_COST_12;
         }
 
-        // Other costs (tests use 4): made once per process. Only production's
-        // timing matters, and production uses 12.
+        // Other costs (tests use 4): made on first use. Under Apache's mod_php
+        // (the Docker image) a static lives for ONE request, so with any cost
+        // but 12 an unknown user costs two bcrypt runs again and the timing gap
+        // is back. If BCRYPT_ROUNDS ever changes on Render, regenerate the
+        // constant above for the new cost. The warning makes that impossible to miss.
         if (self::$dummyHash === null || password_get_info(self::$dummyHash)['options']['cost'] !== $cost) {
+            if (! app()->environment('testing')) {
+                Log::warning("BCRYPT_ROUNDS is $cost, not 12: logins for unknown users are slower than wrong passwords. Regenerate Security::DUMMY_HASH_COST_12 for this cost.");
+            }
             self::$dummyHash = self::hashPassword('timing-dummy');
         }
 

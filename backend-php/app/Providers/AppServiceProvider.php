@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Http\Middleware\AuthenticateJwt;
 use App\Http\Middleware\RequireRoles;
 use App\Services\Security;
+use App\Support\DbTls;
 use App\Support\Identifiers;
 use Dedoc\Scramble\Scramble;
 use Dedoc\Scramble\Support\Generator\OpenApi;
@@ -12,6 +13,8 @@ use Dedoc\Scramble\Support\Generator\Operation;
 use Dedoc\Scramble\Support\Generator\SecurityScheme;
 use Dedoc\Scramble\Support\RouteInfo;
 use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Database\Connection;
+use Illuminate\Database\DatabaseManager;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Gate;
@@ -26,6 +29,22 @@ class AppServiceProvider extends ServiceProvider
         // The docs page lives where FastAPI's did (/docs, /openapi.json),
         // not at Scramble's default /docs/api; see docsPage().
         Scramble::ignoreDefaultRoutes();
+
+        $this->app->resolving('db', fn (DatabaseManager $db) => $db->extend('mysql', $this->mysqlTls(...)));
+    }
+
+    /**
+     * Opens every MySQL connection with DbTls's options (Aiven needs TLS). Runs
+     * when a connection is actually made, so loading or caching the config never
+     * touches DB_SSL_CA: a missing ca.pem fails the first query, loudly, instead
+     * of the Docker build (where Render's secret file isn't mounted yet).
+     */
+    private function mysqlTls(array $config, string $name): Connection
+    {
+        $raw = config("database.connections.$name");
+        $config['options'] = DbTls::options($raw['url'] ?? null, $raw['ssl_ca'] ?? null) + ($config['options'] ?? []);
+
+        return $this->app->make('db.factory')->make($config, $name);
     }
 
     public function boot(): void

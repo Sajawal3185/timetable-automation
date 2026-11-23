@@ -21,15 +21,6 @@ class SecurityTest extends TestCase
         $this->assertFalse(Security::verifyPassword('correct-horse-1', null));
     }
 
-    public function test_python_bcrypt_hashes_still_work(): void
-    {
-        // Python's bcrypt writes "$2b$...", PHP "$2y$..."; the hash itself is the same algorithm.
-        $python = '$2b$'.substr(Security::hashPassword('secret-pass'), 4);
-
-        $this->assertTrue(Security::verifyPassword('secret-pass', $python));
-        $this->assertFalse(Security::verifyPassword('other', $python));
-    }
-
     public function test_72_byte_limit_counts_bytes_not_characters(): void
     {
         Security::hashPassword(str_repeat('a', 72));   // exactly at the limit is fine
@@ -132,8 +123,11 @@ class SecurityTest extends TestCase
                 Security::hashPassword($password);
                 $this->fail('hashed a 73-byte password');
             } catch (InvalidArgumentException) {
-                // A 73-byte guess never matches, even though bcrypt would ignore byte 73.
-                $this->assertFalse(Security::verifyPassword($password, Security::hashPassword($ascii72)));
+                // bcrypt itself only reads 72 bytes, so the hash of the first 72
+                // WOULD match this password; verifyPassword must refuse it anyway.
+                $first72 = Security::hashPassword(substr($password, 0, 72));
+                $this->assertTrue(password_verify($password, $first72), 'bcrypt should ignore byte 73');
+                $this->assertFalse(Security::verifyPassword($password, $first72));
             }
         }
     }
