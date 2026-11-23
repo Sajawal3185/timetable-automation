@@ -9,6 +9,7 @@ use Firebase\JWT\JWT;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Tests\TestCase;
+use Tests\Unit\SecurityTest;
 
 /**
  * The 'jwt' and 'role' middleware (get_current_user and require_roles in Python).
@@ -73,7 +74,7 @@ class JwtAndRolesTest extends TestCase
         // which counts as 0 (every user's starting token_version).
         User::factory()->admin()->create(['id' => 1, 'token_version' => 0]);
 
-        $this->withToken(\Tests\Unit\SecurityTest::PYTHON_TOKEN)->getJson('/api/_test/admins')->assertOk();
+        $this->withToken(SecurityTest::PYTHON_TOKEN)->getJson('/api/_test/admins')->assertOk();
     }
 
     public function test_spaces_in_the_role_list_are_ignored(): void
@@ -85,7 +86,8 @@ class JwtAndRolesTest extends TestCase
 
     public function test_role_is_compared_lowercase(): void
     {
-        // The CHECK constraint keeps real rows lowercase; this is the belt to those braces.
+        // On MySQL the CHECK constraint refuses 'Admin' (CheckConstraintsTest);
+        // SQLite has no such constraint, so Roles::of lowercases as well.
         $this->assertSame('admin', Roles::of(new User(['role' => 'Admin'])));
     }
 
