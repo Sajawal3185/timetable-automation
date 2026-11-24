@@ -52,4 +52,42 @@
     }
     return data;
   };
+
+  // Upload: NUML.api already sends FormData without a Content-Type, so reuse it.
+  NUML.upload = function (path, formData) {
+    return NUML.api(path, { method: "POST", body: formData });
+  };
+
+  // Download: a plain <a href> has no token, so fetch it, make a blob, click a temp link.
+  NUML.download = async function (path, filename) {
+    if (!API_BASE) throw new Error("Download needs the live backend (API_BASE is empty)");
+
+    const headers = {};
+    const token = NUML.getToken();
+    if (token) headers["Authorization"] = "Bearer " + token;
+
+    const res = await fetch(API_BASE + path, { headers });
+
+    if (res.status === 401) {
+      NUML.clearToken();
+      if (!location.pathname.endsWith(LOGIN_PAGE)) location.href = LOGIN_PAGE;
+      throw new Error("Unauthorized");
+    }
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      const err = new Error(data.detail || "Download failed");
+      err.status = res.status;
+      throw err;
+    }
+
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename || "download";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  };
 })();
