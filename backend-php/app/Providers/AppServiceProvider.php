@@ -24,6 +24,9 @@ use RuntimeException;
 
 class AppServiceProvider extends ServiceProvider
 {
+    /** users.identifier and users.email are VARCHAR(150). */
+    private const IDENTIFIER_MAX = 150;
+
     public function register(): void
     {
         // The docs page lives where FastAPI's did (/docs, /openapi.json),
@@ -70,14 +73,18 @@ class AppServiceProvider extends ServiceProvider
         // login and activate use this one limiter, so they share one budget.
         // Over a limit: 429 {"detail": "Too Many Attempts."} plus Retry-After.
         RateLimiter::for('auth', function (Request $request) {
+            // The same Identifiers::normalize() as login and activate (trim + lowercase),
+            // so "Ali", "ali" and " ALI " share one budget.
             $identifier = $request->input('identifier');   // not validated yet: may be anything
-            $account = is_string($identifier) ? Identifiers::normalize($identifier) : '';
+            $account = is_string($identifier) && strlen($identifier) <= 4 * self::IDENTIFIER_MAX
+                ? Identifiers::normalize($identifier) : '';
             $perAddress = Limit::perMinute(100)->by('ip:'.$request->ip());
 
             // No usable identifier: validation will reject it (422) and there is no
             // account to protect. Without this, every such request would share one
-            // 'account:' bucket.
-            if ($account === '') {
+            // 'account:' bucket. Longer than the column can't be an account either.
+            // (Laravel md5s the keys, so length never reaches the cache anyway.)
+            if ($account === '' || mb_strlen($account) > self::IDENTIFIER_MAX) {
                 return [$perAddress];
             }
 
