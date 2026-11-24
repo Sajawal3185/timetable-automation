@@ -27,6 +27,19 @@ return Application::configure(basePath: dirname(__DIR__))
         // every string (passwords too: "my pass " would be saved as "my pass") and
         // turn "" into null. Code that wants trimming does it itself (Identifiers::normalize).
         $middleware->remove([TrimStrings::class, ConvertEmptyStringsToNull::class]);
+
+        // Render's proxy handles HTTPS in front of the app and appends the caller's
+        // address to X-Forwarded-For. Trusting it gives Laravel the real scheme (the
+        // /docs page calls https://) and the real client IP (the auth rate limits).
+        //
+        // 'REMOTE_ADDR' trusts only the machine that connected to us, and on Render
+        // that is always Render's proxy: the container has no public port.
+        // $request->ip() is then the LAST X-Forwarded-For entry, the one Render
+        // wrote. Entries a client sends itself come before it and are ignored
+        // (AuthApiTest::test_rate_limit_address_is_the_one_render_appended).
+        // Not '*': Laravel reads that as "trust every address", and ip() would be
+        // the FIRST entry, which the client chooses (a fresh rate-limit key per try).
+        $middleware->trustProxies(at: 'REMOTE_ADDR');
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         // Every error as {"detail": ...}, like FastAPI (app/Exceptions/DetailErrors.php).
