@@ -361,6 +361,26 @@ class AuthApiTest extends TestCase
         $this->withServerVariables(['REMOTE_ADDR' => '203.0.113.200'])->login('se-123456')->assertStatus(429);
     }
 
+    public function test_case_and_spaces_share_one_account_budget(): void
+    {
+        // Same normalising as login: these are all one account.
+        foreach (['T-Ali', 't-ali', ' T-ALI ', "t-ali\t", 'T-aLi'] as $i => $spelling) {
+            $this->login($spelling, 'wrong-guess-'.$i)->assertStatus(401);
+            $this->login($spelling, 'wrong-guess-x'.$i)->assertStatus(401);
+        }
+        $this->login('t-ali')->assertStatus(429);
+    }
+
+    public function test_an_identifier_longer_than_the_column_only_counts_per_address(): void
+    {
+        // Can't be an account (VARCHAR 150), so there's no account budget to use up.
+        $long = str_repeat('a', 151);
+        for ($i = 0; $i < 12; $i++) {
+            $this->login($long, 'wrong-guess-'.$i)->assertStatus(401);
+        }
+        $this->login(str_repeat('é', 200_000), 'whatever-1')->assertStatus(401);
+    }
+
     public function test_rate_limit_answer_is_429_detail_with_retry_after(): void
     {
         for ($i = 0; $i < 10; $i++) {

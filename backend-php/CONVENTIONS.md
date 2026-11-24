@@ -102,6 +102,11 @@ public function store(StoreRoomRequest $request): JsonResponse
 }
 ```
 
+**Never pass `$request->all()` or `$request->input()` to a model** (`create`,
+`update`, `fill`). Pass `$request->validated()`, or name the fields yourself. On
+`User`, `role`, `is_active` and `token_version` are still fillable, so
+`User::create($request->all())` would let anyone send `"role": "admin"`.
+
 ```php
 // app/Http/Resources/RoomResource.php: list EVERY field the contract shows, nothing more
 public function toArray(Request $request): array
