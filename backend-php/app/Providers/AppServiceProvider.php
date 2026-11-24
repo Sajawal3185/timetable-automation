@@ -63,17 +63,27 @@ class AppServiceProvider extends ServiceProvider
         // 'throttle:auth' on login and activate (not in the Python backend; added
         // in review). 10 tries a minute per account per address stops password
         // guessing; 100 a minute per address stops trying many accounts (high on
-        // purpose: a whole campus can share one address). The address comes from
-        // X-Forwarded-For behind Render's proxy, which a client can fake, so 30 a
+        // purpose: a whole campus can share one address). The address is the last
+        // X-Forwarded-For entry, written by Render's proxy (bootstrap/app.php).
+        // Someone with many real addresses can still spread guesses out, so 30 a
         // minute per account from ANY address caps guessing even then.
+        // login and activate use this one limiter, so they share one budget.
         // Over a limit: 429 {"detail": "Too Many Attempts."} plus Retry-After.
         RateLimiter::for('auth', function (Request $request) {
             $identifier = $request->input('identifier');   // not validated yet: may be anything
             $account = is_string($identifier) ? Identifiers::normalize($identifier) : '';
+            $perAddress = Limit::perMinute(100)->by('ip:'.$request->ip());
+
+            // No usable identifier: validation will reject it (422) and there is no
+            // account to protect. Without this, every such request would share one
+            // 'account:' bucket.
+            if ($account === '') {
+                return [$perAddress];
+            }
 
             return [
                 Limit::perMinute(10)->by('id:'.$account.'|'.$request->ip()),
-                Limit::perMinute(100)->by('ip:'.$request->ip()),
+                $perAddress,
                 Limit::perMinute(30)->by('account:'.$account),
             ];
         });

@@ -129,6 +129,22 @@ class AuthApiTest extends TestCase
         $this->login('se-654321', 'spaced out')->assertStatus(401);
     }
 
+    public function test_trailing_space_password_through_activate_and_login(): void
+    {
+        $this->postJson('/api/auth/activate', ['identifier' => 'se-654321', 'new_password' => 'ends-in-space '])
+            ->assertOk();
+
+        $this->login('se-654321', 'ends-in-space ')->assertOk();
+        $this->login('se-654321', 'ends-in-space')->assertStatus(401);
+        $this->login('se-654321', 'ends-in-space  ')->assertStatus(401);
+
+        // Same for an account an admin made (password set at creation, not activation).
+        $this->loginAs('a-root')->postJson('/api/auth/users', $this->newStaff(['password' => 'staff-pass-1 ']))
+            ->assertStatus(201);
+        $this->login('t-new', 'staff-pass-1 ')->assertOk();
+        $this->login('t-new', 'staff-pass-1')->assertStatus(401);
+    }
+
     // ------------------------------------------------------------------ activate
 
     public function test_activate_logs_the_student_in_and_works_only_once(): void
@@ -343,6 +359,70 @@ class AuthApiTest extends TestCase
                 ->login('se-123456', 'wrong-guess-'.$i)->assertStatus(401);
         }
         $this->withServerVariables(['REMOTE_ADDR' => '203.0.113.200'])->login('se-123456')->assertStatus(429);
+    }
+
+    public function test_rate_limit_answer_is_429_detail_with_retry_after(): void
+    {
+        for ($i = 0; $i < 10; $i++) {
+            $this->login('se-123456', 'wrong-guess-'.$i);
+        }
+        $response = $this->login('se-123456')->assertStatus(429)
+            ->assertExactJson(['detail' => 'Too Many Attempts.']);
+
+        $retryAfter = $response->headers->get('Retry-After');
+        $this->assertMatchesRegularExpression('/^\d+$/', (string) $retryAfter);
+        $this->assertGreaterThan(0, (int) $retryAfter);
+        $this->assertLessThanOrEqual(60, (int) $retryAfter);
+    }
+
+    public function test_login_and_activate_share_one_budget(): void
+    {
+        // 6 logins + 4 activations for the same account = the 10 a minute.
+        for ($i = 0; $i < 6; $i++) {
+            $this->login('se-123456', 'wrong-guess-'.$i)->assertStatus(401);
+        }
+        for ($i = 0; $i < 4; $i++) {
+            $this->postJson('/api/auth/activate', ['identifier' => 'se-123456', 'new_password' => 'guess-'.$i.'-xx'])
+                ->assertStatus(400);   // already activated
+        }
+        $this->login('se-123456')->assertStatus(429);
+        $this->postJson('/api/auth/activate', ['identifier' => 'se-123456', 'new_password' => 'guess-xx-xx'])
+            ->assertStatus(429);
+    }
+
+    public function test_rate_limit_address_is_the_one_render_appended(): void
+    {
+        // Render's proxy (REMOTE_ADDR) appends the caller's real address LAST.
+        // The client controls everything before it, so a new fake first entry
+        // per try must not give a new budget.
+        $viaRender = fn (string $forwardedFor) => $this
+            ->withServerVariables(['REMOTE_ADDR' => '10.10.0.1'])
+            ->withHeaders(['X-Forwarded-For' => $forwardedFor]);
+
+        for ($i = 0; $i < 10; $i++) {
+            $viaRender("6.6.6.$i, 198.51.100.7")->login('se-123456', 'wrong-guess-'.$i)->assertStatus(401);
+        }
+        $viaRender('6.6.6.99, 198.51.100.7')->login('se-123456')->assertStatus(429);
+
+        // A different real address is a different per-address budget (the
+        // per-account 30 is not reached yet), so the proxy's own IP is not the key.
+        $viaRender('198.51.100.8')->login('se-123456')->assertOk();
+
+        $this->assertSame('198.51.100.7', $viaRender('6.6.6.6, 198.51.100.7')
+            ->get('/api/health')->baseRequest->ip());
+    }
+
+    public function test_requests_without_a_usable_identifier_are_422_not_429(): void
+    {
+        // No account to protect, so only the per-address limit applies: 35 bad
+        // requests from different addresses never share one empty-account bucket.
+        foreach ([[], ['identifier' => ['x']], ['identifier' => '   ']] as $body) {
+            for ($i = 0; $i < 12; $i++) {
+                $this->withServerVariables(['REMOTE_ADDR' => "203.0.113.$i"])
+                    ->postJson('/api/auth/login', [...$body, 'password' => 'whatever-1'])
+                    ->assertStatus(422);
+            }
+        }
     }
 
     // ------------------------------------------------------------------ identifiers (review on #98)
