@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Department;
 use App\Models\Section;
+use App\Models\Teacher;
 use App\Support\Paging;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -144,5 +145,16 @@ class PlatformTest extends TestCase
             ['column' => 'student_count', 'direction' => 'asc'],
             ['column' => 'sections.id', 'direction' => 'asc'],
         ], $query->getQuery()->orders);
+    }
+
+    public function test_factories_never_run_out_of_names(): void
+    {
+        // fake()->unique() keeps its list for the whole test run: numerify('#')
+        // gave out after 10 sections and lastName() after a few hundred teachers.
+        $dept = Department::factory()->create();
+        Section::factory()->count(30)->create(['department_id' => $dept->id]);
+        Teacher::factory()->count(600)->make();
+
+        $this->assertSame(30, Section::where('department_id', $dept->id)->distinct()->count('name'));
     }
 }

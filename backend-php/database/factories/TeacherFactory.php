@@ -10,6 +10,8 @@ class TeacherFactory extends Factory
 {
     public function definition(): array
     {
-        return ['name' => 'Dr. '.fake()->unique()->lastName()];
+        // No ->unique(): it runs out of last names over a long test run, and
+        // teachers.name has no unique key (normalized_name is left null here).
+        return ['name' => 'Dr. '.fake()->lastName()];
     }
 }

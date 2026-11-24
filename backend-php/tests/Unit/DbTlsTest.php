@@ -3,10 +3,15 @@
 namespace Tests\Unit;
 
 use App\Support\DbTls;
+use PHPUnit\Framework\Attributes\RequiresPhpExtension;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
 
-/** Port of backend/tests/test_db_url.py: TLS for hosted MySQL (Aiven). */
+/**
+ * Port of backend/tests/test_db_url.py: TLS for hosted MySQL (Aiven).
+ * Skipped without pdo_mysql: the option keys are its constants (a laptop on SQLite).
+ */
+#[RequiresPhpExtension('pdo_mysql')]
 class DbTlsTest extends TestCase
 {
     private const AIVEN = 'mysql://avnadmin:p%40ss@mysql-x.aivencloud.com:10955/defaultdb?ssl-mode=REQUIRED';
