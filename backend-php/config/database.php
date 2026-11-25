@@ -59,9 +59,12 @@ return [
             'prefix_indexes' => true,
             'strict' => true,
             'engine' => null,
-            'options' => extension_loaded('pdo_mysql') ? array_filter([
-                (PHP_VERSION_ID >= 80500 ? Mysql::ATTR_SSL_CA : PDO::MYSQL_ATTR_SSL_CA) => env('MYSQL_ATTR_SSL_CA'),
-            ]) : [],
+            // Aiven TLS (#91): the PDO options are worked out by app/Support/DbTls.php
+            // when a MySQL connection is opened (AppServiceProvider::mysqlTls), not
+            // here: this file is also read by package:discover and config:cache in
+            // the Docker build, where Render's ca.pem secret file doesn't exist yet.
+            'ssl_ca' => env('DB_SSL_CA'),
+            'options' => [],
         ],
 
         'mariadb' => [
