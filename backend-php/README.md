@@ -1,7 +1,7 @@
 # Timetable Automation: PHP backend (Laravel)
 
 The PHP version of `backend/` (FastAPI). Same API, same database; see
-`docs/api-contract.md`. How to write code here: **[CONVENTIONS.md](CONVENTIONS.md)**.
+`docs/api-contract.md`. How to write code here: **[CONVENTIONS.md](CONVENTIONS.md)**. The auth endpoints in detail: [AUTH-API.md](AUTH-API.md).
 
 ## Run it on your laptop
 
