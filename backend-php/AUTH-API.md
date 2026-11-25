@@ -18,7 +18,8 @@ never sent.
 **Identifiers** are trimmed and lowercased before every lookup, exactly like
 Python's `identifier.strip().lower()`: `" SE-123456 "` is `se-123456`.
 **Passwords** are used exactly as typed (never trimmed), at least 8 characters
-for new ones, at most 72 **bytes** (bcrypt's limit, so `é` counts twice).
+for new ones, at most 72 **bytes** (bcrypt's limit, so `é` counts twice), and
+no NUL character (bcrypt would stop reading there; **PHP only**: Python's validator doesn't check it).
 
 ## POST /api/auth/login
 
@@ -35,7 +36,7 @@ No token needed. One login for every role.
 | 200 | `{"token": "<JWT>", "user": {UserOut}}` |
 | 401 | `{"detail": "Invalid credentials"}`: wrong password, unknown identifier, not activated yet, or disabled. Always the same message, on purpose. |
 | 422 | `identifier` or `password` missing or empty |
-| 429 | `{"detail": "Too Many Attempts."}` plus a `Retry-After` header: more than 10 tries a minute for one account from one address, 30 a minute for one account from any address, or 100 a minute from one address. **PHP only**: Python has no limit. |
+| 429 | `{"detail": "Too Many Attempts."}` plus a `Retry-After` header: more than 10 tries a minute for one account from one address, 30 a minute for one account from any address, or 300 a minute from one address. **PHP only**: Python has no limit. |
 
 Send the token on later calls as `Authorization: Bearer <JWT>`. It lasts
 `ACCESS_TOKEN_EXPIRE_MINUTES` (60).
@@ -53,7 +54,7 @@ logged in.
 |---|---|
 | 200 | `{"token": "<JWT>", "user": {UserOut}}`, like login |
 | 400 | `{"detail": "This account cannot be activated"}`: unknown identifier, not a student, already activated, or disabled. Same message for all, so it can't be used to check the roster. If two requests activate the same account at once, exactly one gets 200. |
-| 422 | `new_password` shorter than 8 characters, or longer than 72 bytes (`"Password is too long (max 72 bytes)"`) |
+| 422 | `new_password` shorter than 8 characters, longer than 72 bytes (`"Password is too long (max 72 bytes)"`), or containing a NUL (`"Password cannot contain a NUL character"`) |
 | 429 | as for login |
 
 ## GET /api/auth/me
@@ -75,7 +76,9 @@ roster, never from here.
  "role": "hod", "department_id": 1}
 ```
 
-`department_id` is optional, except that a HOD must have one.
+`department_id` is optional (`null` or left out), except that a HOD must have one;
+`""` is a 422, as in FastAPI. `name` is at most 100 characters and `identifier`
+at most 150 (the column sizes; **PHP only**: Python has no cap).
 
 | Status | Body |
 |---|---|
@@ -84,7 +87,7 @@ roster, never from here.
 | 401 | no token or bad token (as for `/me`) |
 | 403 | `{"detail": "You do not have permission for this action"}`: logged in, but not an admin |
 | 409 | `{"detail": "Identifier already exists"}` (after trimming and lowercasing), also when two requests create it at once |
-| 422 | a field missing, `department_id` not a number, or the password rules above |
+| 422 | a field missing, `name` over 100 or `identifier` over 150 characters, `department_id` not a number (`""` included), or the password rules above |
 
 ## Not ported
 

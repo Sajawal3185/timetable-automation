@@ -3,6 +3,8 @@
 namespace App\Http\Requests;
 
 use App\Rules\MaxBytes;
+use App\Rules\NoNulByte;
+use App\Rules\NotBlankInteger;
 use Illuminate\Foundation\Http\FormRequest;
 
 /**
@@ -15,11 +17,13 @@ class CreateUserRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['required', 'string'],
-            'identifier' => ['required', 'string'],
-            'password' => ['required', 'string', 'min:8', new MaxBytes],
+            // Column sizes (users.name VARCHAR(100), users.identifier VARCHAR(150)):
+            // strict MySQL refuses longer values with a 500. Python has no cap.
+            'name' => ['required', 'string', 'max:100'],
+            'identifier' => ['required', 'string', 'max:150'],
+            'password' => ['required', 'string', 'min:8', new MaxBytes, new NoNulByte],
             'role' => ['required', 'string'],
-            'department_id' => ['nullable', 'integer'],
+            'department_id' => ['nullable', new NotBlankInteger, 'integer'],
         ];
     }
 }
