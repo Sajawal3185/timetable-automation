@@ -459,6 +459,66 @@ class AuthApiTest extends TestCase
         $this->assertSame('se'.mb_chr(0xA0).'1', Identifiers::normalize(' SE'.mb_chr(0xA0).'1 '));
     }
 
+    // ------------------------------------------------------------------ input edge cases (review 2 on #98)
+
+    public function test_password_with_a_nul_byte_is_422_not_500(): void
+    {
+        // bcrypt stops reading at NUL, so hashPassword() refuses it. Validation
+        // must refuse it first, or the public activate endpoint answers 500.
+        $withNul = "long-enough\0-tail";
+
+        $this->postJson('/api/auth/activate', ['identifier' => 'se-654321', 'new_password' => $withNul])
+            ->assertStatus(422)->assertJsonPath('detail.0.msg', 'Password cannot contain a NUL character');
+        $this->loginAs('a-root')->postJson('/api/auth/users', $this->newStaff(['password' => $withNul]))
+            ->assertStatus(422)->assertJsonPath('detail.0.loc', ['body', 'password']);
+
+        // Login just doesn't match (no stored password can contain one).
+        $this->login('se-123456', self::PASSWORD."\0")->assertStatus(401);
+    }
+
+    public function test_create_user_caps_name_and_identifier_at_the_column_length(): void
+    {
+        // users.name is VARCHAR(100), users.identifier VARCHAR(150). Strict MySQL
+        // would refuse longer values with a 500; SQLite silently stores them.
+        $this->loginAs('a-root');
+        $this->postJson('/api/auth/users', $this->newStaff(['name' => str_repeat('n', 101)]))
+            ->assertStatus(422)->assertJsonPath('detail.0.loc', ['body', 'name']);
+        $this->postJson('/api/auth/users', $this->newStaff(['identifier' => str_repeat('t', 151)]))
+            ->assertStatus(422)->assertJsonPath('detail.0.loc', ['body', 'identifier']);
+
+        // Characters, not bytes: VARCHAR counts characters in utf8mb4.
+        $this->postJson('/api/auth/users', $this->newStaff(['name' => str_repeat('é', 100), 'identifier' => str_repeat('t', 150)]))
+            ->assertStatus(201);
+    }
+
+    public function test_empty_string_department_id_is_422_like_fastapi(): void
+    {
+        // Laravel skips non-implicit rules for "" (and ConvertEmptyStringsToNull is
+        // off), so "" used to reach the lookup and give 400 "Department not found".
+        // Pydantic can't parse "" as an int: 422.
+        $this->loginAs('a-root');
+        foreach (['', '   '] as $empty) {
+            $this->postJson('/api/auth/users', $this->newStaff(['identifier' => 't-x', 'department_id' => $empty]))
+                ->assertStatus(422)->assertJsonPath('detail.0.loc', ['body', 'department_id']);
+        }
+        $this->postJson('/api/auth/users', $this->newStaff(['department_id' => null]))->assertStatus(201);
+        $this->postJson('/api/auth/users', $this->newStaff(['identifier' => 't-y', 'department_id' => (string) $this->dept->id]))
+            ->assertStatus(201)->assertJsonPath('department_id', $this->dept->id);
+    }
+
+    public function test_per_address_limit_is_300_a_minute(): void
+    {
+        // One shared campus address trying many different accounts: every request
+        // counts (not only failures), but 300 leaves room for a busy campus.
+        // activate on unknown accounts: 400 without running bcrypt, so this is fast.
+        for ($i = 0; $i < 300; $i++) {
+            $this->postJson('/api/auth/activate', ['identifier' => "nobody-$i", 'new_password' => 'long-enough-1'])
+                ->assertStatus(400);
+        }
+        $this->login('se-123456')->assertStatus(429);
+        $this->withServerVariables(['REMOTE_ADDR' => '203.0.113.9'])->login('se-123456')->assertOk();
+    }
+
     // ------------------------------------------------------------------ docs page
 
     public function test_docs_lock_only_the_endpoints_that_need_a_token(): void
