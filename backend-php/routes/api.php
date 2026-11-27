@@ -15,6 +15,7 @@ use App\Http\Controllers\Api\HealthController;
 use App\Http\Controllers\Api\MakeupController;
 use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\RoomController;
+use App\Http\Controllers\Api\SignupController;
 use App\Http\Controllers\Api\SwapController;
 use App\Http\Controllers\Api\TimetableController;
 use App\Support\Roles;
@@ -32,6 +33,17 @@ Route::prefix('auth')->controller(AuthController::class)->group(function () {
     Route::post('/activate', 'activate')->middleware('throttle:auth');
     Route::get('/me', 'me')->middleware('jwt');
     Route::post('/users', 'createUser')->middleware('role:admin');
+});
+
+// --- signup and forgot password (#93's routers/signup.py), all public ------------
+// Per-email limits live in EmailCodes: one code a minute, 5 tries per code.
+Route::prefix('auth')->controller(SignupController::class)->group(function () {
+    Route::get('/signup-options', 'options');
+    Route::post('/signup', 'signup');
+    Route::post('/verify-email', 'verify');
+    Route::post('/resend-code', 'resend');
+    Route::post('/forgot-password', 'forgot');
+    Route::post('/reset-password', 'reset');
 });
 
 // --- health -------------------------------------------------------------------

@@ -57,7 +57,7 @@ In the service's **Environment** tab:
 | `JWT_SECRET_KEY` | a new random value, **at least 32 characters**: `php -r "echo bin2hex(random_bytes(32));"`. Don't reuse FastAPI's |
 | `CORS_ORIGINS` | the Netlify address, plus `http://localhost:5500,http://127.0.0.1:5500` for local testing |
 | `CORS_ORIGIN_PATTERNS` | optional, for deploy previews: `#^https://deploy-preview-\d+--numl-archive\.netlify\.app$#`, no quotes here (several: separate them with spaces) |
-| `EMAIL_PROVIDER` | `console` on staging (codes appear in the Render log) |
+| `EMAIL_PROVIDER` | `console` on staging (signup and reset codes appear in the Render log). For real emails: `brevo`, plus `BREVO_API_KEY` (Brevo → SMTP & API → API Keys; only here, never in GitHub or chat), `EMAIL_FROM` (a sender verified in Brevo → Senders) and `EMAIL_FROM_NAME`. Test with a real `@numls.edu.pk` inbox: university mail may put it in spam |
 
 **Secret file:** Environment → **Secret Files** → add `ca.pem` with the
 certificate's contents. Render puts it at `/etc/secrets/ca.pem`, and
