@@ -65,3 +65,4 @@ Route::prefix('swap-requests')->controller(SwapController::class)->group(functio
 
 // --- timetable (routers/timetable.py) ----------------------------------------
 Route::get('/timetable', [TimetableController::class, 'index'])->middleware('jwt');
+Route::post('/timetable/import', [TimetableController::class, 'import'])->middleware('role:'.Roles::list(Roles::ADMINS));
