@@ -40,7 +40,6 @@ function addCourse(name = "", grade = "A", credits = "3") {
         type="text"
         aria-label="Course name"
         placeholder="e.g. Enter Subject"
-        value="${name}"
       >
     </td>
 
@@ -52,15 +51,15 @@ function addCourse(name = "", grade = "A", credits = "3") {
 
     <td>
       <input
-  class="credit-input"
-  type="number"
-  aria-label="Credit hours"
-  min="1"
-  max="3"
-  step="1"
-  value="${credits}"
-  required
->
+        class="credit-input"
+        type="number"
+        aria-label="Credit hours"
+        min="1"
+        max="3"
+        step="1"
+        value="${credits}"
+        required
+      >
     </td>
 
     <td>
@@ -72,9 +71,22 @@ function addCourse(name = "", grade = "A", credits = "3") {
     </td>
   `;
 
+  row.querySelector(".course-name").value = name;
+
   row.querySelector(".remove-course").addEventListener("click", () => {
     row.remove();
     updateRowNumbers();
+    calculatedGPA = null;
+  });
+
+  row.querySelectorAll("input, select").forEach(input => {
+    input.addEventListener("input", () => {
+      calculatedGPA = null;
+    });
+
+    input.addEventListener("change", () => {
+      calculatedGPA = null;
+    });
   });
 
   courseRows.appendChild(row);
@@ -93,7 +105,11 @@ function updateRowNumbers() {
 // Calculate semester GPA
 function calculateSemesterGPA() {
   const error = document.getElementById("gpa-error");
+  const message = document.getElementById("gpa-message");
+
   error.textContent = "";
+  message.textContent = "";
+  calculatedGPA = null;
 
   const rows = [...courseRows.querySelectorAll("tr")];
 
@@ -123,9 +139,15 @@ function calculateSemesterGPA() {
       return;
     }
 
-    if (!Number.isFinite(credits) || credits <= 0) {
-      error.textContent = `Enter valid credit hours for ${name}.`;
+    if (!Number.isInteger(credits) || credits < 1 || credits > 3) {
+      error.textContent =
+        `Enter valid credit hours (1–3) for ${name}.`;
       rows[i].querySelector(".credit-input").focus();
+      return;
+    }
+
+    if (!(grade in gradePoints)) {
+      error.textContent = `Select a valid grade for ${name}.`;
       return;
     }
 
@@ -145,13 +167,12 @@ function calculateSemesterGPA() {
     calculatedGPA.toFixed(2);
 
   document.getElementById("total-credits").textContent =
-    totalCredits.toFixed(1).replace(/\.0$/, "");
+    totalCredits.toString();
 
   document.getElementById("total-quality-points").textContent =
     totalQualityPoints.toFixed(2);
 
-  document.getElementById("gpa-message").textContent =
-    "Semester GPA calculated successfully.";
+  message.textContent = "Semester GPA calculated successfully.";
 
   document.getElementById("current-gpa").value =
     calculatedGPA.toFixed(2);
@@ -212,7 +233,10 @@ document.getElementById("cgpa-form").addEventListener("submit", event => {
   event.preventDefault();
 
   const error = document.getElementById("cgpa-error");
+  const message = document.getElementById("cgpa-message");
+
   error.textContent = "";
+  message.textContent = "";
 
   const previousCGPA = Number(
     document.getElementById("previous-cgpa").value
@@ -264,9 +288,9 @@ document.getElementById("cgpa-form").addEventListener("submit", event => {
   document.getElementById("cgpa-result").textContent =
     newCGPA.toFixed(2);
 
-  document.getElementById("cgpa-message").textContent =
+  message.textContent =
     `Based on ${totalCredits} total credit hours.`;
 });
 
-// Initial example courses
+// Initial example course
 addCourse();
