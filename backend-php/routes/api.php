@@ -12,6 +12,9 @@
 
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\HealthController;
+use App\Http\Controllers\Api\RoomController;
+use App\Http\Controllers\Api\TimetableController;
+use App\Support\Roles;
 use Illuminate\Support\Facades\Route;
 
 // --- auth (routers/auth.py) ---------------------------------------------------
@@ -30,3 +33,17 @@ Route::prefix('auth')->controller(AuthController::class)->group(function () {
 
 // --- health -------------------------------------------------------------------
 Route::get('/health', HealthController::class);
+
+// --- rooms and reference data (routers/rooms.py) -----------------------------
+Route::controller(RoomController::class)->group(function () {
+    Route::get('/rooms', 'index')->middleware('jwt');
+    Route::get('/rooms/empty', 'empty')->middleware('jwt');   // before /rooms/{roomId}
+    Route::get('/rooms/{roomId}', 'show')->whereNumber('roomId')->middleware('jwt');
+    Route::post('/rooms', 'store')->middleware('role:'.Roles::list(Roles::ADMINS));
+    Route::put('/rooms/{roomId}', 'update')->whereNumber('roomId')->middleware('role:'.Roles::list(Roles::ADMINS));
+    Route::get('/departments', 'departments')->middleware('jwt');
+    Route::get('/courses', 'courses')->middleware('jwt');
+});
+
+// --- timetable (routers/timetable.py) ----------------------------------------
+Route::get('/timetable', [TimetableController::class, 'index'])->middleware('jwt');
