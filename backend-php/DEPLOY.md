@@ -89,14 +89,28 @@ database must be `timetable_php`. An empty cipher means TLS is off: check
 `DB_SSL_CA`. A wrong or missing `ca.pem` fails right away with a certificate
 or "DB_SSL_CA file not found" error instead of connecting unverified.
 
-The database is empty until the seeder exists (day 3). To make a first admin
-before that, run tinker **on your laptop against the staging database** (free
-Render services have no Shell tab). In PowerShell, from `backend-php/`:
+## Demo data
+
+The database starts empty. Load the demo accounts and timetable **from your
+laptop against the staging database** (free Render services have no Shell tab).
+In PowerShell, from `backend-php/`:
 
 ```
 $env:DB_CONNECTION="mysql"; $env:DB_URL="<the timetable_php URI>"; $env:DB_SSL_CA="<path to ca.pem>"
-php artisan tinker --execute="App\Models\User::create(['name'=>'Admin','identifier'=>'admin','role'=>'admin','password_hash'=>App\Services\Security::hashPassword('CHOOSE-A-PASSWORD')]);"
+$env:SEED_PASSWORD="<8+ characters, shared with the team privately>"
+php artisan demo:seed
 ```
+
+It prints the 7 demo accounts (admin, HOD, 2 teachers, 3 students); all but the
+last student log in with `SEED_PASSWORD`. Running it again adds nothing. Before
+each demo, `php artisan demo:seed --reset` puts it back to the start: it
+**deletes every swap request, makeup class and notification**, reloads the demo
+timetable and resets the demo passwords. Demo databases only. Both commands
+refuse FastAPI's database.
+
+Then import the real timetable on the website (admin → import) or with
+`POST /api/timetable/import`, `dry_run=true` first. The rooms the import creates
+have no capacity yet; set it (`PUT /api/rooms/{id}`), or makeup won't offer them.
 
 Close that terminal afterwards, so the next command doesn't hit staging by accident.
 

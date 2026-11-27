@@ -1,5 +1,6 @@
 <?php
 
+use App\Services\DemoSeed;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
@@ -42,3 +43,41 @@ Artisan::command('migrate:deploy', function () {
         }
     }
 })->purpose('Migrate on deploy: never FastAPI\'s database, one container at a time');
+
+/*
+| The demo data (port of backend/scripts/seed.py). From backend-php/:
+|
+|   php artisan demo:seed            first load; safe to repeat
+|   php artisan demo:seed --reset    before every demo run: DELETES every swap request,
+|                                    makeup class and notification, reloads the demo
+|                                    timetable, resets the demo passwords
+|
+| Every activated demo account gets SEED_PASSWORD (.env, 8+ characters).
+*/
+Artisan::command('demo:seed {--reset : delete ALL swaps, makeups and notifications and reload the demo timetable}', function () {
+    if (Schema::hasTable('alembic_version')) {
+        $this->error("This is FastAPI's database (it has alembic_version). Point DB_URL at timetable_php instead.");
+
+        return 1;
+    }
+    $password = (string) config('timetable.seed_password');
+    if (mb_strlen($password) < DemoSeed::MIN_PASSWORD) {
+        $this->error('Set SEED_PASSWORD ('.DemoSeed::MIN_PASSWORD.'+ characters): it becomes the password of every demo account.');
+
+        return 2;
+    }
+
+    $done = DemoSeed::run($password, (bool) $this->option('reset'));
+
+    $this->info("Seed finished: {$done['added']} rows added, {$done['timetable_entries']} timetable entries loaded.");
+    if ($this->option('reset')) {
+        $this->info("Reset removed {$done['swaps_deleted']} swap requests, {$done['makeups_deleted']} makeup classes "
+            ."and {$done['notifications_deleted']} notifications.");
+    }
+    $this->line('Accounts (password = SEED_PASSWORD, except the last one, which is not activated):');
+    foreach (DemoSeed::USERS as [$identifier, $name, $role]) {
+        $this->line(sprintf('  %-8s %-12s %s', $role, $identifier, $name));
+    }
+
+    return 0;
+})->purpose('Load the demo data (--reset: back to the starting state)');
