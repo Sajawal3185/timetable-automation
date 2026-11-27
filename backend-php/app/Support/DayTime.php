@@ -40,6 +40,28 @@ final class DayTime
             : self::toTime((int) $m[4], 0, $m[5]);
     }
 
+    /**
+     * "08:30 - 10:00", "8:30 to 10", "1:00-2:30 PM" -> ["08:30:00", "10:00:00"]; null if
+     * it isn't a range. (Like Python, "PM" on the end only changes the end time.)
+     *
+     * @return array{0: string, 1: string}|null
+     */
+    public static function parseTimeRange(?string $text): ?array
+    {
+        $text = trim($text ?? '');
+        if ($text === '') {
+            return null;
+        }
+        $parts = preg_split('/\s*(?:-|\x{2013}|\x{2014}|\bto\b)\s*/iu', $text, 2);
+        if (count($parts) !== 2) {
+            return null;
+        }
+        $start = self::parseTime($parts[0]);
+        $end = self::parseTime($parts[1]);
+
+        return $start === null || $end === null ? null : [$start, $end];
+    }
+
     private static function toTime(int $hour, int $minute, ?string $meridiem): ?string
     {
         $meridiem = str_replace('.', '', strtolower($meridiem ?? ''));

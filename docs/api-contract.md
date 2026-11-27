@@ -94,7 +94,7 @@ Room object: `{id, name, capacity, building}`. `capacity` is `null` when unknown
 | Method | URL | Who | Notes |
 | --- | --- | --- | --- |
 | GET | `/api/timetable` | any user | query: `section_id`, `teacher_id`, `room_id`, `course_id`, `department_id`, `day`, `skip`, `limit` |
-| POST | `/api/timetable/import` | hod, admin | multipart form: `department_code` (SE/AI/CS/IT), `dry_run` (default `true`), `file` (.xlsx/.csv, max 10 MB) |
+| POST | `/api/timetable/import` | hod, admin | multipart form: `department_code` (SE/AI/CS/IT), `dry_run` (default `true`), `file` (.xlsx/.csv, max 10 MB; the PHP backend also takes .xls and .pdf) |
 
 Entry object: `{id, section_id, course_id, teacher_id, room_id, day_of_week, start_time, end_time}`.
 
@@ -114,6 +114,8 @@ Import response (`dry_run=true` saves nothing):
 ```
 
 `level: "error"` rows are skipped; `"warning"` rows are kept. `rooms_created` lists rooms invented by the import: their capacity is **unknown (`null`)**, so set it with `PUT /api/rooms/{id}`. Re-importing the same file is safe (identical entries are skipped).
+
+PDF (PHP backend): each page is one sheet. It must be a PDF saved from Excel or Word (a scanned picture is refused with 400). The section comes from a title above the table (`Section: BSSE-4A`, or a line that is just `BSSE-4A`); without one the classes go into section `Page N` and a warning says so. Always run with `dry_run=true` first and check `preview`.
 
 ## 8. Exam repository (`exams.py`)
 
