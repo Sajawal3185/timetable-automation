@@ -7,14 +7,17 @@ Endpoints:
     GET  /api/auth/me         who am I (used by the frontend on page refresh)
     POST /api/auth/users      admin creates teacher / hod / admin accounts
 
+Self-signup and forgot password live in routers/signup.py.
+
 Design rules this file enforces:
   * ONE login endpoint for every role. The role comes from the database row,
     never from the request body.
-  * There is NO public sign-up at all. Students claim a pre-imported roster
-    account (activate); staff accounts are created by an admin (POST /users).
-    A self-signup endpoint was removed (BE-04, review item BR-M8): it let anyone
-    with a roll-number-shaped string create a student in any section, and the
-    server cannot prove a roll number belongs to the person typing it.
+  * Accounts come from three places: roster students claim theirs (activate),
+    an admin creates staff (POST /users), and anyone with an @numls.edu.pk inbox
+    can sign up by proving it with an emailed code (routers/signup.py).
+    The old self-signup was removed (BE-04, review item BR-M8) because it
+    trusted a typed roll number, which the server cannot prove; the new one
+    trusts only the email code.
 """
 
 import re
@@ -48,8 +51,8 @@ STAFF_ROLES = {"teacher", "hod", "admin"}
 # Matched AFTER lowercasing. This only checks the SHAPE, it cannot prove the
 # roll number really belongs to the person typing it (see README limitation).
 # Loosen or tighten the digit range if other departments format theirs differently.
-# Not used by any endpoint since self-signup was removed; kept for BE-13
-# (real roll-number format), which will validate roster imports with it.
+# Used by routers/signup.py for the student signup form (profile only, never
+# a login key), and by BE-13 for roster imports.
 ROLL_NUMBER_PATTERN = re.compile(r"^[a-z]{2,4}-\d{6,8}$")
 
 
@@ -67,7 +70,7 @@ def _check_password_length(value: str) -> str:
 
 
 class LoginRequest(BaseModel):
-    identifier: str = Field(min_length=1)   # roll number (students) or staff id; email is not a login key
+    identifier: str = Field(min_length=1)   # roll number / staff id / numl-f24-26789, or the NUML email
     password: str = Field(min_length=1)
 
 
@@ -124,13 +127,22 @@ def _normalize(identifier: str) -> str:
     return identifier.strip().lower()
 
 
+def find_account(db: Session, typed: str) -> User | None:
+    """The account for a typed "NUML email or ID": the identifier first, then the email."""
+    key = _normalize(typed)
+    user = db.execute(select(User).where(User.identifier == key)).scalar_one_or_none()
+    if user is None and "@" in key:
+        user = db.execute(select(User).where(User.email == key)).scalar_one_or_none()
+    return user
+
+
 # ---------------------------------------------------------------------------
 # POST /api/auth/login
 # ---------------------------------------------------------------------------
 
 @router.post("/login", response_model=LoginResponse)
 def login(data: LoginRequest, db: Session = Depends(get_db)):
-    user = db.query(User).filter(User.identifier == _normalize(data.identifier)).first()
+    user = find_account(db, data.identifier)
 
     # Always run ONE bcrypt comparison, even when the user doesn't exist or has
     # no password yet. If we returned early, "unknown user" would answer in ~1ms
@@ -148,7 +160,7 @@ def login(data: LoginRequest, db: Session = Depends(get_db)):
         )
 
     # The role is read from the DB row and signed into the token.
-    token = create_access_token(user_id=user.id, role=user.role)
+    token = create_access_token(user_id=user.id, role=user.role, token_version=user.token_version)
     return LoginResponse(token=token, user=_user_out(db, user))
 
 
@@ -174,7 +186,7 @@ def activate(data: ActivateRequest, db: Session = Depends(get_db)):
     db.commit()  # the account now has a password, so it can no longer be claimed
 
     # Log them straight in so the student doesn't have to type it all again.
-    token = create_access_token(user_id=user.id, role=user.role)
+    token = create_access_token(user_id=user.id, role=user.role, token_version=user.token_version)
     return LoginResponse(token=token, user=_user_out(db, user))
 
 
