@@ -39,6 +39,10 @@ return [
     // --- Email (signup and forgot-password codes, from #93) -----------------
     // "console": write the code to the log instead of sending it (local, CI).
     // "brevo":   send through Brevo's HTTPS API (Render blocks outgoing SMTP).
+    // The password of every demo account (php artisan demo:seed / db:seed). 8+ characters.
+    // Never written in the code: the deploy is public, so it would open the admin account.
+    'seed_password' => env('SEED_PASSWORD'),
+
     'email' => [
         'provider' => env('EMAIL_PROVIDER', 'console'),
         'brevo_api_key' => env('BREVO_API_KEY'),
