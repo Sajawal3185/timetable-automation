@@ -1,23 +1,14 @@
 /* ==========================================================================
-   dashboard.js  -  needs common.js loaded first.
-   common.js already sends logged-out users to the login page.
-
-   Used by dashboard.html and admin-dashboard.html. The admin page is the
-   same page with <body class="... admin-page">; only admins and HODs
-   (NUML.isAdmin) may stay on it, everyone else goes to the student dashboard.
-
-   What it fills in:
-     1. Greeting and profile button
-     2. Today's date
-     3. Profile menu and Log out
-
-   Names go in with textContent, never innerHTML, so a name like "<b>"
-   stays plain text.
+   dashboard.js  -  needs common.js and api.js loaded first.
+   Used by dashboard.html and admin-dashboard.html.
+   Names go in with textContent, never innerHTML.
    ========================================================================== */
 
-/* Admin page only. This just hides the page from other roles; the backend
-   checks the role on every admin endpoint. */
-if (document.body.classList.contains("admin-page") && !NUML.isAdmin(NUML.getUser())) {
+const isAdminPage = document.body.classList.contains("admin-page");
+
+/* Admin page only: hides it from other roles. The backend checks the role
+   on every admin endpoint. */
+if (isAdminPage && !NUML.isAdmin(NUML.getUser())) {
   window.location.replace(NUML.PAGES.dashboard);
 }
 
@@ -28,11 +19,9 @@ function setText(id, text) {
 
 
 /* ===== 1. Greeting and profile button ===== */
-const user = NUML.getUser();
+function renderUser(user) {
+  if (!user) return;
 
-if (user) {
-  /* An old or hand-edited saved user may have no name: fall back to the
-     roll number, and keep the "Welcome back" greeting if there is neither. */
   const name = String(user.name || "").trim() || String(user.identifier || "").trim();
   const initials = name
     .split(/\s+/)
@@ -51,8 +40,21 @@ if (user) {
   setText("userId", handle);
 }
 
+/* Show the saved user at once, then replace it with the server's answer.
+   A fake saved user gets a 401, and api.js sends it to the login page. */
+renderUser(NUML.getUser());
 
-/* ===== 2. Today's date ("Wednesday, 11 November 2026") ===== */
+if (typeof NUML.verifySession === "function") {
+  NUML.verifySession().then((u) => {
+    renderUser(u);
+    if (isAdminPage && u && !NUML.isAdmin(u)) {
+      window.location.replace(NUML.PAGES.dashboard);
+    }
+  });
+}
+
+
+/* ===== 2. Today's date ===== */
 setText("today", new Date().toLocaleDateString("en-GB", {
   weekday: "long", day: "numeric", month: "long", year: "numeric"
 }));
@@ -76,7 +78,6 @@ if (profileBtn && profileMenu) {
     }
   });
 
-  /* Escape closes the menu and puts focus back on the button */
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape" && !profileMenu.hidden) {
       profileMenu.hidden = true;
@@ -86,8 +87,8 @@ if (profileBtn && profileMenu) {
   });
 }
 
-/* Log out: clear the session AND navigate. Without preventDefault the link
-   just opens login.html, which sees the saved session and bounces back here. */
+/* Log out: clear the session AND navigate. querySelectorAll, so BOTH links
+   work (profile menu and sidebar). */
 document.querySelectorAll(".dash-logout").forEach((link) => {
   link.addEventListener("click", (e) => {
     e.preventDefault();
