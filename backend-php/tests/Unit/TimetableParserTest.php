@@ -214,6 +214,67 @@ class TimetableParserTest extends TestCase
         $this->assertSame(['BSCS-2A', 'Friday', '14:00:00', '15:30:00', 'Lab 1'], [$c->section, $c->day, $c->startTime, $c->endTime, $c->room]);
     }
 
+    /**
+     * NUML's own PDF layout (F26 SE and BSCS timetables): days across, a time
+     * label per row, cells Course / Room / Teacher, the section written sideways,
+     * two sections per page, and later pages without the day header.
+     */
+    public function test_numl_department_pdf(): void
+    {
+        $days = ['MONDAY', 'TUESDAY', 'WEDNESDAY'];
+        $page1 = [[90, 560, 'BS SOFTWARE ENGINEERING - Fall 2026 (Morning)'], [35, 534, 'Semester'], [94, 534, 'Slot Time']];
+        foreach ($days as $k => $day) {
+            $page1[] = [190 + 130 * $k, 532, $day];
+        }
+        $block = function (float $top, string $code, string $group, array $rows) {
+            $texts = [[60, $top - 120, $code, 90], [77, $top - 110, $group, 90]];   // sideways section name
+            foreach ($rows as $r => [$slot, $cells]) {
+                $y = $top - 40 * $r;
+                $texts[] = [102, $y, $slot];
+                foreach ($cells as $k => $cell) {
+                    if ($cell === 'FREE SLOT') {
+                        $texts[] = [200 + 130 * $k, $y, 'FREE SLOT', 45];   // the diagonal stamp
+
+                        continue;
+                    }
+                    foreach (explode('|', $cell) as $line => $text) {
+                        $texts[] = [190 + 130 * $k, $y + 13 - 13 * $line, $text];
+                    }
+                }
+            }
+
+            return $texts;
+        };
+        $page1 = [...$page1,
+            ...$block(492, 'BSSE - B39', 'I-A-Mor', [
+                ['08:00 - 08:50', ['Prog. Fundamentals|Room # 8 - Ghazali|Mr. Khateeb Khan', 'FREE SLOT', 'Applied Physics Lab|Control Lab - Ghazali Block|Mr. Favvad Qadir']],
+                ['08:55 - 09:45', ['Ideology & Const. of|Pakistan|Room # 8 - Ghazali|Ms. Hafsa', 'FYP', 'Maths-1 for Medical Students']],
+            ]),
+            ...$block(292, 'BSSE - B39', 'I-B-Mor', [
+                ['08:00 - 08:50', ['DLD Lab|Signal Process & Comm. Lab - Ghazali|Block|Mr. Farooq', 'Pre-Math I (Thursday)|Room # 06 - Ghazali|(1:45 - 4:30)|Dr Afshan Qayum', '']],
+            ]),
+        ];
+        $page2 = $block(492, 'BSSE - B38', 'II-A-Mor', [
+            ['08:00 - 08:50', ['', 'Discrete Structures|Room # 43 - Ghazali|Dr. Safi Ullah Nasir', '']],
+            ['08:55 - 09:45', ['', 'Discrete Structures|Room # 43 - Ghazali|Dr. Safi Ullah Nasir', '']],
+        ]);
+
+        $result = $this->parseFile(TinyPdf::make([$page1, $page2], 6.6), 'se.pdf', 'SE');
+
+        $this->assertSame([], $result->issues);
+        $this->assertSame(['BSSE - B39 I-A-Mor', 'BSSE - B39 I-B-Mor', 'BSSE - B38 II-A-Mor'], $result->sheetsRead);
+        $got = array_map(fn ($r) => [$r->section, $r->day, substr($r->startTime, 0, 5), $r->courseTitle, $r->room, $r->teacher], $result->rows);
+        $this->assertEqualsCanonicalizing([
+            ['BSSE - B39 I-A-Mor', 'Monday', '08:00', 'Prog. Fundamentals', 'Room # 8 - Ghazali', 'Mr. Khateeb Khan'],
+            ['BSSE - B39 I-A-Mor', 'Wednesday', '08:00', 'Applied Physics Lab', 'Control Lab - Ghazali Block', 'Mr. Favvad Qadir'],
+            ['BSSE - B39 I-A-Mor', 'Monday', '08:55', 'Ideology & Const. of Pakistan', 'Room # 8 - Ghazali', 'Ms. Hafsa'],
+            ['BSSE - B39 I-A-Mor', 'Wednesday', '08:55', 'Maths-1 for Medical Students', '', ''],
+            ['BSSE - B39 I-B-Mor', 'Monday', '08:00', 'DLD Lab', 'Signal Process & Comm. Lab - Ghazali Block', 'Mr. Farooq'],
+            ['BSSE - B38 II-A-Mor', 'Tuesday', '08:00', 'Discrete Structures', 'Room # 43 - Ghazali', 'Dr. Safi Ullah Nasir'],
+            ['BSSE - B38 II-A-Mor', 'Tuesday', '08:55', 'Discrete Structures', 'Room # 43 - Ghazali', 'Dr. Safi Ullah Nasir'],
+        ], $got);
+    }
+
     public function test_pdf_page_without_a_section_title_warns(): void
     {
         $page = TinyPdf::gridPage('Timetable Fall 2026', ['08:30 - 10:00', '10:00 - 11:30'], ['Monday' => [0 => 'Maths|Dr. X|R-1']]);

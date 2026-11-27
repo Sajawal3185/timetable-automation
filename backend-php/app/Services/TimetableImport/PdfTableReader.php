@@ -39,19 +39,33 @@ final class PdfTableReader
         $pdf = (new Parser([], $config))->parseFile($path);
         $sheets = [];
         $anyText = false;
+        $days = null;   // NUML's later pages leave the day header out: page 1's columns are kept
 
         foreach ($pdf->getPages() as $i => $page) {
             $items = [];
             foreach ($page->getDataTm() as $item) {
                 $text = SheetReader::clean((string) ($item[1] ?? ''));
                 if ($text !== '') {
-                    // The size on screen: the Tf size times the text matrix's vertical scale.
-                    $size = (float) ($item[3] ?? 0) * abs((float) $item[0][3]);
-                    $items[] = ['x' => (float) $item[0][4], 'y' => (float) $item[0][5], 'text' => $text, 'size' => $size];
+                    [$a, $b, $c, $d] = array_map('floatval', array_slice($item[0], 0, 4));
+                    // The size on screen: the Tf size times the text matrix's scale (rotation-proof).
+                    $size = (float) ($item[3] ?? 0) * sqrt($c * $c + $d * $d);
+                    $scale = sqrt($a * $a + $b * $b) ?: 1.0;
+                    $items[] = ['x' => (float) $item[0][4], 'y' => (float) $item[0][5], 'text' => $text, 'size' => $size,
+                        'a' => $a / $scale, 'b' => $b / $scale];
                 }
             }
             $anyText = $anyText || $items !== [];
-            $sheets[] = self::pageToSheet($items, $i + 1);
+
+            // NUML's own layout first (days across, sideways section names), then any table.
+            $grid = PdfDayGridReader::read($items, $days, $i + 1);
+            if ($grid !== null) {
+                [$pageSheets, $days] = $grid;
+                array_push($sheets, ...$pageSheets);
+
+                continue;
+            }
+            $upright = array_values(array_filter($items, fn ($it) => abs($it['b'] ?? 0) < 0.1));
+            $sheets[] = self::pageToSheet($upright, $i + 1);
         }
 
         if (! $anyText) {

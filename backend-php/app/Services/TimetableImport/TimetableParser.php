@@ -37,7 +37,9 @@ final class TimetableParser
         'room' => ['room', 'venue', 'classroom', 'location', 'room no', 'room number'],
     ];
 
-    public const EMPTY_CELLS = ['', '-', '--', 'x', 'free', 'break', 'lunch', 'prayer', 'prayer break', 'n/a', 'none'];
+    /** Python's list, plus NUML's "FREE SLOT(S)" and "FYP" (final year project time, not a class). */
+    public const EMPTY_CELLS = ['', '-', '--', 'x', 'free', 'break', 'lunch', 'prayer', 'prayer break', 'n/a', 'none',
+        'free slot', 'free slots', 'fyp'];
 
     private const CODE_RE = '/^\s*([A-Za-z]{2,4}\s?-?\s?\d{3,4}[A-Za-z]?)\s*[-:\x{2013}]?\s*(.*)$/su';
 

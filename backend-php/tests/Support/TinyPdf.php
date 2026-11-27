@@ -10,7 +10,10 @@ namespace Tests\Support;
  */
 final class TinyPdf
 {
-    /** @param list<list<array{0: float, 1: float, 2: string}>> $pages */
+    /**
+     * @param  list<list<array{0: float, 1: float, 2: string, 3?: int}>>  $pages  text at x, y; the
+     *                                                                               optional 4th value turns it (degrees, anticlockwise)
+     */
     public static function make(array $pages, float $fontSize = 9): string
     {
         $objects = [
@@ -23,9 +26,13 @@ final class TinyPdf
             [$pageId, $contentId] = [$next++, $next++];
             $kids[] = "$pageId 0 R";
             $stream = '';
-            foreach ($texts as [$x, $y, $text]) {
+            foreach ($texts as $t) {
+                [$x, $y, $text] = $t;
+                $angle = deg2rad($t[3] ?? 0);
+                [$cos, $sin] = [round(cos($angle), 4), round(sin($angle), 4)];
                 $escaped = strtr($text, ['\\' => '\\\\', '(' => '\\(', ')' => '\\)']);
-                $stream .= sprintf("BT /F1 %.1F Tf 1 0 0 1 %.2F %.2F Tm (%s) Tj ET\n", $fontSize, $x, $y, $escaped);
+                $stream .= sprintf("BT /F1 %.1F Tf %.4F %.4F %.4F %.4F %.2F %.2F Tm (%s) Tj ET\n",
+                    $fontSize, $cos, $sin, -$sin, $cos, $x, $y, $escaped);
             }
             $objects[$contentId] = '<< /Length '.strlen($stream)." >>\nstream\n$stream\nendstream";
             $objects[$pageId] = "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 842 595] /Resources << /Font << /F1 3 0 R >> >> /Contents $contentId 0 R >>";

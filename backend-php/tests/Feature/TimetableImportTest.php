@@ -198,6 +198,23 @@ class TimetableImportTest extends TestCase
         $this->assertSame([$this->c1->id, $this->mid->id], [$entry->course_id, $entry->room_id]);
     }
 
+    public function test_titles_that_make_the_same_code_get_different_codes(): void
+    {
+        // Both clashes are in the real F26 PDFs; Python's loader crashed on them.
+        TimetableLoader::load([
+            $this->row(courseCode: '', courseTitle: 'Digital Logic Design'),
+            $this->row(courseCode: '', courseTitle: 'Digital Logic & Design', day: 'Tuesday'),
+            $this->row(courseCode: '', courseTitle: 'Artificial Intelligence', day: 'Wednesday'),
+            $this->row(courseCode: '', courseTitle: 'Artificial Intelligence Lab', day: 'Thursday'),
+        ], 'SE');
+
+        $this->assertEqualsCanonicalizing(
+            ['DIGITALLOGICDESIGN', 'DIGITALLOGICDESIGN-2', 'ARTIFICIALINTELLIGEN', 'ARTIFICIALINTELLIG-2'],
+            Course::where('department_id', $this->dept->id)->whereNotIn('code', ['CS101', 'SE201'])->pluck('code')->all(),
+        );
+        $this->assertSame(4, TimetableEntry::count());
+    }
+
     // ------------------------------------------------------------ helpers
 
     private function upload(array $fields, string $name, string $bytes): TestResponse

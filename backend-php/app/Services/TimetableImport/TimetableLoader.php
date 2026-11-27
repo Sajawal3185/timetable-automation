@@ -54,9 +54,7 @@ final class TimetableLoader
                     ? self::firstByName(Course::query(), 'code', $row->courseCode)
                     : self::firstByName(Course::where('department_id', $dept->id), 'title', $row->courseTitle);
                 if ($course === null) {
-                    $newCode = $row->courseCode !== ''
-                        ? $row->courseCode
-                        : substr(strtoupper(preg_replace('/[^A-Za-z0-9]/', '', $row->courseTitle)), 0, 20);
+                    $newCode = $row->courseCode !== '' ? $row->courseCode : self::madeUpCode($row->courseTitle, $dept->id);
                     $course = Course::create(['code' => $newCode, 'title' => $row->courseTitle, 'department_id' => $dept->id]);
                     $summary->coursesCreated++;
                 }
@@ -107,6 +105,23 @@ final class TimetableLoader
         }
 
         return $summary;
+    }
+
+    /**
+     * A code for a course that has only a title: its letters and digits, at most
+     * 20. Different titles can give the same code ("Digital Logic Design" and
+     * "Digital Logic & Design", or two long titles cut at 20), and codes are
+     * unique per department, so a taken code gets -2, -3, ... (Python crashes here.)
+     */
+    private static function madeUpCode(string $title, int $departmentId): string
+    {
+        $base = substr(strtoupper(preg_replace('/[^A-Za-z0-9]/', '', $title)), 0, 20) ?: 'COURSE';
+        $code = $base;
+        for ($n = 2; Course::where('department_id', $departmentId)->where('code', $code)->exists(); $n++) {
+            $code = substr($base, 0, 20 - strlen("-$n"))."-$n";
+        }
+
+        return $code;
     }
 
     /** The first row whose $column equals $value, ignoring case (Python's _ci_first). */
