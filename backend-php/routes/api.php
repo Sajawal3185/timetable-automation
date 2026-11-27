@@ -12,6 +12,7 @@
 
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\HealthController;
+use App\Http\Controllers\Api\MakeupController;
 use App\Http\Controllers\Api\RoomController;
 use App\Http\Controllers\Api\SwapController;
 use App\Http\Controllers\Api\TimetableController;
@@ -34,6 +35,13 @@ Route::prefix('auth')->controller(AuthController::class)->group(function () {
 
 // --- health -------------------------------------------------------------------
 Route::get('/health', HealthController::class);
+
+// --- makeup classes (routers/makeup.py) --------------------------------------
+Route::prefix('makeup')->controller(MakeupController::class)->group(function () {
+    Route::post('/find-slots', 'findSlots')->middleware('role:'.Roles::list(Roles::STAFF));
+    Route::post('/', 'store')->middleware('role:'.Roles::list(Roles::STAFF));
+    Route::get('/', 'index')->middleware('jwt');
+});
 
 // --- rooms and reference data (routers/rooms.py) -----------------------------
 Route::controller(RoomController::class)->group(function () {
