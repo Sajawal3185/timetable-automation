@@ -13,6 +13,7 @@
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\HealthController;
 use App\Http\Controllers\Api\RoomController;
+use App\Http\Controllers\Api\SwapController;
 use App\Http\Controllers\Api\TimetableController;
 use App\Support\Roles;
 use Illuminate\Support\Facades\Route;
@@ -43,6 +44,15 @@ Route::controller(RoomController::class)->group(function () {
     Route::put('/rooms/{roomId}', 'update')->whereNumber('roomId')->middleware('role:'.Roles::list(Roles::ADMINS));
     Route::get('/departments', 'departments')->middleware('jwt');
     Route::get('/courses', 'courses')->middleware('jwt');
+});
+
+// --- swaps (routers/swaps.py) ------------------------------------------------
+Route::prefix('swap-requests')->controller(SwapController::class)->group(function () {
+    Route::post('/', 'store')->middleware('role:'.Roles::TEACHER);
+    Route::get('/', 'index')->middleware('role:'.Roles::list(Roles::STAFF));
+    Route::post('/{swapId}/approve', 'approve')->whereNumber('swapId')->middleware('role:'.Roles::list(Roles::ADMINS));
+    Route::post('/{swapId}/reject', 'reject')->whereNumber('swapId')->middleware('role:'.Roles::list(Roles::ADMINS));
+    Route::post('/{swapId}/cancel', 'cancel')->whereNumber('swapId')->middleware('role:'.Roles::TEACHER);
 });
 
 // --- timetable (routers/timetable.py) ----------------------------------------
