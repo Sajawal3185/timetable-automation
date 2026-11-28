@@ -135,7 +135,8 @@ jobs:
             -e APP_KEY="base64:$(openssl rand -base64 32)" -e JWT_SECRET_KEY="$(openssl rand -hex 32)" \
             -e DB_CONNECTION=sqlite -e DB_DATABASE=/var/www/html/database/ci.sqlite \
             timetable-php
-          for i in $(seq 1 30); do docker exec api-ca test -f /usr/local/share/db-ca.pem && break; sleep 1; done
+          # Wait for config:cache (it runs after the copy), so the check reads what Apache reads.
+          for i in $(seq 1 30); do docker exec api-ca test -f bootstrap/cache/config.php && break; sleep 1; done
           # www-data (Apache's user) can't read the mounted original, but can read the copy the app uses.
           ! docker exec -u www-data api-ca cat /etc/secrets/ca.pem
           docker exec -u www-data api-ca php artisan tinker \
