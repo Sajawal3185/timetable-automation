@@ -139,8 +139,9 @@ jobs:
           for i in $(seq 1 30); do docker exec api-ca test -f bootstrap/cache/config.php && break; sleep 1; done
           # www-data (Apache's user) can't read the mounted original, but can read the copy the app uses.
           ! docker exec -u www-data api-ca cat /etc/secrets/ca.pem
-          docker exec -u www-data api-ca php artisan tinker \
-            --execute="echo is_readable(config('database.connections.mysql.ssl_ca')) ? 'readable' : 'NOT readable';" | grep -x readable
+          # The cached config is what Apache's PHP reads (tinker can't run as www-data: no writable home).
+          docker exec -u www-data api-ca php -r '$c = require "bootstrap/cache/config.php"; $f = $c["database"]["connections"]["mysql"]["ssl_ca"]; echo $f, " ", is_readable($f) ? "readable" : "NOT readable", "\n";' \
+            | tee /dev/stderr | grep -x "/usr/local/share/db-ca.pem readable"
       - name: Container log
         if: always()
         run: docker logs api; docker logs api-ca || true
