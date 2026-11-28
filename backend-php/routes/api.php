@@ -11,6 +11,7 @@
 */
 
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\ExamPaperController;
 use App\Http\Controllers\Api\HealthController;
 use App\Http\Controllers\Api\LectureMaterialController;
 use App\Http\Controllers\Api\MakeupController;
@@ -33,6 +34,15 @@ Route::prefix('auth')->controller(AuthController::class)->group(function () {
     Route::post('/activate', 'activate')->middleware('throttle:auth');
     Route::get('/me', 'me')->middleware('jwt');
     Route::post('/users', 'createUser')->middleware('role:admin');
+});
+
+// --- exam papers (routers/portal.py) ------------------------------------------
+Route::prefix('exam-papers')->controller(ExamPaperController::class)->middleware('jwt')->group(function () {
+    Route::get('/', 'index');
+    Route::post('/', 'store')->middleware('role:teacher,hod,admin');
+    Route::get('/{paperId}', 'show')->whereNumber('paperId');
+    Route::get('/{paperId}/download', 'download')->whereNumber('paperId');
+    Route::delete('/{paperId}', 'destroy')->whereNumber('paperId');
 });
 
 // --- health -------------------------------------------------------------------
