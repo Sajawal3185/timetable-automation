@@ -39,6 +39,9 @@ return Application::configure(basePath: dirname(__DIR__))
         // (AuthApiTest::test_rate_limit_address_is_the_one_render_appended).
         // Not '*': Laravel reads that as "trust every address", and ip() would be
         // the FIRST entry, which the client chooses (a fresh rate-limit key per try).
+        // On Render that last entry turned out to be one of Cloudflare's/Render's own
+        // addresses, so the rate limits use Cloudflare's CF-Connecting-IP instead
+        // (App\Support\ClientIp); ip() is the fallback off Render.
         $middleware->trustProxies(at: 'REMOTE_ADDR');
     })
     ->withExceptions(function (Exceptions $exceptions): void {

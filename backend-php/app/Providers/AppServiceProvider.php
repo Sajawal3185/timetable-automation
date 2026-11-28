@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Http\Middleware\AuthenticateJwt;
 use App\Http\Middleware\RequireRoles;
 use App\Services\Security;
+use App\Support\ClientIp;
 use App\Support\DbTls;
 use App\Support\Identifiers;
 use Dedoc\Scramble\Scramble;
@@ -80,7 +81,8 @@ class AppServiceProvider extends ServiceProvider
             $identifier = $request->input('identifier');   // not validated yet: may be anything
             $account = is_string($identifier) && strlen($identifier) <= 4 * self::IDENTIFIER_MAX
                 ? Identifiers::normalize($identifier) : '';
-            $perAddress = Limit::perMinute(300)->by('ip:'.$request->ip());
+            $ip = ClientIp::of($request);   // Cloudflare's CF-Connecting-IP on Render (see ClientIp)
+            $perAddress = Limit::perMinute(300)->by('ip:'.$ip);
 
             // No usable identifier: validation will reject it (422) and there is no
             // account to protect. Without this, every such request would share one
@@ -91,7 +93,7 @@ class AppServiceProvider extends ServiceProvider
             }
 
             return [
-                Limit::perMinute(10)->by('id:'.$account.'|'.$request->ip()),
+                Limit::perMinute(10)->by('id:'.$account.'|'.$ip),
                 $perAddress,
                 Limit::perMinute(30)->by('account:'.$account),
             ];

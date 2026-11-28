@@ -7,8 +7,10 @@ use App\Models\Section;
 use App\Models\Teacher;
 use App\Models\User;
 use App\Services\Security;
+use App\Support\ClientIp;
 use App\Support\Identifiers;
 use Database\Factories\UserFactory;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Testing\TestResponse;
 use Tests\TestCase;
@@ -430,6 +432,36 @@ class AuthApiTest extends TestCase
 
         $this->assertSame('198.51.100.7', $viaRender('6.6.6.6, 198.51.100.7')
             ->get('/api/health')->baseRequest->ip());
+    }
+
+    public function test_rate_limit_address_is_cloudflares_client_ip_on_render(): void
+    {
+        // On Render the last X-Forwarded-For entry is Cloudflare's/Render's own and
+        // changes per request; CF-Connecting-IP is the real client (Cloudflare refuses
+        // requests that arrive with it, so it can't be faked). See App\Support\ClientIp.
+        $viaCloudflare = fn (string $client, int $hop) => $this
+            ->withServerVariables(['REMOTE_ADDR' => '10.10.0.1'])
+            ->withHeaders(['X-Forwarded-For' => "$client, 172.70.0.$hop", 'CF-Connecting-IP' => $client]);
+
+        for ($i = 0; $i < 10; $i++) {   // a different hop every time, as on staging
+            $viaCloudflare('198.51.100.20', $i)->login('se-123456', 'wrong-guess-'.$i)->assertStatus(401);
+        }
+        $viaCloudflare('198.51.100.20', 99)->login('se-123456')->assertStatus(429);
+
+        // Another real client still has its own budget (the per-account 30 is not reached).
+        $viaCloudflare('198.51.100.21', 1)->login('se-123456')->assertOk();
+    }
+
+    public function test_client_ip_ignores_a_cf_header_that_is_not_an_ip(): void
+    {
+        $request = Request::create('/api/health', server: ['REMOTE_ADDR' => '198.51.100.9']);
+        $this->assertSame('198.51.100.9', ClientIp::of($request));
+
+        $request->headers->set('CF-Connecting-IP', 'not-an-ip');
+        $this->assertSame('198.51.100.9', ClientIp::of($request));
+
+        $request->headers->set('CF-Connecting-IP', ' 2001:db8::7 ');
+        $this->assertSame('2001:db8::7', ClientIp::of($request));
     }
 
     public function test_requests_without_a_usable_identifier_are_422_not_429(): void
