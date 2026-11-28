@@ -11,7 +11,8 @@ use App\Http\Resources\RoomResource;
 use App\Models\Course;
 use App\Models\Department;
 use App\Models\Room;
-use App\Models\TimetableEntry;
+use App\Models\Section;
+use App\Models\Teacher;
 use App\Support\DayTime;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\UniqueConstraintViolationException;
@@ -150,6 +151,38 @@ class RoomController extends Controller
             ->get();
 
         return CourseResource::collection($courses);
+    }
+
+    /**
+     * Sections by name, for "pick a section" and section names in the timetable.
+     * Not in FastAPI (the contract listed it as pending).
+     */
+    public function sections(Request $request): JsonResponse
+    {
+        $q = $request->validate(['department_id' => ['nullable', 'integer']]);
+
+        $rows = Section::orderBy('name')->orderBy('id')
+            ->when($q['department_id'] ?? null, fn (Builder $b, $id) => $b->where('department_id', $id))
+            ->get(['id', 'name', 'department_id', 'student_count']);
+
+        return response()->json($rows);
+    }
+
+    /**
+     * Teachers by name, for teacher names in the timetable and the admin's
+     * "link this account" picker. user_id is null while no account is linked.
+     * Not in FastAPI.
+     */
+    public function teachers(Request $request): JsonResponse
+    {
+        $q = $request->validate(['department_id' => ['nullable', 'integer'], 'unlinked' => ['sometimes', 'in:true,false,1,0']]);
+
+        $rows = Teacher::orderBy('name')->orderBy('id')
+            ->when($q['department_id'] ?? null, fn (Builder $b, $id) => $b->where('department_id', $id))
+            ->when(in_array($q['unlinked'] ?? null, ['true', '1'], true), fn (Builder $b) => $b->whereNull('user_id'))
+            ->get(['id', 'name', 'department_id', 'user_id']);
+
+        return response()->json($rows);
     }
 
     private function find(int $roomId): Room

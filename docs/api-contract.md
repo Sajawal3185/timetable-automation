@@ -85,9 +85,17 @@ Notification object: `{id, type (schedule_changed/swap_requested/swap_approved/s
 | PUT | `/api/rooms/{id}` | hod, admin | any subset of the body above |
 | GET | `/api/departments` | any user | `[{id, name, code}]` |
 | GET | `/api/courses` | any user | query: `department_id`, `search`, `skip`, `limit` |
-| GET | `/api/sections` | any user | query: `department_id`. Returns `[{id, name, department_id, student_count}]`. Lets the frontend offer "pick a section" *(pending BE-04)* |
+| GET | `/api/sections` | any user | query: `department_id`. Returns `[{id, name, department_id, student_count}]` by name. Lets the frontend offer "pick a section" and show section names *(PHP backend only)* |
+| GET | `/api/teachers` | any user | query: `department_id`, `unlinked=true` (no account linked yet). Returns `[{id, name, department_id, user_id}]` by name; `user_id` is `null` until an admin links an account *(PHP backend only)* |
 
 Room object: `{id, name, capacity, building}`. `capacity` is `null` when unknown (rooms created by a timetable import); the makeup solver never uses such a room. Course object: `{id, code, title, credit_hours, department_id}`.
+
+### Admin: the users screen *(PHP backend only)*
+
+| Method | URL | Who | Notes |
+| --- | --- | --- | --- |
+| GET | `/api/admin/users` | admin | query: `role`, `department_id`, `unlinked=true` (staff with no teacher record: the ones to link), `skip`, `limit` (`X-Total-Count`). Users by name: the user object plus `email`, `email_verified`, `is_active` |
+| PUT | `/api/admin/users/{id}` | admin | body: any of `{role, teacher_id, department_id}`; only the fields sent change. `role` is `teacher`, `hod` or `admin`; `teacher_id` links the account to a teacher record (`null` unlinks), which fills `teacher_id` in `/api/auth/me`. `400` your own role, a student account (they can't get a staff role or a teacher record), a HOD without a department, unknown department or teacher; `404` user missing; `409` that teacher record is linked to another account |
 
 ## 7. Timetable (`timetable.py`)
 

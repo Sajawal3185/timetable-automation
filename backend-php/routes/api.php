@@ -10,6 +10,7 @@
 |   Route::post('/rooms', [RoomController::class, 'store'])->middleware('role:hod,admin'); // these roles only
 */
 
+use App\Http\Controllers\Api\AdminUserController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ExamPaperController;
 use App\Http\Controllers\Api\HealthController;
@@ -21,6 +22,12 @@ use App\Http\Controllers\Api\SwapController;
 use App\Http\Controllers\Api\TimetableController;
 use App\Support\Roles;
 use Illuminate\Support\Facades\Route;
+
+// --- admin: the users screen (new in PHP, not in FastAPI) ---------------------
+Route::prefix('admin')->controller(AdminUserController::class)->middleware('role:'.Roles::ADMIN)->group(function () {
+    Route::get('/users', 'index');
+    Route::put('/users/{userId}', 'update')->whereNumber('userId');
+});
 
 // --- auth (routers/auth.py) ---------------------------------------------------
 Route::prefix('auth')->controller(AuthController::class)->group(function () {
@@ -82,6 +89,8 @@ Route::controller(RoomController::class)->group(function () {
     Route::put('/rooms/{roomId}', 'update')->whereNumber('roomId')->middleware('role:'.Roles::list(Roles::ADMINS));
     Route::get('/departments', 'departments')->middleware('jwt');
     Route::get('/courses', 'courses')->middleware('jwt');
+    Route::get('/sections', 'sections')->middleware('jwt');   // new in PHP
+    Route::get('/teachers', 'teachers')->middleware('jwt');   // new in PHP
 });
 
 // --- swaps (routers/swaps.py) ------------------------------------------------
