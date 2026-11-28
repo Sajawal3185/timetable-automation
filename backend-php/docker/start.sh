@@ -12,6 +12,15 @@ if [ "${DB_CONNECTION}" = "sqlite" ] && [ -n "${DB_DATABASE}" ] && [ ! -f "${DB_
     touch "${DB_DATABASE}" && chown www-data:www-data "${DB_DATABASE}" "$(dirname "${DB_DATABASE}")"
 fi
 
+# Render's secret files (/etc/secrets/ca.pem) are readable by root only. This script
+# runs as root, so migrations connected fine, but Apache's PHP runs as www-data: it
+# could not read the CA, so every database query from a web request failed (500).
+# Copy the certificate to a place www-data can read; it is a public CA, not a secret.
+if [ -n "${DB_SSL_CA}" ] && [ -f "${DB_SSL_CA}" ]; then
+    install -m 0644 "${DB_SSL_CA}" /usr/local/share/db-ca.pem
+    export DB_SSL_CA=/usr/local/share/db-ca.pem
+fi
+
 # Settings are read once here and cached, so a missing one fails now, not mid-request.
 php artisan config:cache
 

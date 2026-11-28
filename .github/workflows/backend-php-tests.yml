@@ -126,6 +126,20 @@ jobs:
           # 307/308. After a 301 it would send a GET, and login would answer 405.
           BODY='{"identifier":"ci-admin","password":"ci-password-1"}'
           curl -fsSL localhost:8080/api/auth/login/ -H 'Content-Type: application/json' -d "$BODY" | jq -e .token
+      - name: A root-only DB_SSL_CA (like Render's /etc/secrets) is readable by Apache
+        run: |
+          set -x
+          mkdir -p secrets && echo "not a real cert" > secrets/ca.pem && chmod 700 secrets && chmod 600 secrets/ca.pem
+          docker run -d --name api-ca \
+            -v "$PWD/secrets:/etc/secrets:ro" -e DB_SSL_CA=/etc/secrets/ca.pem \
+            -e APP_KEY="base64:$(openssl rand -base64 32)" -e JWT_SECRET_KEY="$(openssl rand -hex 32)" \
+            -e DB_CONNECTION=sqlite -e DB_DATABASE=/var/www/html/database/ci.sqlite \
+            timetable-php
+          for i in $(seq 1 30); do docker exec api-ca test -f /usr/local/share/db-ca.pem && break; sleep 1; done
+          # www-data (Apache's user) can't read the mounted original, but can read the copy the app uses.
+          ! docker exec -u www-data api-ca cat /etc/secrets/ca.pem
+          docker exec -u www-data api-ca php artisan tinker \
+            --execute="echo is_readable(config('database.connections.mysql.ssl_ca')) ? 'readable' : 'NOT readable';" | grep -x readable
       - name: Container log
         if: always()
-        run: docker logs api
+        run: docker logs api; docker logs api-ca || true
