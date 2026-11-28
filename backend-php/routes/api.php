@@ -11,6 +11,7 @@
 */
 
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\EventController;
 use App\Http\Controllers\Api\ExamPaperController;
 use App\Http\Controllers\Api\HealthController;
 use App\Http\Controllers\Api\LectureMaterialController;
@@ -34,6 +35,15 @@ Route::prefix('auth')->controller(AuthController::class)->group(function () {
     Route::post('/activate', 'activate')->middleware('throttle:auth');
     Route::get('/me', 'me')->middleware('jwt');
     Route::post('/users', 'createUser')->middleware('role:admin');
+});
+
+// --- events (routers/events.py) -----------------------------------------------
+Route::prefix('events')->controller(EventController::class)->group(function () {
+    Route::get('/', 'index')->middleware('jwt');
+    Route::get('/{eventId}', 'show')->whereNumber('eventId')->middleware('jwt');
+    Route::post('/', 'store')->middleware('role:'.Roles::list(Roles::ADMINS));
+    Route::put('/{eventId}', 'update')->whereNumber('eventId')->middleware('role:'.Roles::list(Roles::ADMINS));
+    Route::delete('/{eventId}', 'destroy')->whereNumber('eventId')->middleware('role:'.Roles::list(Roles::ADMINS));
 });
 
 // --- exam papers (routers/exams.py) -------------------------------------------
