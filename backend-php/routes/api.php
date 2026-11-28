@@ -17,6 +17,7 @@ use App\Http\Controllers\Api\LectureMaterialController;
 use App\Http\Controllers\Api\MakeupController;
 use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\RoomController;
+use App\Http\Controllers\Api\SoftwareResourceController;
 use App\Http\Controllers\Api\SwapController;
 use App\Http\Controllers\Api\TimetableController;
 use App\Support\Roles;
@@ -82,6 +83,15 @@ Route::controller(RoomController::class)->group(function () {
     Route::put('/rooms/{roomId}', 'update')->whereNumber('roomId')->middleware('role:'.Roles::list(Roles::ADMINS));
     Route::get('/departments', 'departments')->middleware('jwt');
     Route::get('/courses', 'courses')->middleware('jwt');
+});
+
+// --- software resources (routers/software.py) --------------------------------
+Route::prefix('software-resources')->controller(SoftwareResourceController::class)->group(function () {
+    Route::get('/', 'index')->middleware('jwt');
+    Route::get('/{itemId}', 'show')->whereNumber('itemId')->middleware('jwt');
+    Route::post('/', 'store')->middleware('role:'.Roles::list(Roles::STAFF));
+    Route::put('/{itemId}', 'update')->whereNumber('itemId')->middleware('role:'.Roles::list(Roles::STAFF));
+    Route::delete('/{itemId}', 'destroy')->whereNumber('itemId')->middleware('role:'.Roles::list(Roles::STAFF));
 });
 
 // --- swaps (routers/swaps.py) ------------------------------------------------
