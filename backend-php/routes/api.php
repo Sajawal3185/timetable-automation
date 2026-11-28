@@ -36,10 +36,10 @@ Route::prefix('auth')->controller(AuthController::class)->group(function () {
     Route::post('/users', 'createUser')->middleware('role:admin');
 });
 
-// --- exam papers (routers/portal.py) ------------------------------------------
+// --- exam papers (routers/exams.py) -------------------------------------------
 Route::prefix('exam-papers')->controller(ExamPaperController::class)->middleware('jwt')->group(function () {
     Route::get('/', 'index');
-    Route::post('/', 'store')->middleware('role:teacher,hod,admin');
+    Route::post('/', 'store')->middleware('role:'.Roles::list(Roles::STAFF));
     Route::get('/{paperId}', 'show')->whereNumber('paperId');
     Route::get('/{paperId}/download', 'download')->whereNumber('paperId');
     Route::delete('/{paperId}', 'destroy')->whereNumber('paperId');
@@ -48,10 +48,10 @@ Route::prefix('exam-papers')->controller(ExamPaperController::class)->middleware
 // --- health -------------------------------------------------------------------
 Route::get('/health', HealthController::class);
 
-// --- lecture materials (routers/portal.py) -----------------------------------
+// --- lecture materials (routers/materials.py) --------------------------------
 Route::prefix('lecture-materials')->controller(LectureMaterialController::class)->middleware('jwt')->group(function () {
     Route::get('/', 'index');
-    Route::post('/', 'store')->middleware('role:teacher,hod,admin');
+    Route::post('/', 'store')->middleware('role:'.Roles::list(Roles::STAFF));
     Route::get('/by-course/{courseId}', 'byCourse')->whereNumber('courseId');   // before /{materialId}
     Route::get('/{materialId}', 'show')->whereNumber('materialId');
     Route::get('/{materialId}/download', 'download')->whereNumber('materialId');

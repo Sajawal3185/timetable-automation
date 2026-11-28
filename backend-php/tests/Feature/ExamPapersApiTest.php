@@ -2,9 +2,11 @@
 
 namespace Tests\Feature;
 
+use App\Services\FileStorage;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Testing\TestResponse;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Tests\Support\Files;
 use Tests\Support\SeedsArchive;
 use Tests\TestCase;
@@ -162,6 +164,29 @@ class ExamPapersApiTest extends TestCase
 
         $this->bare('teacher', $big)->assertStatus(413)->assertExactJson(['detail' => 'File too large (max 1 MB)']);
         $this->assertSame([], Storage::disk('local')->allFiles('exam_papers'));
+    }
+
+    public function test_file_refused_by_php_gives_413_or_400_not_500(): void
+    {
+        // What PHP hands over when the file broke upload_max_filesize, or arrived only partly.
+        $tmp = tempnam(sys_get_temp_dir(), 'up');
+        file_put_contents($tmp, Files::pdf());
+        $tooBig = new UploadedFile($tmp, 'paper.pdf', 'application/pdf', UPLOAD_ERR_INI_SIZE, true);
+        $partial = new UploadedFile($tmp, 'paper.pdf', 'application/pdf', UPLOAD_ERR_PARTIAL, true);
+
+        // Through the API Laravel's 'file' rule already answers 422; FileStorage's own guard
+        // (413 / 400) protects any other caller, so check it directly too.
+        $this->bare('teacher', $tooBig)->assertStatus(422);
+        foreach ([[$tooBig, 413], [$partial, 400]] as [$file, $status]) {
+            try {
+                FileStorage::save($file, 'exam_papers', FileStorage::PAPER_EXTENSIONS);
+                $this->fail('save() accepted a file PHP refused');
+            } catch (HttpException $e) {
+                $this->assertSame($status, $e->getStatusCode());
+            }
+        }
+        $this->assertSame([], Storage::disk('local')->allFiles('exam_papers'));
+        @unlink($tmp);
     }
 
     public function test_exam_instructor_name_rule(): void

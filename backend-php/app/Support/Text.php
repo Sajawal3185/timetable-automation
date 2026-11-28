@@ -21,6 +21,15 @@ final class Text
      */
     public static function likeContains(string $value): string
     {
-        return '%'.str_replace(['!', '%', '_'], ['!!', '!%', '!_'], $value).'%';
+        return '%'.self::likeExact($value).'%';
+    }
+
+    /**
+     * The value with % and _ escaped, for a whole-value, case-insensitive match:
+     * LIKE ... ESCAPE '!'. "Fall_2025" then matches only "fall_2025", not "Fall-2025".
+     */
+    public static function likeExact(string $value): string
+    {
+        return str_replace(['!', '%', '_'], ['!!', '!%', '!_'], $value);
     }
 }

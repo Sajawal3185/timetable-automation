@@ -86,7 +86,7 @@ class LectureMaterialController extends Controller
             $query->where('material_type', $q['material_type']);
         }
         if (($q['term'] ?? '') !== '') {
-            $query->whereRaw('term LIKE ?', [Text::strip($q['term'])]);
+            $query->whereRaw("term LIKE ? ESCAPE '!'", [Text::likeExact(Text::strip($q['term']))]);
         }
         if (($q['q'] ?? '') !== '') {
             $like = Text::likeContains(Text::strip($q['q']));
@@ -107,17 +107,14 @@ class LectureMaterialController extends Controller
         $rows = LectureMaterial::where('course_id', $courseId)->orderBy('instructor_name')->orderBy('id')->get();
 
         $groups = [];
-  $names = [];   // the name as first written (lowest id), to show
-        $firstId = [];
+        $names = [];   // the name on the first row of each group (instructor_name, id order), as Python shows it
         foreach ($rows as $material) {
             $key = mb_convert_case(Text::strip($material->instructor_name), MB_CASE_FOLD);   // Python casefold()
-            if (! isset($firstId[$key]) || $material->id < $firstId[$key]) {
-                $firstId[$key] = $material->id;
+            if (! isset($names[$key])) {
                 $names[$key] = $material->instructor_name;
             }
             $groups[$key][] = (new LectureMaterialResource($material))->resolve();
         }
-       
 
         return response()->json([
             'course_id' => $course->id,

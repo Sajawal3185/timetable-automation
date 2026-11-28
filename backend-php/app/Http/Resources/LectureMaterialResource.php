@@ -7,8 +7,8 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
- * LectureMaterialOut. TODO: compare the field list with LectureMaterialOut in
- * backend/app/schemas/portal.py and docs/api-contract.md. file_path is never exposed.
+ * LectureMaterialOut in backend/app/schemas/portal.py: every field there, nothing more.
+ * file_path is never exposed.
  */
 class LectureMaterialResource extends JsonResource
 {

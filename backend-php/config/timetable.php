@@ -32,10 +32,6 @@ return [
     // typo or "off"/"no" hides it. ((bool) "off" would have been true.)
     'docs_enabled' => filter_var(env('DOCS_ENABLED', true), FILTER_VALIDATE_BOOLEAN),
 
-    // --- File uploads -------------------------------------------------------
-    'upload_dir' => env('UPLOAD_DIR', 'uploads'),
-    'max_upload_mb' => (int) env('MAX_UPLOAD_MB', 20),
-
     // --- Email (signup and forgot-password codes, from #93) -----------------
     // "console": write the code to the log instead of sending it (local, CI).
     // "brevo":   send through Brevo's HTTPS API (Render blocks outgoing SMTP).
@@ -50,7 +46,14 @@ return [
         'from_name' => env('EMAIL_FROM_NAME', 'NUML Timetable'),
     ],
 
-'uploads' => [
+    // --- File uploads (exam papers, lecture materials) ----------------------
+    // disk: a disk from config/filesystems.php. "local" = storage/app/private,
+    // which is NOT kept across a Render redeploy (Supabase S3 later).
+    // max_mb: keep it at or below the Dockerfile's upload_max_filesize (25M),
+    // or PHP drops bigger files before the app can answer 413.
+    'uploads' => [
         'disk' => env('UPLOAD_DISK', 'local'),
         'max_mb' => (int) env('MAX_UPLOAD_MB', 20),
-    ],];
+    ],
+
+];

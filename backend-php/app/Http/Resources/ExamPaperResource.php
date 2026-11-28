@@ -7,8 +7,8 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
- * ExamPaperOut. TODO: compare the field list with ExamPaperOut in backend/app/schemas/portal.py
- * and docs/api-contract.md: every field there, nothing more. file_path is never exposed.
+ * ExamPaperOut in backend/app/schemas/portal.py: every field there, nothing more.
+ * file_path is never exposed.
  */
 class ExamPaperResource extends JsonResource
 {

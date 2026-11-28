@@ -8,10 +8,7 @@ use Illuminate\Validation\Rule;
 /** POST /api/exam-papers (multipart form). Python: the Form(...) parameters of upload_exam_paper. */
 class StoreExamPaperRequest extends FormRequest
 {
-    /**
-     * TODO: copy the values of ExamType in backend/app/schemas/portal.py. The three here are the ones
-     * the Python tests use; if the enum has more (assignment? other?), add them or those uploads give 422.
-     */
+    /** ExamType in backend/app/schemas/portal.py. */
     public const TYPES = ['quiz', 'midterm', 'final', 'sessional', 'other'];
 
     public function rules(): array

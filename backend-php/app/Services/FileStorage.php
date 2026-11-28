@@ -121,11 +121,24 @@ class FileStorage
             abort(400, 'File type '.($ext === '' ? '(none)' : $ext)." not allowed. Allowed: ['".implode("', '", $sorted)."']");
         }
 
+        // PHP itself refused the file (over upload_max_filesize / post_max_size, or a partial
+        // upload): there is nothing on disk to read, so answer 413 / 400 instead of crashing.
+        if (! $file->isValid()) {
+            if (in_array($file->getError(), [UPLOAD_ERR_INI_SIZE, UPLOAD_ERR_FORM_SIZE], true)) {
+                abort(413, 'File too large (max '.self::maxUploadMb().' MB)');
+            }
+            abort(400, 'The file did not upload completely, please try again');
+        }
+
         $size = (int) $file->getSize();
         if ($size === 0) {
             abort(400, 'Uploaded file is empty');
         }
-        $handle = fopen($file->getRealPath(), 'rb');
+        $path = $file->getRealPath();
+        $handle = $path === false ? false : @fopen($path, 'rb');
+        if ($handle === false) {
+            abort(400, 'Could not read the uploaded file');
+        }
         $head = (string) fread($handle, self::CHUNK);
         fclose($handle);
         if (! self::contentMatchesExtension($ext, $head)) {
@@ -140,7 +153,12 @@ class FileStorage
             abort(500, 'Could not save the file');
         }
 
-        return new SavedFile($stored, $original, $file->getClientMimeType(), $size);
+        // The type comes from the browser and content_type is varchar(100): a longer one would
+        // make the INSERT fail (500) on strict MySQL, so keep it only if it fits.
+        $type = $file->getClientMimeType();
+        $type = ($type !== '' && strlen($type) <= 100) ? $type : null;
+
+        return new SavedFile($stored, $original, $type, $size);
     }
 
     /** Download of a stored file, always as an attachment (never rendered in the page). */

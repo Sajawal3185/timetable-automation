@@ -78,7 +78,7 @@ class ExamPaperController extends Controller
             $query->where('exam_papers.course_id', $q['course_id']);
         }
         if (($q['term'] ?? '') !== '') {   // case-insensitive, like ilike
-            $query->whereRaw('exam_papers.term LIKE ?', [Text::strip($q['term'])]);
+            $query->whereRaw("exam_papers.term LIKE ? ESCAPE '!'", [Text::likeExact(Text::strip($q['term']))]);
         }
         if (! empty($q['exam_type'])) {
             $query->where('exam_papers.exam_type', $q['exam_type']);

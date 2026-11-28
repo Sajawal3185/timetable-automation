@@ -2,6 +2,9 @@
 
 namespace Tests\Feature;
 
+use App\Models\LectureMaterial;
+use App\Services\FileStorage;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Testing\TestResponse;
 use Tests\Support\Files;
 use Tests\Support\SeedsArchive;
@@ -68,8 +71,34 @@ class MaterialsApiTest extends TestCase
         $groups = $this->getJson("/api/lecture-materials/by-course/{$this->c1->id}")->json('instructors');
 
         $this->assertCount(1, $groups);
-        $this->assertSame('Dr. Ali', $groups[0]['instructor_name']);
+        // As in Python: the name on the first row in (instructor_name, id) order. Which spelling that
+        // is depends on the database collation ("DR. ALI" on SQLite, "Dr. Ali" on case-blind MySQL).
+        $first = LectureMaterial::orderBy('instructor_name')->orderBy('id')->value('instructor_name');
+        $this->assertSame($first, $groups[0]['instructor_name']);
         $this->assertCount(2, $groups[0]['materials']);
+    }
+
+    public function test_term_filter_matches_the_whole_term_only(): void
+    {
+        $this->upload('teacher', ['title' => 'A', 'term' => 'Fall-2025']);
+        $this->upload('teacher', ['title' => 'B', 'term' => 'Fall_2025']);
+
+        $this->assertSame(['B'], array_column($this->list(['term' => 'fall_2025']), 'title'));   // _ is not a wildcard
+        $this->assertSame([], $this->list(['term' => '%']));                                    // % is not a wildcard
+    }
+
+    public function test_overlong_browser_content_type_is_dropped(): void
+    {
+        // content_type is varchar(100); a longer browser-sent type would fail the INSERT on strict MySQL.
+        // (A test request re-guesses the type from the file, so call the storage directly.)
+        $tmp = tempnam(sys_get_temp_dir(), 'up');
+        file_put_contents($tmp, Files::pdf());
+        $long = new UploadedFile($tmp, 'week1.pdf', 'application/'.str_repeat('x', 120), null, true);
+        $normal = new UploadedFile($tmp, 'week1.pdf', 'application/pdf', null, true);
+
+        $this->assertNull(FileStorage::save($long, 'lecture_materials', FileStorage::MATERIAL_EXTENSIONS)->contentType);
+        $this->assertSame('application/pdf', FileStorage::save($normal, 'lecture_materials', FileStorage::MATERIAL_EXTENSIONS)->contentType);
+        @unlink($tmp);
     }
 
     public function test_material_defaults_instructor_to_uploader_and_filters(): void
@@ -122,8 +151,8 @@ class MaterialsApiTest extends TestCase
         $this->assertSame([201, 'Dr. Teacher'], $nameOf($this->upload('teacher')));                                        // omitted
         $this->assertSame([201, 'Dr. Teacher'], $nameOf($this->upload('teacher', ['instructor_name' => '   '])));         // blank
         $this->assertSame([201, 'Dr. Ali'], $nameOf($this->upload('admin', ['instructor_name' => 'Dr. Ali'])));
-        // The Python file you sent was cut off here; these mirror the exam-paper test. Compare with its last lines.
         $this->assertSame([201, 'Ms. Sara'], $nameOf($this->upload('hod', ['instructor_name' => '  Ms. Sara  '])));       // trimmed
+        // PHP-only extra (Python's test ends above): an HOD sending an empty name falls back to their own.
         $this->assertSame([201, 'HOD'], $nameOf($this->upload('hod', ['instructor_name' => ''])));
     }
 }
