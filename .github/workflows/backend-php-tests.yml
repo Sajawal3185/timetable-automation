@@ -140,7 +140,7 @@ jobs:
           # www-data (Apache's user) can't read the mounted original, but can read the copy the app uses.
           ! docker exec -u www-data api-ca cat /etc/secrets/ca.pem
           # The cached config is what Apache's PHP reads (tinker can't run as www-data: no writable home).
-          docker exec -u www-data api-ca php -r '$c = require "bootstrap/cache/config.php"; $f = $c["database"]["connections"]["mysql"]["ssl_ca"]; echo $f, " ", is_readable($f) ? "readable" : "NOT readable", "\n";' \
+          docker exec -u www-data api-ca php -r 'require "vendor/autoload.php"; $c = require "bootstrap/cache/config.php"; $f = $c["database"]["connections"]["mysql"]["ssl_ca"]; echo $f, " ", is_readable($f) ? "readable" : "NOT readable", "\n";' \
             | tee /dev/stderr | grep -x "/usr/local/share/db-ca.pem readable"
       - name: Container log
         if: always()
