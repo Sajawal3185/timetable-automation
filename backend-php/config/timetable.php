@@ -50,4 +50,7 @@ return [
         'from_name' => env('EMAIL_FROM_NAME', 'NUML Timetable'),
     ],
 
-];
+'uploads' => [
+        'disk' => env('UPLOAD_DISK', 'local'),
+        'max_mb' => (int) env('MAX_UPLOAD_MB', 20),
+    ],];
