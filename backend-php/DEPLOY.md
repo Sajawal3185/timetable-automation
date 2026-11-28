@@ -81,8 +81,12 @@ SQLite and a local MySQL, so this has to be done once on staging). With the
 same three `$env:` lines as below, in PowerShell from `backend-php/`:
 
 ```
-php artisan tinker --execute="dump(DB::select('SHOW SESSION STATUS LIKE ?', ['Ssl_cipher']), DB::scalar('SELECT DATABASE()'));"
+php artisan tinker --execute="dump(DB::scalar('SELECT VARIABLE_VALUE FROM performance_schema.session_status WHERE VARIABLE_NAME = ?', ['Ssl_cipher']), DB::scalar('SELECT DATABASE()'));"
 ```
+
+(Not `SHOW SESSION STATUS LIKE ?`: MySQL refuses a `?` placeholder in a
+`SHOW` statement with a 1064 syntax error.) If the path to `ca.pem` has
+spaces, keep it in the quotes: `$env:DB_SSL_CA="D:\My Files\ca (1).pem"`.
 
 `Ssl_cipher` must have a value (for example `TLS_AES_256_GCM_SHA384`), and the
 database must be `timetable_php`. An empty cipher means TLS is off: check
