@@ -12,6 +12,7 @@
 
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\HealthController;
+use App\Http\Controllers\Api\LectureMaterialController;
 use App\Http\Controllers\Api\MakeupController;
 use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\RoomController;
@@ -36,6 +37,16 @@ Route::prefix('auth')->controller(AuthController::class)->group(function () {
 
 // --- health -------------------------------------------------------------------
 Route::get('/health', HealthController::class);
+
+// --- lecture materials (routers/portal.py) -----------------------------------
+Route::prefix('lecture-materials')->controller(LectureMaterialController::class)->middleware('jwt')->group(function () {
+    Route::get('/', 'index');
+    Route::post('/', 'store')->middleware('role:teacher,hod,admin');
+    Route::get('/by-course/{courseId}', 'byCourse')->whereNumber('courseId');   // before /{materialId}
+    Route::get('/{materialId}', 'show')->whereNumber('materialId');
+    Route::get('/{materialId}/download', 'download')->whereNumber('materialId');
+    Route::delete('/{materialId}', 'destroy')->whereNumber('materialId');
+});
 
 // --- makeup classes (routers/makeup.py) --------------------------------------
 Route::prefix('makeup')->controller(MakeupController::class)->group(function () {
