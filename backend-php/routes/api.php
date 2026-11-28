@@ -12,6 +12,7 @@
 
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ExamPaperController;
+use App\Http\Controllers\Api\GpaController;
 use App\Http\Controllers\Api\HealthController;
 use App\Http\Controllers\Api\LectureMaterialController;
 use App\Http\Controllers\Api\MakeupController;
@@ -21,6 +22,15 @@ use App\Http\Controllers\Api\SwapController;
 use App\Http\Controllers\Api\TimetableController;
 use App\Support\Roles;
 use Illuminate\Support\Facades\Route;
+
+Route::middleware(['jwt'])->prefix('gpa')->group(function () {
+    Route::get('grade-scale', [GpaController::class, 'gradeScale']);
+    Route::post('calculate', [GpaController::class, 'calculate']);
+    Route::get('records', [GpaController::class, 'records']);
+    Route::post('records', [GpaController::class, 'addRecord']);
+    Route::delete('records/{recordId}', [GpaController::class, 'deleteRecord']);
+    Route::get('summary', [GpaController::class, 'summary']);
+});
 
 // --- auth (routers/auth.py) ---------------------------------------------------
 Route::prefix('auth')->controller(AuthController::class)->group(function () {
